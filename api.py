@@ -1,13 +1,26 @@
 from flask import Flask, request, render_template, jsonify
+from  werkzeug.debug import get_current_traceback
+from functools import wraps
 from models import db, Node, Session
-import json
 from datetime import datetime
 import helpers
+import logging
 
 
 helpers.setup_logger()
 app = Flask(__name__)
 db.init_app(app)
+
+
+def validate_json(f):
+    @wraps(f)
+    def wrapper(*args, **kw):
+        try:
+            request.get_json(force=True)
+        except:
+            return jsonify({"error": 'payload must be a valid json'}), 400
+        return f(*args, **kw)
+    return wrapper
 
 
 @app.route('/', methods=['GET'])
@@ -19,10 +32,9 @@ def home():
 
 @app.route('/v1/node_register', methods=['POST'])
 def node_register():
-    #payload = json.loads(request.data)
     payload = request.get_json(force=True)
-    node_key = payload['node_key']
-    connection_config = payload['connection_config']
+    node_key = payload.get('node_key', '')
+    connection_config = payload.get('connection_config', '')
 
     node = Node.query.get(node_key)
     if not node:
@@ -34,18 +46,17 @@ def node_register():
     db.session.add(node)
     db.session.commit()
 
-    return jsonify({'status': 'ok'})
+    return jsonify({})
 
 
 @app.route('/v1/client_create_session', methods=['POST'])
 def client_create_session():
     payload = request.get_json(force=True)
-    node_key = payload['node_key']
+    node_key = payload.get('node_key', '')
 
     node = Node.query.get(node_key)
-
     if not node:
-        return json.dumps({'status': 'node key not found'})
+        return jsonify(error='node key not found'), 400
 
     session_key = helpers.generate_random_string()
     session = Session(session_key)
@@ -58,24 +69,26 @@ def client_create_session():
 
     return jsonify(
     {
-        'status': 'ok',
         'session_key': session_key,
         'connection_config': node.connection_config,
-        #'node_ip': node.ip,
     })
 
 
 @app.route('/v1/node_get_session', methods=['POST'])
 def node_get_session():
     payload = request.get_json(force=True)
-    node_key = payload['node_key']
-    client_ip = payload['client_ip']
+    node_key = payload.get('node_key', '')
+    client_ip = payload.get('client_ip', '')
 
     node = Node.query.get(node_key)
     if not node:
-        return json.dumps({'status': 'node key not found'})
+        return jsonify(error='node key not found'), 400
 
-    session = Session.query.filter_by(node_key=node_key, client_ip=client_ip, established=False).first()
+    session = Session.query.filter_by(
+        node_key=node_key,
+        client_ip=client_ip,
+        established=False
+    ).first()
 
     if session:
         session.established = True
@@ -85,7 +98,6 @@ def node_get_session():
 
     return jsonify(
     {
-        'status': 'ok',
         'session_key': session.session_key if session else None,
         'is_session_valid': session is not None
     })
@@ -102,7 +114,7 @@ def node_send_stats():
 
     node = Node.query.get(node_key)
     if not node:
-        return json.dumps({'status': 'node key not found'})
+        return jsonify(error='node key not found'), 400
 
     # update node updated_at
     node.updated_at = datetime.utcnow()
@@ -139,7 +151,6 @@ def node_send_stats():
 
     return jsonify(
     {
-        'status': 'ok',
         'sessions': return_values
     })
 
@@ -157,7 +168,7 @@ def client_send_stats():
     is_session_valid = False
 
     if not session:
-        return json.dumps({'status': 'session key not found'})
+        return jsonify(error='session key not found'), 400
 
     if session:
         if session.established:
@@ -170,10 +181,29 @@ def client_send_stats():
 
     return jsonify(
     {
-        'status': 'ok',
         'session_key': session_key,
         'is_session_valid': is_session_valid
     })
+
+
+#app.config['TRAP_HTTP_EXCEPTIONS']=True
+#app.config['PROPAGATE_EXCEPTIONS'] = True
+
+@app.errorhandler(404)
+def method_not_found(e):
+    return jsonify(error='unknown API method'), 404
+
+
+@app.errorhandler(405)
+def method_not_allowed(e):
+    return jsonify(error='method not allowed'), 405
+
+
+@app.errorhandler(Exception)
+def handle_error(e):
+    track = get_current_traceback(skip=1, show_hidden_frames=True, ignore_system_exceptions=False)
+    logging.error(track.plaintext)
+    return jsonify(error=str(e)), 500
 
 
 if __name__ == '__main__':

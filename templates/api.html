@@ -2,34 +2,35 @@ Mysterium.Network API<br>
 Version: 1.0<br>
 URL Base: http://api.mysterium.network:5000<br>
 Params should be encoded in JSON and passed as HTTP body data.<br>
-Returned values are encoded in JSON. If status is not 'ok', other values may not be included.<br>
+Returned values are encoded in JSON.
+API reqest returns status code. For example status code 200 means success.<br>
 
 <p>
     POST /v1/node_register<br>
     Params: node_key, connection_config<br>
-    Returns: status
+    Returns:
 </p>
 
 <p>
     POST /v1/client_create_session<br>
     Params: node_key<br>
-    Returns: status, session_key, connection_config
+    Returns: session_key, connection_config
 </p>
 
 <p>
     POST /v1/node_get_session<br>
     Params: node_key, client_ip<br>
-    Returns: status, session_key, is_session_valid
+    Returns: session_key, is_session_valid
 </p>
 
 <p>
     POST /v1/node_send_stats<br>
     Params: node_key, sessions: [session_key, bytes_sent, bytes_received]<br>
-    Returns: status, sessions: [session_key, is_session_valid]
+    Returns: sessions: [session_key, is_session_valid]
 </p>
 
 <p>
     POST /v1/client_send_stats<br>
     Params: session_key, bytes_sent, bytes_received<br>
-    Returns: status, session_key, is_session_valid
+    Returns: session_key, is_session_valid
 </p>
