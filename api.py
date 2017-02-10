@@ -36,6 +36,9 @@ def node_register():
     node_key = payload.get('node_key', '')
     connection_config = payload.get('connection_config', '')
 
+    if node_key == '':
+        return jsonify(error='node key is empty'), 400
+
     node = Node.query.get(node_key)
     if node:
         return jsonify(error='node key is already registered'), 400
