@@ -15,7 +15,7 @@ def test_node_reg():
     )
 
     print re.content
-    re.json()['status']
+    re.json()
 
 
 def test_client_create_session():
@@ -29,7 +29,6 @@ def test_client_create_session():
     )
     print re.content
     data = re.json()
-    data['status']
     data['session_key']
     data['connection_config']
 
@@ -45,7 +44,6 @@ def test_node_get_session():
     )
     print re.content
     data = re.json()
-    data['status']
     data['is_session_valid']
     data['session_key']
 
@@ -69,7 +67,6 @@ def test_node_send_stats():
 
     print re.content
     data = re.json()
-    data['status']
     for el in data['sessions']:
         el['is_session_valid']
         el['session_key']
@@ -89,14 +86,13 @@ def test_client_send_stats():
 
     print re.content
     data = re.json()
-    data['status']
     data['is_session_valid']
     data['session_key']
 
 
 
-test_node_reg()
-test_client_create_session()
-test_node_get_session()
-test_node_send_stats()
-test_client_send_stats()
+# test_node_reg()
+# test_client_create_session()
+# test_node_get_session()
+# test_node_send_stats()
+# test_client_send_stats()
