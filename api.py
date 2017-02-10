@@ -37,9 +37,10 @@ def node_register():
     connection_config = payload.get('connection_config', '')
 
     node = Node.query.get(node_key)
-    if not node:
-        node = Node(node_key)
+    if node:
+        return jsonify(error='node key is already registered'), 400
 
+    node = Node(node_key)
     node.ip = request.remote_addr
     node.connection_config = connection_config
     node.updated_at = datetime.utcnow()
