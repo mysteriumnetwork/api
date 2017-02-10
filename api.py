@@ -111,8 +111,8 @@ def node_get_session():
 @app.route('/v1/node_send_stats', methods=['POST'])
 def node_send_stats():
     payload = request.get_json(force=True)
-    node_key = payload['node_key']
-    sessions = payload['sessions']
+    node_key = payload.get('node_key', '')
+    sessions = payload.get('sessions', [])
 
     return_values = []
 
@@ -127,9 +127,9 @@ def node_send_stats():
 
     # update sessions
     for se in sessions:
-        session_key = se['session_key']
-        bytes_sent = se['bytes_sent']
-        bytes_received = se['bytes_received']
+        session_key = se.get('session_key', '')
+        bytes_sent = se.get('bytes_sent', 0)
+        bytes_received = se.get('bytes_received', 0)
 
         # get session by key
         session = Session.query.get(session_key)
@@ -163,9 +163,9 @@ def node_send_stats():
 @app.route('/v1/client_send_stats', methods=['POST'])
 def client_send_stats():
     payload = request.get_json(force=True)
-    session_key = payload['session_key']
-    bytes_sent = payload['bytes_sent']
-    bytes_received = payload['bytes_received']
+    session_key = payload.get('session_key', '')
+    bytes_sent = payload.get('bytes_sent', 0)
+    bytes_received = payload.get('bytes_received', 0)
 
     # get session by key
     session = Session.query.get(session_key)
