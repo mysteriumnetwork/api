@@ -31,6 +31,7 @@ def home():
 
 
 @app.route('/v1/node_register', methods=['POST'])
+@validate_json
 def node_register():
     payload = request.get_json(force=True)
     node_key = payload.get('node_key', '')
@@ -54,6 +55,7 @@ def node_register():
 
 
 @app.route('/v1/client_create_session', methods=['POST'])
+@validate_json
 def client_create_session():
     payload = request.get_json(force=True)
     node_key = payload.get('node_key', '')
@@ -79,6 +81,7 @@ def client_create_session():
 
 
 @app.route('/v1/node_get_session', methods=['POST'])
+@validate_json
 def node_get_session():
     payload = request.get_json(force=True)
     node_key = payload.get('node_key', '')
@@ -109,6 +112,7 @@ def node_get_session():
 
 # Node call this function each minute.
 @app.route('/v1/node_send_stats', methods=['POST'])
+@validate_json
 def node_send_stats():
     payload = request.get_json(force=True)
     node_key = payload.get('node_key', '')
@@ -161,6 +165,7 @@ def node_send_stats():
 
 # Client call this function each minute.
 @app.route('/v1/client_send_stats', methods=['POST'])
+@validate_json
 def client_send_stats():
     payload = request.get_json(force=True)
     session_key = payload.get('session_key', '')
