@@ -41,10 +41,9 @@ def node_register():
         return jsonify(error='node key is empty'), 400
 
     node = Node.query.get(node_key)
-    if node:
-        return jsonify(error='node key is already registered'), 400
+    if not node:
+        node = Node(node_key)
 
-    node = Node(node_key)
     node.ip = request.remote_addr
     node.connection_config = connection_config
     node.updated_at = datetime.utcnow()
@@ -63,6 +62,9 @@ def client_create_session():
     node = Node.query.get(node_key)
     if not node:
         return jsonify(error='node key not found'), 400
+
+    if node.get_status() != 'active':
+        return jsonify(error='node is not active'), 400
 
     session_key = helpers.generate_random_string()
     session = Session(session_key)

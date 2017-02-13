@@ -25,6 +25,10 @@ class Node(db.Model):
         self.node_key = node_key
         self.created_at = datetime.utcnow()
 
+    def get_status(self):
+        # TODO: implement status checking
+        return 'active'
+
 
 class Session(db.Model):
     __tablename__ = 'session'
