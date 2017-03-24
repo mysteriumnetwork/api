@@ -1,4 +1,5 @@
 from flask import Flask, request, render_template, jsonify
+from flask_sslify import SSLify
 from  werkzeug.debug import get_current_traceback
 from functools import wraps
 from models import db, Node, Session
@@ -9,6 +10,7 @@ import logging
 
 helpers.setup_logger()
 app = Flask(__name__)
+sslify = SSLify(app)
 db.init_app(app)
 
 
