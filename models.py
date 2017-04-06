@@ -54,3 +54,15 @@ class Session(db.Model):
         self.client_bytes_sent = 0
         self.client_bytes_received = 0
 
+
+class NodeAvailability(db.Model):
+    __tablename__ = 'node_availability'
+    #id = db.Column(db.String(34), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    node_key = db.Column(db.String(34))
+    date = db.Column(db.DateTime)
+
+    def __init__(self, node_key):
+        self.node_key = node_key
+        self.date = datetime.utcnow()
+        #self.id = self.node_key + self.date.strftime('%Y%m%d%H%M%S')

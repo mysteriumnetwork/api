@@ -2,7 +2,7 @@ from flask import Flask, request, render_template, jsonify
 from flask_sslify import SSLify
 from  werkzeug.debug import get_current_traceback
 from functools import wraps
-from models import db, Node, Session
+from models import db, Node, Session, NodeAvailability
 from datetime import datetime
 import helpers
 import logging
@@ -160,6 +160,11 @@ def node_send_stats():
             'session_key': session_key,
             'is_session_valid': is_session_valid
         })
+
+    # add record to NodeAvailability
+    na = NodeAvailability(node_key)
+    db.session.add(na)
+    db.session.commit()
 
     return jsonify(
     {
