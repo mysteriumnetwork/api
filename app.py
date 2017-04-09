@@ -110,7 +110,6 @@ def node_get_session():
     return jsonify(
     {
         'session_key': session.session_key if session else None,
-        'is_session_valid': session is not None
     })
 
 
