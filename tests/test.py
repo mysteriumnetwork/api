@@ -44,7 +44,6 @@ def test_node_get_session():
     )
     print re.content
     data = re.json()
-    data['is_session_valid']
     data['session_key']
 
 

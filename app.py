@@ -101,16 +101,17 @@ def node_get_session():
         established=False
     ).first()
 
-    if session:
-        session.established = True
-        session.node_updated_at = datetime.utcnow()
-        db.session.add(session)
-        db.session.commit()
+    if not session:
+        return jsonify(error='no available sessions'), 400
+
+    session.established = True
+    session.node_updated_at = datetime.utcnow()
+    db.session.add(session)
+    db.session.commit()
 
     return jsonify(
     {
-        'session_key': session.session_key if session else None,
-        'session_available': session is not None
+        'session_key': session.session_key,
     })
 
 
