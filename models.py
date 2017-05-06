@@ -66,3 +66,21 @@ class NodeAvailability(db.Model):
         self.node_key = node_key
         self.date = datetime.utcnow()
         #self.id = self.node_key + self.date.strftime('%Y%m%d%H%M%S')
+
+
+class RegisteredParticipant(db.Model):
+    __tablename__ = 'registered_participant'
+    #id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    node_ip = db.Column(db.String(45), primary_key=True)
+    node_key = db.Column(db.String(34))
+    #node_ip = db.Column(db.String(45))
+    eth_address = db.Column(db.String(45))
+    email = db.Column(db.String(100))
+    created_at = db.Column(db.DateTime)
+
+    def __init__(self, node_key, node_ip, eth_address, email=None):
+        self.node_key = node_key
+        self.node_ip = node_ip
+        self.eth_address = eth_address
+        self.email = email
+        self.created_at = datetime.utcnow()
