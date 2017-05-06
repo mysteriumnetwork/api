@@ -2,7 +2,7 @@ from flask import Flask, request, render_template, jsonify
 from flask_sslify import SSLify
 from  werkzeug.debug import get_current_traceback
 from functools import wraps
-from models import db, Node, Session, NodeAvailability
+from models import db, Node, Session, NodeAvailability, RegisteredParticipant
 from datetime import datetime
 import helpers
 import logging
@@ -41,6 +41,15 @@ def node_register():
 
     if node_key == '':
         return jsonify(error='node key is empty'), 400
+
+
+    rp = RegisteredParticipant.query.get(request.remote_addr)
+    if not rp:
+        return jsonify(error='ip address is not registered'), 400
+
+    if rp.node_key != node_key:
+        return jsonify(error='node key is not registered'), 400
+
 
     node = Node.query.get(node_key)
     if not node:
