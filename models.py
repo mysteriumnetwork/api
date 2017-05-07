@@ -71,9 +71,9 @@ class NodeAvailability(db.Model):
 class RegisteredParticipant(db.Model):
     __tablename__ = 'registered_participant'
     #id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    node_ip = db.Column(db.String(45), primary_key=True)
-    node_key = db.Column(db.String(34))
-    #node_ip = db.Column(db.String(45))
+    #node_ip = db.Column(db.String(45), primary_key=True)
+    node_key = db.Column(db.String(34), primary_key=True)
+    node_ip = db.Column(db.String(45), unique=True)
     eth_address = db.Column(db.String(45))
     email = db.Column(db.String(100))
     created_at = db.Column(db.DateTime)

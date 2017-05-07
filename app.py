@@ -43,12 +43,10 @@ def node_register():
         return jsonify(error='node key is empty'), 400
 
 
-    rp = RegisteredParticipant.query.get(request.remote_addr)
-    if not rp:
-        return jsonify(error='ip address is not registered'), 400
-
-    if rp.node_key != node_key:
-        return jsonify(error='node key is not registered'), 400
+    rp = RegisteredParticipant.query.get(node_key)
+    if rp:
+        if rp.node_ip != request.remote_addr:
+            return jsonify(error='node key and ip address mismatch'), 400
 
 
     node = Node.query.get(node_key)
@@ -100,6 +98,13 @@ def node_get_session():
     node_key = payload.get('node_key', '')
     client_ip = payload.get('client_ip', '')
 
+
+    rp = RegisteredParticipant.query.get(node_key)
+    if rp:
+        if rp.node_ip != request.remote_addr:
+            return jsonify(error='node key and ip address mismatch'), 400
+
+
     node = Node.query.get(node_key)
     if not node:
         return jsonify(error='node key not found'), 400
@@ -133,6 +138,13 @@ def node_send_stats():
     sessions = payload.get('sessions', [])
 
     return_values = []
+
+
+    rp = RegisteredParticipant.query.get(node_key)
+    if rp:
+        if rp.node_ip != request.remote_addr:
+            return jsonify(error='node key and ip address mismatch'), 400
+
 
     node = Node.query.get(node_key)
     if not node:
