@@ -211,13 +211,14 @@ def client_send_stats():
         return jsonify(error='session key not found'), 400
 
     if session:
-        if session.established:
-            session.client_bytes_sent = bytes_sent
-            session.client_bytes_received = bytes_received
-            session.client_updated_at = datetime.utcnow()
-            db.session.add(session)
-            db.session.commit()
-            is_session_valid = True
+        # TODO: add this checking as soon as send stats is implemented in node
+        #if session.established:
+        session.client_bytes_sent = bytes_sent
+        session.client_bytes_received = bytes_received
+        session.client_updated_at = datetime.utcnow()
+        db.session.add(session)
+        db.session.commit()
+        is_session_valid = True
 
     return jsonify(
     {
