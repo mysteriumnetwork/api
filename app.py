@@ -171,12 +171,13 @@ def node_send_stats():
 
         if session:
             if session.established:
-                session.node_bytes_sent = bytes_sent
-                session.node_bytes_received = bytes_received
-                session.node_updated_at = datetime.utcnow()
-                db.session.add(session)
-                db.session.commit()
-                is_session_valid = True
+                if bytes_sent >= 0 and bytes_received >= 0:
+                    session.node_bytes_sent = bytes_sent
+                    session.node_bytes_received = bytes_received
+                    session.node_updated_at = datetime.utcnow()
+                    db.session.add(session)
+                    db.session.commit()
+                    is_session_valid = True
 
         return_values.append({
             'session_key': session_key,
@@ -213,12 +214,13 @@ def client_send_stats():
     if session:
         # TODO: add this checking as soon as send stats is implemented in node
         #if session.established:
-        session.client_bytes_sent = bytes_sent
-        session.client_bytes_received = bytes_received
-        session.client_updated_at = datetime.utcnow()
-        db.session.add(session)
-        db.session.commit()
-        is_session_valid = True
+        if bytes_sent >= 0 and bytes_received >= 0:
+            session.client_bytes_sent = bytes_sent
+            session.client_bytes_received = bytes_received
+            session.client_updated_at = datetime.utcnow()
+            db.session.add(session)
+            db.session.commit()
+            is_session_valid = True
 
     return jsonify(
     {
