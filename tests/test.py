@@ -23,31 +23,17 @@ def test_node_reg():
 
 def test_client_create_session():
     payload = {
-        'node_key': 'node key',
+        'node_key': 'node1',
     }
 
     re = requests.post(
         'http://127.0.0.1:5000/v1/client_create_session',
-        data = json.dumps(payload)
+        data=json.dumps(payload)
     )
     print re.content
     data = re.json()
     data['session_key']
-    data['connection_config']
-
-
-def test_node_get_session():
-    payload = {
-        'node_key': 'node key',
-        'client_ip': '127.0.0.1',
-    }
-    re = requests.post(
-        'http://127.0.0.1:5000/v1/node_get_session',
-        data = json.dumps(payload)
-    )
-    print re.content
-    data = re.json()
-    data['session_key']
+    data['service_proposal']
 
 
 def test_node_send_stats():

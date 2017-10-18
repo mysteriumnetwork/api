@@ -6,6 +6,7 @@ from models import db, Node, Session, NodeAvailability
 from datetime import datetime
 import helpers
 import logging
+import json
 
 
 helpers.setup_logger()
@@ -71,19 +72,27 @@ def client_create_session():
     if node.get_status() != 'active':
         return jsonify(error='node is not active'), 400
 
+    try:
+        obj = json.loads(node.connection_config)
+    except:
+        return jsonify(error='cannot deserialize service proposal'), 400
+
+    service_proposal = obj.get('service_proposal', None)
+    if service_proposal is None:
+        return jsonify(error='service_proposal was not found'), 400
+
     session_key = helpers.generate_random_string()
     session = Session(session_key)
     session.node_key = node_key
     session.client_updated_at = datetime.utcnow()
     session.client_ip = request.remote_addr
-
     db.session.add(session)
     db.session.commit()
 
     return jsonify(
     {
         'session_key': session_key,
-        'connection_config': node.connection_config,
+        'service_proposal': service_proposal,
     })
 
 
