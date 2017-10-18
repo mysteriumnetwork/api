@@ -36,18 +36,21 @@ def home():
 @validate_json
 def node_register():
     payload = request.get_json(force=True)
-    node_key = payload.get('node_key', '')
-    connection_config = payload.get('connection_config', '')
 
-    if node_key == '':
-        return jsonify(error='node key is empty'), 400
+    proposal = payload.get('service_proposal', None)
+    if proposal is None:
+        return jsonify(error='missing service_proposal'), 400
+
+    node_key = proposal.get('provider_id', None)
+    if node_key is None:
+        return jsonify(error='missing provider_id'), 400
 
     node = Node.query.get(node_key)
     if not node:
         node = Node(node_key)
 
     node.ip = request.remote_addr
-    node.connection_config = connection_config
+    node.connection_config = request.data
     node.updated_at = datetime.utcnow()
     db.session.add(node)
     db.session.commit()

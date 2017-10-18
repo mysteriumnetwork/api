@@ -7,7 +7,14 @@ API reqest returns status code. For example status code 200 means success.<br>
 
 <p>
     POST /v1/node_register<br>
-    Params: node_key, connection_config<br>
+    Params: Proposal<br>
+    Proposal Example:
+    "service_proposal": {
+            "id": 1,
+            "format": "service-proposal/v1",
+            "provider_id": "node1"
+    }
+    <br>
     Returns:
 </p>
 
@@ -15,12 +22,6 @@ API reqest returns status code. For example status code 200 means success.<br>
     POST /v1/client_create_session<br>
     Params: node_key<br>
     Returns: session_key, connection_config
-</p>
-
-<p>
-    POST /v1/node_get_session<br>
-    Params: node_key, client_ip<br>
-    Returns: session_key
 </p>
 
 <p>

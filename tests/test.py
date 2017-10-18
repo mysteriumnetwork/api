@@ -5,13 +5,16 @@ import json
 def test_node_reg():
 
     payload = {
-        'node_key':'node key',
-        'connection_config': 'connection config'
+        "service_proposal": {
+            "id": 1,
+            "format": "service-proposal/v1",
+            "provider_id": "node1",
+        }
     }
 
     re = requests.post(
         'http://127.0.0.1:5000/v1/node_register',
-        data = json.dumps(payload)
+        data=json.dumps(payload)
     )
 
     print re.content
