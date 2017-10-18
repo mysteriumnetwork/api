@@ -2,7 +2,7 @@ from flask import Flask, request, render_template, jsonify
 from flask_sslify import SSLify
 from  werkzeug.debug import get_current_traceback
 from functools import wraps
-from models import db, Node, Session, NodeAvailability, RegisteredParticipant
+from models import db, Node, Session, NodeAvailability
 from datetime import datetime
 import helpers
 import logging
@@ -41,13 +41,6 @@ def node_register():
 
     if node_key == '':
         return jsonify(error='node key is empty'), 400
-
-
-    rp = RegisteredParticipant.query.get(node_key)
-    if rp:
-        if rp.node_ip != request.remote_addr:
-            return jsonify(error='node key and ip address mismatch'), 400
-
 
     node = Node.query.get(node_key)
     if not node:
@@ -98,13 +91,6 @@ def node_get_session():
     node_key = payload.get('node_key', '')
     client_ip = payload.get('client_ip', '')
 
-
-    rp = RegisteredParticipant.query.get(node_key)
-    if rp:
-        if rp.node_ip != request.remote_addr:
-            return jsonify(error='node key and ip address mismatch'), 400
-
-
     node = Node.query.get(node_key)
     if not node:
         return jsonify(error='node key not found'), 400
@@ -138,13 +124,6 @@ def node_send_stats():
     sessions = payload.get('sessions', [])
 
     return_values = []
-
-
-    rp = RegisteredParticipant.query.get(node_key)
-    if rp:
-        if rp.node_ip != request.remote_addr:
-            return jsonify(error='node key and ip address mismatch'), 400
-
 
     node = Node.query.get(node_key)
     if not node:
