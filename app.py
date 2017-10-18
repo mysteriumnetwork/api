@@ -87,37 +87,6 @@ def client_create_session():
     })
 
 
-@app.route('/v1/node_get_session', methods=['POST'])
-@validate_json
-def node_get_session():
-    payload = request.get_json(force=True)
-    node_key = payload.get('node_key', '')
-    client_ip = payload.get('client_ip', '')
-
-    node = Node.query.get(node_key)
-    if not node:
-        return jsonify(error='node key not found'), 400
-
-    session = Session.query.filter_by(
-        node_key=node_key,
-        client_ip=client_ip,
-        established=False
-    ).first()
-
-    if not session:
-        return jsonify(error='no available sessions'), 400
-
-    session.established = True
-    session.node_updated_at = datetime.utcnow()
-    db.session.add(session)
-    db.session.commit()
-
-    return jsonify(
-    {
-        'session_key': session.session_key,
-    })
-
-
 # Node call this function each minute.
 @app.route('/v1/node_send_stats', methods=['POST'])
 @validate_json
