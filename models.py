@@ -66,3 +66,13 @@ class NodeAvailability(db.Model):
         self.node_key = node_key
         self.date = datetime.utcnow()
         #self.id = self.node_key + self.date.strftime('%Y%m%d%H%M%S')
+
+
+class Identity(db.Model):
+    __tablename__ = 'identity'
+    identity = db.Column(db.String(42), primary_key=True)
+    created_at = db.Column(db.DateTime)
+
+    def __init__(self, identity):
+        self.identity = identity
+        self.created_at = datetime.utcnow()
