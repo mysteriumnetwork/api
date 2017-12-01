@@ -2,7 +2,7 @@ from flask import Flask, request, render_template, jsonify
 from flask_sslify import SSLify
 from  werkzeug.debug import get_current_traceback
 from functools import wraps
-from models import db, Node, Session, NodeAvailability
+from models import db, Node, Session, NodeAvailability, Identity
 from datetime import datetime
 import helpers
 import logging
@@ -187,6 +187,24 @@ def client_send_stats():
         'session_key': session_key,
         'is_session_valid': is_session_valid
     })
+
+
+# End Point to save identity
+@app.route('/v1/save_identity', methods=['POST'])
+@validate_json
+def save_identity():
+    payload = request.get_json(force=True)
+
+    identity_arg = payload.get('identity', '')
+    identity = Identity.query.get(identity_arg)
+    if identity:
+        return jsonify(error='identity already exists'), 400
+
+    identity = Identity(identity_arg)
+    db.session.add(identity)
+    db.session.commit()
+
+    return jsonify({})
 
 
 #app.config['TRAP_HTTP_EXCEPTIONS']=True
