@@ -190,7 +190,7 @@ def client_send_stats():
 
 
 # End Point to save identity
-@app.route('/v1/save_identity', methods=['POST'])
+@app.route('/v1/identities', methods=['POST'])
 @validate_json
 def save_identity():
     payload = request.get_json(force=True)

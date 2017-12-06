@@ -7,7 +7,7 @@ def test_save_identity():
     }
 
     re = requests.post(
-        'http://127.0.0.1:5000/v1/save_identity',
+        'http://127.0.0.1:5000/v1/identities',
         data=json.dumps(payload)
     )
     print re.content
