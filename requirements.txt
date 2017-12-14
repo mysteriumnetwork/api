@@ -2,3 +2,4 @@ flask_sqlalchemy==2.1
 PyMySQL
 Flask-SSLify
 requests==2.18.4
+eth-keys==0.1.0b3
