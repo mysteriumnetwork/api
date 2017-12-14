@@ -7,6 +7,8 @@ from datetime import datetime
 import helpers
 import logging
 import json
+from signature import recover_public_address
+import base64
 
 
 helpers.setup_logger()
@@ -205,6 +207,28 @@ def save_identity():
     db.session.commit()
 
     return jsonify({})
+
+
+# End Point example which verifies payload signature
+@app.route('/v1/signed_payload', methods=['POST'])
+@validate_json
+def signed_payload():
+    payload = request.get_json(force=True)
+    signature_base64_encoded = request.headers.get('signature')
+    identity = payload['identity']
+
+    signature_bytes = base64.b64decode(signature_base64_encoded)
+
+    recovered_public_address = recover_public_address(
+        request.data,
+        signature_bytes,
+    )
+
+    # verify payload
+    if recovered_public_address.lower() == identity.lower():
+        return jsonify({})
+    else:
+        return jsonify(error='invalid signature'), 400
 
 
 #app.config['TRAP_HTTP_EXCEPTIONS']=True
