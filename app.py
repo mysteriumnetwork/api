@@ -226,7 +226,7 @@ def signed_payload():
     if recovered_public_address.lower() == identity.lower():
         return jsonify({})
     else:
-        return jsonify(error='invalid signature'), 400
+        return jsonify(error='payload was not signed with provided identity'), 401
 
 
 #app.config['TRAP_HTTP_EXCEPTIONS']=True
