@@ -213,12 +213,10 @@ def save_identity():
 @app.route('/v1/signed_payload', methods=['POST'])
 @validate_json
 def signed_payload():
-    payload = request.get_json(force=True)
+    identity = request.headers.get('identity')
     signature_base64_encoded = request.headers.get('signature')
-    identity = payload['identity']
 
     signature_bytes = base64.b64decode(signature_base64_encoded)
-
     recovered_public_address = recover_public_address(
         request.data,
         signature_bytes,

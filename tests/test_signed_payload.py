@@ -8,7 +8,6 @@ def print_payload_signature():
     pk = keys.PrivateKey(b'\x01' * 32)
 
     payload = {
-        "identity": pk.public_key.to_checksum_address().lower(),
         "service_proposal": {
             "id": 1,
             "format": "service-proposal/v1",
@@ -24,7 +23,6 @@ def print_payload_signature():
 
 def test_signed_payload():
     payload = {
-        "identity": "0x1a642f0e3c3af545e7acbd38b07251b3990914f1",
         "service_proposal": {
             "id": 1,
             "format": "service-proposal/v1",
@@ -33,7 +31,8 @@ def test_signed_payload():
     }
 
     headers = {
-        'signature': "nXA/isHCIQsAUqmPodf9ZsDdPYYmV+Z+poBg45d3jp4Ww0wmuqAI7VmXib69J3WvglRwT7kvoHkInZ+YO+vy3gE="
+        "identity": "0x1a642f0e3c3af545e7acbd38b07251b3990914f1",
+        'signature': "Da1mAwK5abmXQCNsCE+YjsZbR9jTyEKqdrjxxMKwNzwr2NFnM35UiVQJWcg8rgL+X2PR60LoIUMlGU9OPaSoZwE="
     }
 
     re = requests.post(
