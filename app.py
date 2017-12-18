@@ -197,7 +197,7 @@ def client_send_stats():
 def save_identity():
     payload = request.get_json(force=True)
 
-    identity_arg = payload.get('identity', '')
+    identity_arg = payload.get('identity', '').lower()
     identity = Identity.query.get(identity_arg)
     if identity:
         return jsonify(error='identity already exists'), 400
