@@ -4,7 +4,6 @@ from eth_keys.datatypes import (
 
 from eth_utils import (
     to_checksum_address,
-    #to_normalized_address
 )
 
 from eth_keys.utils.address import (
