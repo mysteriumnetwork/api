@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import settings
+import json
 
 app = Flask(__name__)
 
@@ -28,6 +29,17 @@ class Node(db.Model):
     def get_status(self):
         # TODO: implement status checking
         return 'active'
+
+    def get_service_proposals(self):
+        try:
+            config = json.loads(self.connection_config)
+        except ValueError:
+            return None
+
+        service_proposal = config.get('service_proposal')
+        if service_proposal is None:
+            return None
+        return [service_proposal]
 
 
 class Session(db.Model):

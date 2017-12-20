@@ -34,6 +34,17 @@ class TestApi(unittest.TestCase):
         data['service_proposal']
 
     def test_proposals(self):
+        re = self._get('/v1/proposals')
+
+        self.assertEqual(200, re.status_code)
+
+        data = re.json()
+        proposals = data['proposals']
+        self.assertGreater(len(proposals), 0)
+        for proposal in proposals:
+            self.assertIsNotNone(proposal['id'])
+
+    def test_proposals_filtering(self):
         re = self._get('/v1/proposals', {'node_key': 'node1'})
 
         self.assertEqual(200, re.status_code)
@@ -88,7 +99,7 @@ class TestApi(unittest.TestCase):
         data['is_session_valid']
         data['session_key']
 
-    def _get(self, url, params):
+    def _get(self, url, params={}):
         return requests.get(
             self.HOST + url,
             params=params
