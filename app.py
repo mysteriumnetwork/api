@@ -59,6 +59,26 @@ def node_register():
     return jsonify({})
 
 
+@app.route('/v1/proposals', methods=['GET'])
+def proposals():
+    node_key = request.args.get('node_key')
+    node = Node.query.get(node_key)
+    if not node:
+        return jsonify(error='node by node_key not found'), 400
+
+    try:
+        config = json.loads(node.connection_config)
+    except ValueError:
+        return jsonify(error='cannot deserialize node configuration'), 400
+
+    service_proposal = config.get('service_proposal')
+    if service_proposal is None:
+        return jsonify(error='node config does not contain service proposal'), 400
+
+    return jsonify({'proposals': [service_proposal]})
+
+
+# TODO: remove this endpoint after it's usages are replaced with '/proposals'
 @app.route('/v1/client_create_session', methods=['POST'])
 @validate_json
 def client_create_session():

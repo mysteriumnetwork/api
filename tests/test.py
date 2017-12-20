@@ -5,6 +5,8 @@ import json
 
 
 class TestApi(unittest.TestCase):
+    HOST = 'http://127.0.0.1:5000'
+
     def test_node_reg(self):
 
         payload = {
@@ -30,6 +32,25 @@ class TestApi(unittest.TestCase):
         data = re.json()
         data['session_key']
         data['service_proposal']
+
+    def test_proposals(self):
+        re = self._get('/v1/proposals', {'node_key': 'node1'})
+
+        self.assertEqual(200, re.status_code)
+
+        data = re.json()
+        proposals = data['proposals']
+        self.assertEqual(1, len(proposals))
+        proposal = proposals[0]
+        self.assertIsNotNone(proposal['id'])
+        self.assertEqual('node1', proposal['provider_id'])
+
+    def test_proposals_with_unknown_node_key(self):
+        re = self._get('/v1/proposals', {'node_key': 'UNKNOWN'})
+
+        self.assertEqual(400, re.status_code)
+        data = re.json()
+        self.assertEqual('node by node_key not found', data['error'])
 
     # TODO: fix test
     def _test_node_send_stats(self):
@@ -67,10 +88,16 @@ class TestApi(unittest.TestCase):
         data['is_session_valid']
         data['session_key']
 
+    def _get(self, url, params):
+        return requests.get(
+            self.HOST + url,
+            params=params
+        )
+
     def _post(self, url, payload):
         return requests.post(
-            'http://127.0.0.1:5000' + url,
-            data = json.dumps(payload)
+            self.HOST + url,
+            data=json.dumps(payload)
         )
 
 
