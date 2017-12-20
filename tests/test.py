@@ -15,10 +15,7 @@ class TestApi(unittest.TestCase):
             }
         }
 
-        re = requests.post(
-            'http://127.0.0.1:5000/v1/node_register',
-            data=json.dumps(payload)
-        )
+        re = self._post('/v1/node_register', payload)
 
         print re.content
         re.json()
@@ -28,10 +25,7 @@ class TestApi(unittest.TestCase):
             'node_key': 'node1',
         }
 
-        re = requests.post(
-            'http://127.0.0.1:5000/v1/client_create_session',
-            data=json.dumps(payload)
-        )
+        re = self._post('/v1/client_create_session', payload)
         print re.content
         data = re.json()
         data['session_key']
@@ -50,10 +44,7 @@ class TestApi(unittest.TestCase):
             'sessions': [session]
         }
 
-        re = requests.post(
-            'http://127.0.0.1:5000/v1/node_send_stats',
-            data = json.dumps(payload)
-        )
+        re = self._post('/v1/node_send_stats', payload)
 
         print re.content
         data = re.json()
@@ -69,15 +60,18 @@ class TestApi(unittest.TestCase):
             'bytes_received': 60,
         }
 
-        re = requests.post(
-            'http://127.0.0.1:5000/v1/client_send_stats',
-            data = json.dumps(payload)
-        )
+        re = self._post('/v1/client_send_stats', payload)
 
         print re.content
         data = re.json()
         data['is_session_valid']
         data['session_key']
+
+    def _post(self, url, payload):
+        return requests.post(
+            'http://127.0.0.1:5000' + url,
+            data = json.dumps(payload)
+        )
 
 
 if __name__ == '__main__':
