@@ -29,3 +29,10 @@ Create tables from models:
 ```
 $ python manual_create_db.py
 ```
+
+## Development
+
+To execute tests, start api service in background and run:
+```bash
+python -m unittest discover
+```
