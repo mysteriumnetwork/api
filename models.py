@@ -15,7 +15,7 @@ db = SQLAlchemy(app)
 
 class Node(db.Model):
     __tablename__ = 'node'
-    node_key = db.Column(db.String(34), primary_key=True)
+    node_key = db.Column(db.String(42), primary_key=True)
     ip = db.Column(db.String(45))
     connection_config = db.Column(db.Text)
     created_at = db.Column(db.DateTime)
