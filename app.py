@@ -76,7 +76,7 @@ def proposals():
     return jsonify({'proposals': service_proposals})
 
 
-# TODO: remove this endpoint after it's usages are replaced with '/proposals'
+# TODO: make 'session_id' param required after client update
 @app.route('/v1/client_create_session', methods=['POST'])
 @validate_json
 def client_create_session():
@@ -99,7 +99,7 @@ def client_create_session():
     if service_proposal is None:
         return jsonify(error='service_proposal was not found'), 400
 
-    session_key = helpers.generate_random_string()
+    session_key = payload.get('session_key') or helpers.generate_random_string()
     session = Session(session_key)
     session.node_key = node_key
     session.client_updated_at = datetime.utcnow()
