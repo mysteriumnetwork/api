@@ -46,7 +46,7 @@ class Session(db.Model):
     __tablename__ = 'session'
 
     session_key = db.Column(db.String(34), primary_key=True)
-    node_key = db.Column(db.String(34))
+    node_key = db.Column(db.String(42))
     created_at = db.Column(db.DateTime)
     node_updated_at = db.Column(db.DateTime)
     client_updated_at = db.Column(db.DateTime)
