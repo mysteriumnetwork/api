@@ -1,37 +1,43 @@
-Mysterium.Network API<br>
-Version: 1.0<br>
-URL Base: https://mvp.mysterium.network:5000<br>
-Params should be encoded in JSON and passed as HTTP body data.<br>
+Mysterium.Network API<br/>
+Version: 1.0<br/>
+URL Base: https://mvp.mysterium.network:5000<br/>
+Params should be encoded in JSON and passed as HTTP body data.<br/>
 Returned values are encoded in JSON.
-API reqest returns status code. For example status code 200 means success.<br>
+API reqest returns status code. For example status code 200 means success.<br/>
 
 <p>
-    POST /v1/node_register<br>
-    Params: Proposal<br>
+    POST /v1/node_register<br/>
+    Params: Proposal<br/>
     Proposal Example:
     "service_proposal": {
             "id": 1,
             "format": "service-proposal/v1",
             "provider_id": "node1"
     }
-    <br>
+    <br/>
     Returns:
 </p>
 
 <p>
-    POST /v1/client_create_session<br>
-    Params: node_key<br>
+    GET /v1/proposals<br/>
+    Params: node_key (optional)<br/>
+    Returns: proposals
+</p>
+
+<p>
+    POST /v1/client_create_session<br/>
+    Params: node_key, session_key (optional)<br/>
     Returns: session_key, connection_config
 </p>
 
 <p>
-    POST /v1/node_send_stats<br>
-    Params: node_key, sessions: [session_key, bytes_sent, bytes_received]<br>
+    POST /v1/node_send_stats<br/>
+    Params: node_key, sessions: [session_key, bytes_sent, bytes_received]<br/>
     Returns: sessions: [session_key, is_session_valid]
 </p>
 
 <p>
-    POST /v1/client_send_stats<br>
-    Params: session_key, bytes_sent, bytes_received<br>
+    POST /v1/client_send_stats<br/>
+    Params: session_key, bytes_sent, bytes_received<br/>
     Returns: session_key, is_session_valid
 </p>
