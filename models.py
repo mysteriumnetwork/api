@@ -13,10 +13,12 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://{}:{}@localhost/{}'.for
 
 db = SQLAlchemy(app)
 
+NODE_KEY_LIMIT = 42
+
 
 class Node(db.Model):
     __tablename__ = 'node'
-    node_key = db.Column(db.String(42), primary_key=True)
+    node_key = db.Column(db.String(NODE_KEY_LIMIT), primary_key=True)
     ip = db.Column(db.String(45))
     connection_config = db.Column(db.Text)
     created_at = db.Column(db.DateTime)
@@ -46,7 +48,7 @@ class Session(db.Model):
     __tablename__ = 'session'
 
     session_key = db.Column(db.String(34), primary_key=True)
-    node_key = db.Column(db.String(42))
+    node_key = db.Column(db.String(NODE_KEY_LIMIT))
     created_at = db.Column(db.DateTime)
     node_updated_at = db.Column(db.DateTime)
     client_updated_at = db.Column(db.DateTime)
