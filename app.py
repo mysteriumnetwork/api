@@ -59,6 +59,24 @@ def node_register():
     return jsonify({})
 
 
+@app.route('/v1/proposals', methods=['GET'])
+def proposals():
+    node_key = request.args.get('node_key')
+
+    if node_key:
+        node = Node.query.get(node_key)
+        nodes = [node] if node else []
+    else:
+        nodes = Node.query.all()
+
+    service_proposals = []
+    for node in nodes:
+        service_proposals += node.get_service_proposals()
+
+    return jsonify({'proposals': service_proposals})
+
+
+# TODO: remove this endpoint after it's usages are replaced with '/proposals'
 @app.route('/v1/client_create_session', methods=['POST'])
 @validate_json
 def client_create_session():
