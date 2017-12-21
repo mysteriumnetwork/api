@@ -65,9 +65,7 @@ def proposals():
 
     if node_key:
         node = Node.query.get(node_key)
-        if not node:
-            return jsonify(error='node by node_key not found'), 400
-        nodes = [node]
+        nodes = [node] if node else []
     else:
         nodes = Node.query.all()
 

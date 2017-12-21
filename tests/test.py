@@ -59,9 +59,9 @@ class TestApi(unittest.TestCase):
     def test_proposals_with_unknown_node_key(self):
         re = self._get('/v1/proposals', {'node_key': 'UNKNOWN'})
 
-        self.assertEqual(400, re.status_code)
+        self.assertEqual(200, re.status_code)
         data = re.json()
-        self.assertEqual('node by node_key not found', data['error'])
+        self.assertEqual([], data['proposals'])
 
     # TODO: fix test
     def _test_node_send_stats(self):
