@@ -6,7 +6,6 @@ from models import db, Node, Session, NodeAvailability, Identity
 from datetime import datetime
 import helpers
 import logging
-import json
 
 
 helpers.setup_logger()
@@ -74,44 +73,6 @@ def proposals():
         service_proposals += node.get_service_proposals()
 
     return jsonify({'proposals': service_proposals})
-
-
-# TODO: make 'session_id' param required after client update
-@app.route('/v1/client_create_session', methods=['POST'])
-@validate_json
-def client_create_session():
-    payload = request.get_json(force=True)
-    node_key = payload.get('node_key', '')
-
-    node = Node.query.get(node_key)
-    if not node:
-        return jsonify(error='node key not found'), 400
-
-    if node.get_status() != 'active':
-        return jsonify(error='node is not active'), 400
-
-    try:
-        obj = json.loads(node.connection_config)
-    except:
-        return jsonify(error='cannot deserialize service proposal'), 400
-
-    service_proposal = obj.get('service_proposal', None)
-    if service_proposal is None:
-        return jsonify(error='service_proposal was not found'), 400
-
-    session_key = payload.get('session_key') or helpers.generate_random_string()
-    session = Session(session_key)
-    session.node_key = node_key
-    session.client_updated_at = datetime.utcnow()
-    session.client_ip = request.remote_addr
-    db.session.add(session)
-    db.session.commit()
-
-    return jsonify(
-    {
-        'session_key': session_key,
-        'service_proposal': service_proposal,
-    })
 
 
 # Node call this function each minute.
