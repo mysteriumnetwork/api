@@ -1,4 +1,3 @@
-import random
 import unittest
 
 import requests
@@ -22,31 +21,6 @@ class TestApi(unittest.TestCase):
 
         print re.content
         re.json()
-
-    def test_client_create_session(self):
-        payload = {
-            'node_key': 'node1',
-        }
-
-        re = self._post('/v1/client_create_session', payload)
-        print re.content
-        data = re.json()
-        data['session_key']
-        data['service_proposal']
-
-    def test_client_create_session_with_session_key(self):
-        session_key = random.randint(0, 10**9)
-        payload = {
-            'node_key': 'node1',
-            'session_key': session_key,
-        }
-
-        re = self._post('/v1/client_create_session', payload)
-        print re.content
-        data = re.json()
-        self.assertEqual(session_key, data['session_key'])
-        self.assertIsNotNone(data['service_proposal'])
-
 
     def test_proposals(self):
         re = self._get('/v1/proposals')
