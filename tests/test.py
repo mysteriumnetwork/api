@@ -2,7 +2,7 @@ import unittest
 
 import json
 
-from app import app
+from app import app, db
 
 
 class TestApi(unittest.TestCase):
@@ -10,9 +10,10 @@ class TestApi(unittest.TestCase):
         app.testing = True
         app.debug = True
         self.app = app.test_client()
+        db.drop_all()
+        db.create_all()
 
     def test_node_reg(self):
-
         payload = {
             "service_proposal": {
                 "id": 1,
@@ -27,6 +28,8 @@ class TestApi(unittest.TestCase):
         json.loads(re.data)
 
     def test_proposals(self):
+        self._register_node()
+
         re = self.app.get('/v1/proposals')
 
         self.assertEqual(200, re.status_code)
@@ -38,6 +41,8 @@ class TestApi(unittest.TestCase):
             self.assertIsNotNone(proposal['id'])
 
     def test_proposals_filtering(self):
+        self._register_node()
+
         re = self._get('/v1/proposals', {'node_key': 'node1'})
 
         self.assertEqual(200, re.status_code)
@@ -50,6 +55,8 @@ class TestApi(unittest.TestCase):
         self.assertEqual('node1', proposal['provider_id'])
 
     def test_proposals_with_unknown_node_key(self):
+        self._register_node()
+
         re = self._get('/v1/proposals', {'node_key': 'UNKNOWN'})
 
         self.assertEqual(200, re.status_code)
@@ -97,6 +104,16 @@ class TestApi(unittest.TestCase):
 
     def _post(self, url, payload):
         return self.app.post(url, data=json.dumps(payload))
+
+    def _register_node(self):
+        payload = {
+            "service_proposal": {
+                "id": 1,
+                "format": "service-proposal/v1",
+                "provider_id": "node1",
+            }
+        }
+        self._post('/v1/node_register', payload)
 
 
 if __name__ == '__main__':

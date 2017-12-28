@@ -2,7 +2,7 @@ import unittest
 
 import json
 
-from app import app
+from app import app, db
 
 
 class TestApi(unittest.TestCase):
@@ -10,8 +10,9 @@ class TestApi(unittest.TestCase):
         app.testing = True
         app.debug = True
         self.app = app.test_client()
+        db.drop_all()
+        db.create_all()
 
-    # TODO: assert response, fix it to be 200
     def test_save_identity(self):
         payload = {
             'identity': '0x0000000000000000000000000000000000000001',
@@ -19,6 +20,7 @@ class TestApi(unittest.TestCase):
 
         re = self.app.post('/v1/identities', data=json.dumps(payload))
         print re.data
+        self.assertEqual(200, re.status_code)
 
 
 if __name__ == '__main__':
