@@ -74,6 +74,32 @@ def proposals():
     return jsonify({'proposals': service_proposals})
 
 
+# Node and client should call this endpoint each minute.
+@app.route('/v1/sessions/<session_key>/stats', methods=['POST'])
+@validate_json
+def session_stats_create(session_key):
+    payload = request.get_json(force=True)
+
+    bytes_sent = payload.get('bytes_sent')
+    bytes_received = payload.get('bytes_received')
+    if bytes_sent < 0:
+        return jsonify({'error': 'bytes_sent should not be negative'}), 400
+    if bytes_received < 0:
+        return jsonify({'error': 'bytes_received should not be negative'}), 400
+
+    session = Session.query.get(session_key)
+    if session is None:
+        session = Session(session_key)
+
+    session.client_bytes_sent = bytes_sent
+    session.client_bytes_received = bytes_received
+
+    db.session.add(session)
+    db.session.commit()
+
+    return jsonify({})
+
+
 # Node call this function each minute.
 @app.route('/v1/node_send_stats', methods=['POST'])
 @validate_json
