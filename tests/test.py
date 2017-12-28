@@ -1,11 +1,15 @@
 import unittest
 
-import requests
 import json
+
+from app import app
 
 
 class TestApi(unittest.TestCase):
-    HOST = 'http://127.0.0.1:5000'
+    def setUp(self):
+        app.testing = True
+        app.debug = True
+        self.app = app.test_client()
 
     def test_node_reg(self):
 
@@ -19,15 +23,15 @@ class TestApi(unittest.TestCase):
 
         re = self._post('/v1/node_register', payload)
 
-        print re.content
-        re.json()
+        print re.data
+        json.loads(re.data)
 
     def test_proposals(self):
-        re = self._get('/v1/proposals')
+        re = self.app.get('/v1/proposals')
 
         self.assertEqual(200, re.status_code)
 
-        data = re.json()
+        data = json.loads(re.data)
         proposals = data['proposals']
         self.assertGreater(len(proposals), 0)
         for proposal in proposals:
@@ -38,7 +42,7 @@ class TestApi(unittest.TestCase):
 
         self.assertEqual(200, re.status_code)
 
-        data = re.json()
+        data = json.loads(re.data)
         proposals = data['proposals']
         self.assertEqual(1, len(proposals))
         proposal = proposals[0]
@@ -49,7 +53,7 @@ class TestApi(unittest.TestCase):
         re = self._get('/v1/proposals', {'node_key': 'UNKNOWN'})
 
         self.assertEqual(200, re.status_code)
-        data = re.json()
+        data = json.loads(re.data)
         self.assertEqual([], data['proposals'])
 
     # TODO: fix test
@@ -67,8 +71,8 @@ class TestApi(unittest.TestCase):
 
         re = self._post('/v1/node_send_stats', payload)
 
-        print re.content
-        data = re.json()
+        print re.data
+        data = json.loads(re.data)
         for el in data['sessions']:
             el['is_session_valid']
             el['session_key']
@@ -83,22 +87,16 @@ class TestApi(unittest.TestCase):
 
         re = self._post('/v1/client_send_stats', payload)
 
-        print re.content
-        data = re.json()
+        print re.data
+        data = json.loads(re.data)
         data['is_session_valid']
         data['session_key']
 
     def _get(self, url, params={}):
-        return requests.get(
-            self.HOST + url,
-            params=params
-        )
+        return self.app.get(url, query_string=params)
 
     def _post(self, url, payload):
-        return requests.post(
-            self.HOST + url,
-            data=json.dumps(payload)
-        )
+        return self.app.post(url, data=json.dumps(payload))
 
 
 if __name__ == '__main__':
