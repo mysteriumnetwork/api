@@ -2,23 +2,16 @@ import unittest
 
 import json
 
-from app import app, db
+from tests.test_case import TestCase
 
 
-class TestApi(unittest.TestCase):
-    def setUp(self):
-        app.testing = True
-        app.debug = True
-        self.app = app.test_client()
-        db.drop_all()
-        db.create_all()
-
+class TestApi(TestCase):
     def test_save_identity(self):
         payload = {
             'identity': '0x0000000000000000000000000000000000000001',
         }
 
-        re = self.app.post('/v1/identities', data=json.dumps(payload))
+        re = self.client.post('/v1/identities', data=json.dumps(payload))
         print re.data
         self.assertEqual(200, re.status_code)
 

@@ -2,17 +2,10 @@ import unittest
 
 import json
 
-from app import app, db
+from tests.test_case import TestCase
 
 
-class TestApi(unittest.TestCase):
-    def setUp(self):
-        app.testing = True
-        app.debug = True
-        self.app = app.test_client()
-        db.drop_all()
-        db.create_all()
-
+class TestApi(TestCase):
     def test_node_reg(self):
         payload = {
             "service_proposal": {
@@ -23,14 +16,15 @@ class TestApi(unittest.TestCase):
         }
 
         re = self._post('/v1/node_register', payload)
+        self.assertEqual(200, re.status_code)
 
         print re.data
-        json.loads(re.data)
+        re.json
 
     def test_proposals(self):
         self._register_node()
 
-        re = self.app.get('/v1/proposals')
+        re = self._get('/v1/proposals')
 
         self.assertEqual(200, re.status_code)
 
@@ -100,10 +94,10 @@ class TestApi(unittest.TestCase):
         data['session_key']
 
     def _get(self, url, params={}):
-        return self.app.get(url, query_string=params)
+        return self.client.get(url, query_string=params)
 
     def _post(self, url, payload):
-        return self.app.post(url, data=json.dumps(payload))
+        return self.client.post(url, data=json.dumps(payload))
 
     def _register_node(self):
         payload = {
