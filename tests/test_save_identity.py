@@ -1,20 +1,19 @@
 import unittest
 
-import requests
 import json
 
+from tests.test_case import TestCase
 
-class TestApi(unittest.TestCase):
+
+class TestApi(TestCase):
     def test_save_identity(self):
         payload = {
             'identity': '0x0000000000000000000000000000000000000001',
         }
 
-        re = requests.post(
-            'http://127.0.0.1:5000/v1/identities',
-            data=json.dumps(payload)
-        )
-        print re.content
+        re = self.client.post('/v1/identities', data=json.dumps(payload))
+        print re.data
+        self.assertEqual(200, re.status_code)
 
 
 if __name__ == '__main__':

@@ -30,4 +30,3 @@ def setup_logger():
     console.setFormatter(logging.Formatter(log_format, datefmt=log_datefmt))
     logging.getLogger('').addHandler(console)
     logging.getLogger('urllib3').setLevel(logging.WARNING)
-    logging.getLogger('requests').setLevel(logging.WARNING)

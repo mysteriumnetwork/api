@@ -6,12 +6,11 @@ from models import db, Node, Session, NodeAvailability, Identity
 from datetime import datetime
 import helpers
 import logging
+import settings
 
 
 helpers.setup_logger()
 app = Flask(__name__)
-sslify = SSLify(app)
-db.init_app(app)
 
 
 def validate_json(f):
@@ -186,9 +185,6 @@ def save_identity():
     return jsonify({})
 
 
-#app.config['TRAP_HTTP_EXCEPTIONS']=True
-#app.config['PROPAGATE_EXCEPTIONS'] = True
-
 @app.errorhandler(404)
 def method_not_found(e):
     return jsonify(error='unknown API method'), 404
@@ -207,5 +203,9 @@ def handle_error(e):
 
 
 if __name__ == '__main__':
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://{}:{}@localhost/{}'.format(
+        settings.USER, settings.PASSWD, settings.DATABASE)
+    sslify = SSLify(app)
+    db.init_app(app)
     app.run(debug=True)
 

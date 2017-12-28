@@ -1,15 +1,12 @@
-import random
 import unittest
 
-import requests
 import json
 
+from tests.test_case import TestCase
 
-class TestApi(unittest.TestCase):
-    HOST = 'http://127.0.0.1:5000'
 
+class TestApi(TestCase):
     def test_node_reg(self):
-
         payload = {
             "service_proposal": {
                 "id": 1,
@@ -19,52 +16,32 @@ class TestApi(unittest.TestCase):
         }
 
         re = self._post('/v1/node_register', payload)
+        self.assertEqual(200, re.status_code)
 
-        print re.content
-        re.json()
-
-    def test_client_create_session(self):
-        payload = {
-            'node_key': 'node1',
-        }
-
-        re = self._post('/v1/client_create_session', payload)
-        print re.content
-        data = re.json()
-        data['session_key']
-        data['service_proposal']
-
-    def test_client_create_session_with_session_key(self):
-        session_key = random.randint(0, 10**9)
-        payload = {
-            'node_key': 'node1',
-            'session_key': session_key,
-        }
-
-        re = self._post('/v1/client_create_session', payload)
-        print re.content
-        data = re.json()
-        self.assertEqual(session_key, data['session_key'])
-        self.assertIsNotNone(data['service_proposal'])
-
+        print re.data
+        re.json
 
     def test_proposals(self):
+        self._register_node()
+
         re = self._get('/v1/proposals')
 
         self.assertEqual(200, re.status_code)
 
-        data = re.json()
+        data = json.loads(re.data)
         proposals = data['proposals']
         self.assertGreater(len(proposals), 0)
         for proposal in proposals:
             self.assertIsNotNone(proposal['id'])
 
     def test_proposals_filtering(self):
+        self._register_node()
+
         re = self._get('/v1/proposals', {'node_key': 'node1'})
 
         self.assertEqual(200, re.status_code)
 
-        data = re.json()
+        data = json.loads(re.data)
         proposals = data['proposals']
         self.assertEqual(1, len(proposals))
         proposal = proposals[0]
@@ -72,10 +49,12 @@ class TestApi(unittest.TestCase):
         self.assertEqual('node1', proposal['provider_id'])
 
     def test_proposals_with_unknown_node_key(self):
+        self._register_node()
+
         re = self._get('/v1/proposals', {'node_key': 'UNKNOWN'})
 
         self.assertEqual(200, re.status_code)
-        data = re.json()
+        data = json.loads(re.data)
         self.assertEqual([], data['proposals'])
 
     # TODO: fix test
@@ -93,8 +72,8 @@ class TestApi(unittest.TestCase):
 
         re = self._post('/v1/node_send_stats', payload)
 
-        print re.content
-        data = re.json()
+        print re.data
+        data = json.loads(re.data)
         for el in data['sessions']:
             el['is_session_valid']
             el['session_key']
@@ -109,22 +88,26 @@ class TestApi(unittest.TestCase):
 
         re = self._post('/v1/client_send_stats', payload)
 
-        print re.content
-        data = re.json()
+        print re.data
+        data = json.loads(re.data)
         data['is_session_valid']
         data['session_key']
 
     def _get(self, url, params={}):
-        return requests.get(
-            self.HOST + url,
-            params=params
-        )
+        return self.client.get(url, query_string=params)
 
     def _post(self, url, payload):
-        return requests.post(
-            self.HOST + url,
-            data=json.dumps(payload)
-        )
+        return self.client.post(url, data=json.dumps(payload))
+
+    def _register_node(self):
+        payload = {
+            "service_proposal": {
+                "id": 1,
+                "format": "service-proposal/v1",
+                "provider_id": "node1",
+            }
+        }
+        self._post('/v1/node_register', payload)
 
 
 if __name__ == '__main__':

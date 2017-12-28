@@ -1,4 +1,4 @@
 flask_sqlalchemy==2.1
+Flask-Testing==0.7.1
 PyMySQL
 Flask-SSLify
-requests==2.18.4
