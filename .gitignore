@@ -1,6 +1,5 @@
 .idea/
 api.log
-server.py
 settings.py
 venv/
 *.pyc
