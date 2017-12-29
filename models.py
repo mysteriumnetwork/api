@@ -7,6 +7,7 @@ db = SQLAlchemy()
 
 
 NODE_KEY_LIMIT = 42
+SESSION_KEY_LIMIT = 36
 
 
 class Node(db.Model):
@@ -40,7 +41,7 @@ class Node(db.Model):
 class Session(db.Model):
     __tablename__ = 'session'
 
-    session_key = db.Column(db.String(34), primary_key=True)
+    session_key = db.Column(db.String(SESSION_KEY_LIMIT), primary_key=True)
     node_key = db.Column(db.String(NODE_KEY_LIMIT))
     created_at = db.Column(db.DateTime)
     node_updated_at = db.Column(db.DateTime)
@@ -64,7 +65,6 @@ class Session(db.Model):
 
 class NodeAvailability(db.Model):
     __tablename__ = 'node_availability'
-    #id = db.Column(db.String(34), primary_key=True)
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     node_key = db.Column(db.String(34))
     date = db.Column(db.DateTime)
@@ -72,7 +72,6 @@ class NodeAvailability(db.Model):
     def __init__(self, node_key):
         self.node_key = node_key
         self.date = datetime.utcnow()
-        #self.id = self.node_key + self.date.strftime('%Y%m%d%H%M%S')
 
 
 class Identity(db.Model):

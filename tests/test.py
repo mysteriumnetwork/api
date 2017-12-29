@@ -2,7 +2,8 @@ import unittest
 
 import json
 
-from tests.test_case import TestCase
+from models import Session
+from tests.test_case import TestCase, db
 
 
 class TestApi(TestCase):
@@ -56,6 +57,46 @@ class TestApi(TestCase):
         self.assertEqual(200, re.status_code)
         data = json.loads(re.data)
         self.assertEqual([], data['proposals'])
+
+    def test_session_stats_create_without_session(self):
+        re = self._post('/v1/sessions/123/stats', {'bytes_sent': 20, 'bytes_received': 40})
+        self.assertEqual(200, re.status_code)
+        self.assertEqual({}, re.json)
+
+        sessions = Session.query.all()
+        self.assertEqual(1, len(sessions))
+        session = sessions[0]
+        self.assertEqual('123', session.session_key)
+        self.assertEqual(20, session.client_bytes_sent)
+        self.assertEqual(40, session.client_bytes_received)
+
+    def test_session_stats_create_with_session(self):
+        session = Session('123')
+        db.session.add(session)
+        db.session.commit()
+
+        re = self._post('/v1/sessions/123/stats', {'bytes_sent': 20, 'bytes_received': 40})
+        self.assertEqual(200, re.status_code)
+        self.assertEqual({}, re.json)
+
+        sessions = Session.query.all()
+        self.assertEqual(1, len(sessions))
+        session = sessions[0]
+        self.assertEqual('123', session.session_key)
+        self.assertEqual(20, session.client_bytes_sent)
+        self.assertEqual(40, session.client_bytes_received)
+
+    def test_session_stats_create_with_negative_values(self):
+        re = self._post('/v1/sessions/123/stats', {'bytes_sent': -20, 'bytes_received': 40})
+        self.assertEqual(400, re.status_code)
+        self.assertEqual({'error': 'bytes_sent should not be negative'}, re.json)
+
+        re = self._post('/v1/sessions/123/stats', {'bytes_sent': 20, 'bytes_received': -40})
+        self.assertEqual(400, re.status_code)
+        self.assertEqual({'error': 'bytes_received should not be negative'}, re.json)
+
+        sessions = Session.query.all()
+        self.assertEqual(0, len(sessions))
 
     # TODO: fix test
     def _test_node_send_stats(self):
