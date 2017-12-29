@@ -1,4 +1,5 @@
 from flask import Flask, request, render_template, jsonify
+from flask_migrate import Migrate
 from flask_sslify import SSLify
 from  werkzeug.debug import get_current_traceback
 from functools import wraps
@@ -11,6 +12,10 @@ import settings
 
 helpers.setup_logger()
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://{}:{}@localhost/{}'.format(
+    settings.USER, settings.PASSWD, settings.DATABASE)
+
+migrate = Migrate(app, db)
 
 
 def validate_json(f):
@@ -229,8 +234,6 @@ def handle_error(e):
 
 
 if __name__ == '__main__':
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://{}:{}@localhost/{}'.format(
-        settings.USER, settings.PASSWD, settings.DATABASE)
     sslify = SSLify(app)
     db.init_app(app)
     app.run(debug=True)

@@ -2,3 +2,4 @@ flask_sqlalchemy==2.1
 Flask-Testing==0.7.1
 PyMySQL
 Flask-SSLify
+Flask-Migrate
