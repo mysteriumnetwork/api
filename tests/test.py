@@ -69,6 +69,8 @@ class TestApi(TestCase):
         self.assertEqual('123', session.session_key)
         self.assertEqual(20, session.client_bytes_sent)
         self.assertEqual(40, session.client_bytes_received)
+        self.assertIsNotNone(session.client_updated_at)
+        self.assertEqual('127.0.0.1', session.client_ip)
 
     def test_session_stats_create_with_session(self):
         session = Session('123')
