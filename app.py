@@ -95,11 +95,11 @@ def session_stats_create(session_key):
     session = Session.query.get(session_key)
     if session is None:
         session = Session(session_key)
-        session.client_updated_at = datetime.utcnow()
         session.client_ip = request.remote_addr
 
     session.client_bytes_sent = bytes_sent
     session.client_bytes_received = bytes_received
+    session.client_updated_at = datetime.utcnow()
 
     db.session.add(session)
     db.session.commit()
