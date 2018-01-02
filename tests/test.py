@@ -19,7 +19,6 @@ class TestApi(TestCase):
         re = self._post('/v1/node_register', payload)
         self.assertEqual(200, re.status_code)
 
-        print re.data
         re.json
 
     def test_proposals(self):
@@ -69,6 +68,8 @@ class TestApi(TestCase):
         self.assertEqual('123', session.session_key)
         self.assertEqual(20, session.client_bytes_sent)
         self.assertEqual(40, session.client_bytes_received)
+        self.assertIsNotNone(session.client_updated_at)
+        self.assertEqual('127.0.0.1', session.client_ip)
 
     def test_session_stats_create_with_session(self):
         session = Session('123')
@@ -85,6 +86,7 @@ class TestApi(TestCase):
         self.assertEqual('123', session.session_key)
         self.assertEqual(20, session.client_bytes_sent)
         self.assertEqual(40, session.client_bytes_received)
+        self.assertIsNotNone(session.client_updated_at)
 
     def test_session_stats_create_with_negative_values(self):
         re = self._post('/v1/sessions/123/stats', {'bytes_sent': -20, 'bytes_received': 40})
@@ -113,7 +115,6 @@ class TestApi(TestCase):
 
         re = self._post('/v1/node_send_stats', payload)
 
-        print re.data
         data = json.loads(re.data)
         for el in data['sessions']:
             el['is_session_valid']
@@ -129,7 +130,6 @@ class TestApi(TestCase):
 
         re = self._post('/v1/client_send_stats', payload)
 
-        print re.data
         data = json.loads(re.data)
         data['is_session_valid']
         data['session_key']
