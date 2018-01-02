@@ -19,7 +19,6 @@ class TestApi(TestCase):
         re = self._post('/v1/node_register', payload)
         self.assertEqual(200, re.status_code)
 
-        print re.data
         re.json
 
     def test_proposals(self):
@@ -116,7 +115,6 @@ class TestApi(TestCase):
 
         re = self._post('/v1/node_send_stats', payload)
 
-        print re.data
         data = json.loads(re.data)
         for el in data['sessions']:
             el['is_session_valid']
@@ -132,7 +130,6 @@ class TestApi(TestCase):
 
         re = self._post('/v1/client_send_stats', payload)
 
-        print re.data
         data = json.loads(re.data)
         data['is_session_valid']
         data['session_key']

@@ -12,7 +12,6 @@ class TestApi(TestCase):
         }
 
         re = self.client.post('/v1/identities', data=json.dumps(payload))
-        print re.data
         self.assertEqual(200, re.status_code)
 
 
