@@ -79,7 +79,7 @@ def proposals():
     return jsonify({'proposals': service_proposals})
 
 
-# Node and client should call this endpoint each minute.
+# Client calls this endpoint each minute.
 @app.route('/v1/sessions/<session_key>/stats', methods=['POST'])
 @validate_json
 def session_stats_create(session_key):
@@ -163,40 +163,6 @@ def node_send_stats():
     return jsonify(
     {
         'sessions': return_values
-    })
-
-
-# Client call this function each minute.
-@app.route('/v1/client_send_stats', methods=['POST'])
-@validate_json
-def client_send_stats():
-    payload = request.get_json(force=True)
-    session_key = payload.get('session_key', '')
-    bytes_sent = payload.get('bytes_sent', 0)
-    bytes_received = payload.get('bytes_received', 0)
-
-    # get session by key
-    session = Session.query.get(session_key)
-    is_session_valid = False
-
-    if not session:
-        return jsonify(error='session key not found'), 400
-
-    if session:
-        # TODO: add this checking as soon as send stats is implemented in node
-        #if session.established:
-        if bytes_sent >= 0 and bytes_received >= 0:
-            session.client_bytes_sent = bytes_sent
-            session.client_bytes_received = bytes_received
-            session.client_updated_at = datetime.utcnow()
-            db.session.add(session)
-            db.session.commit()
-            is_session_valid = True
-
-    return jsonify(
-    {
-        'session_key': session_key,
-        'is_session_valid': is_session_valid
     })
 
 

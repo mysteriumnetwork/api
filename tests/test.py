@@ -120,20 +120,6 @@ class TestApi(TestCase):
             el['is_session_valid']
             el['session_key']
 
-    # TODO: fix test
-    def _test_client_send_stats(self):
-        payload = {
-            'session_key': 'X2d9gyQk1j',
-            'bytes_sent': 50,
-            'bytes_received': 60,
-        }
-
-        re = self._post('/v1/client_send_stats', payload)
-
-        data = json.loads(re.data)
-        data['is_session_valid']
-        data['session_key']
-
     def _get(self, url, params={}):
         return self.client.get(url, query_string=params)
 
