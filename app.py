@@ -1,4 +1,5 @@
 from flask import Flask, request, render_template, jsonify
+from flask_migrate import Migrate
 from flask_sslify import SSLify
 from  werkzeug.debug import get_current_traceback
 from functools import wraps
@@ -9,12 +10,15 @@ import logging
 import json
 from signature import recover_public_address
 import base64
+import settings
 
 
 helpers.setup_logger()
 app = Flask(__name__)
-sslify = SSLify(app)
-db.init_app(app)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://{}:{}@localhost/{}'.format(
+    settings.USER, settings.PASSWD, settings.DATABASE)
+
+migrate = Migrate(app, db)
 
 
 def validate_json(f):
@@ -61,41 +65,49 @@ def node_register():
     return jsonify({})
 
 
-@app.route('/v1/client_create_session', methods=['POST'])
+@app.route('/v1/proposals', methods=['GET'])
+def proposals():
+    node_key = request.args.get('node_key')
+
+    if node_key:
+        node = Node.query.get(node_key)
+        nodes = [node] if node else []
+    else:
+        nodes = Node.query.all()
+
+    service_proposals = []
+    for node in nodes:
+        service_proposals += node.get_service_proposals()
+
+    return jsonify({'proposals': service_proposals})
+
+
+# Node and client should call this endpoint each minute.
+@app.route('/v1/sessions/<session_key>/stats', methods=['POST'])
 @validate_json
-def client_create_session():
+def session_stats_create(session_key):
     payload = request.get_json(force=True)
-    node_key = payload.get('node_key', '')
 
-    node = Node.query.get(node_key)
-    if not node:
-        return jsonify(error='node key not found'), 400
+    bytes_sent = payload.get('bytes_sent')
+    bytes_received = payload.get('bytes_received')
+    if bytes_sent < 0:
+        return jsonify({'error': 'bytes_sent should not be negative'}), 400
+    if bytes_received < 0:
+        return jsonify({'error': 'bytes_received should not be negative'}), 400
 
-    if node.get_status() != 'active':
-        return jsonify(error='node is not active'), 400
+    session = Session.query.get(session_key)
+    if session is None:
+        session = Session(session_key)
+        session.client_ip = request.remote_addr
 
-    try:
-        obj = json.loads(node.connection_config)
-    except:
-        return jsonify(error='cannot deserialize service proposal'), 400
-
-    service_proposal = obj.get('service_proposal', None)
-    if service_proposal is None:
-        return jsonify(error='service_proposal was not found'), 400
-
-    session_key = helpers.generate_random_string()
-    session = Session(session_key)
-    session.node_key = node_key
+    session.client_bytes_sent = bytes_sent
+    session.client_bytes_received = bytes_received
     session.client_updated_at = datetime.utcnow()
-    session.client_ip = request.remote_addr
+
     db.session.add(session)
     db.session.commit()
 
-    return jsonify(
-    {
-        'session_key': session_key,
-        'service_proposal': service_proposal,
-    })
+    return jsonify({})
 
 
 # Node call this function each minute.
@@ -229,9 +241,6 @@ def signed_payload():
         return jsonify(error='payload was not signed with provided identity'), 401
 
 
-#app.config['TRAP_HTTP_EXCEPTIONS']=True
-#app.config['PROPAGATE_EXCEPTIONS'] = True
-
 @app.errorhandler(404)
 def method_not_found(e):
     return jsonify(error='unknown API method'), 404
@@ -250,5 +259,7 @@ def handle_error(e):
 
 
 if __name__ == '__main__':
+    sslify = SSLify(app)
+    db.init_app(app)
     app.run(debug=True)
 

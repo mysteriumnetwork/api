@@ -1,5 +1,7 @@
 flask_sqlalchemy==2.1
+Flask-Testing==0.7.1
 PyMySQL
 Flask-SSLify
+Flask-Migrate
 requests==2.18.4
 eth-keys==0.1.0b3
