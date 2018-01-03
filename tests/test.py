@@ -100,25 +100,26 @@ class TestApi(TestCase):
         sessions = Session.query.all()
         self.assertEqual(0, len(sessions))
 
-    # TODO: fix test
-    def _test_node_send_stats(self):
+    def test_node_send_stats(self):
+        self._register_node()
+
         session = {
             'session_key': 'X2d9gyQk1j',
             'bytes_sent': 20,
             'bytes_received': 10,
         }
-
         payload = {
-            'node_key': 'node key',
+            'node_key': 'node1',
             'sessions': [session]
         }
 
         re = self._post('/v1/node_send_stats', payload)
 
-        data = json.loads(re.data)
-        for el in data['sessions']:
-            el['is_session_valid']
-            el['session_key']
+        sessions = re.json['sessions']
+        self.assertEqual(1, len(sessions))
+        for session in sessions:
+            self.assertIsNotNone(session['is_session_valid'])
+            self.assertEqual('X2d9gyQk1j', session['session_key'])
 
     def _get(self, url, params={}):
         return self.client.get(url, query_string=params)
