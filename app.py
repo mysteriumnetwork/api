@@ -7,6 +7,9 @@ from models import db, Node, Session, NodeAvailability, Identity
 from datetime import datetime
 import helpers
 import logging
+import json
+from signature import recover_public_address
+import base64
 import settings
 
 
@@ -206,7 +209,7 @@ def client_send_stats():
 def save_identity():
     payload = request.get_json(force=True)
 
-    identity_arg = payload.get('identity', '')
+    identity_arg = payload.get('identity', '').lower()
     identity = Identity.query.get(identity_arg)
     if identity:
         return jsonify(error='identity already exists'), 400
@@ -216,6 +219,30 @@ def save_identity():
     db.session.commit()
 
     return jsonify({})
+
+
+# End Point example which verifies payload signature
+@app.route('/v1/signed_payload', methods=['POST'])
+@validate_json
+def signed_payload():
+    identity = request.headers.get('identity')
+
+    authorization = request.headers.get('Authorization')
+    authentication_type, signature_base64_encoded = authorization.split(' ')
+    if authentication_type != 'Signature':
+        return jsonify(error='authentication type have to be Signature'), 401
+
+    signature_bytes = base64.b64decode(signature_base64_encoded)
+    recovered_public_address = recover_public_address(
+        request.data,
+        signature_bytes,
+    )
+
+    # verify payload
+    if recovered_public_address.lower() == identity.lower():
+        return jsonify({})
+    else:
+        return jsonify(error='payload was not signed with provided identity'), 401
 
 
 @app.errorhandler(404)

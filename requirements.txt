@@ -3,3 +3,4 @@ Flask-Testing==0.7.1
 PyMySQL
 Flask-SSLify
 Flask-Migrate
+eth-keys==0.1.0b3
