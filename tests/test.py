@@ -2,7 +2,7 @@ import unittest
 
 import json
 
-from models import Session
+from models import Session, Node
 from tests.test_case import TestCase, db
 
 
@@ -56,6 +56,20 @@ class TestApi(TestCase):
         self.assertEqual(200, re.status_code)
         data = json.loads(re.data)
         self.assertEqual([], data['proposals'])
+
+    def test_proposals_with_invalid_node_proposals(self):
+        node1 = Node("node1")
+        node1.connection_config = ""
+        db.session.add(node1)
+
+        node2 = Node("node2")
+        node2.connection_config = json.dumps({})
+        db.session.add(node2)
+
+        re = self._get('/v1/proposals')
+
+        self.assertEqual(200, re.status_code)
+        self.assertEqual({'proposals': []}, re.json)
 
     def test_session_stats_create_without_session(self):
         re = self._post('/v1/sessions/123/stats', {'bytes_sent': 20, 'bytes_received': 40})

@@ -30,11 +30,11 @@ class Node(db.Model):
         try:
             config = json.loads(self.connection_config)
         except ValueError:
-            return None
+            return []
 
         service_proposal = config.get('service_proposal')
         if service_proposal is None:
-            return None
+            return []
         return [service_proposal]
 
 
