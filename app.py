@@ -226,7 +226,11 @@ def save_identity():
 @validate_json
 def signed_payload():
     identity = request.headers.get('identity')
-    signature_base64_encoded = request.headers.get('signature')
+
+    authorization = request.headers.get('Authorization')
+    authentication_type, signature_base64_encoded = authorization.split(' ')
+    if authentication_type != 'Signature':
+        return jsonify(error='authentication type have to be Signature'), 401
 
     signature_bytes = base64.b64decode(signature_base64_encoded)
     recovered_public_address = recover_public_address(

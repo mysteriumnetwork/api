@@ -32,7 +32,7 @@ class TestApi(TestCase):
 
         headers = {
             "identity": "0x1a642f0e3c3af545e7acbd38b07251b3990914f1",
-            "signature": "Da1mAwK5abmXQCNsCE+YjsZbR9jTyEKqdrjxxMKwNzwr2NFnM35UiVQJWcg8rgL+X2PR60LoIUMlGU9OPaSoZwE="
+            "Authorization": "Signature Da1mAwK5abmXQCNsCE+YjsZbR9jTyEKqdrjxxMKwNzwr2NFnM35UiVQJWcg8rgL+X2PR60LoIUMlGU9OPaSoZwE="
         }
 
         re = self.client.post(
@@ -50,7 +50,7 @@ class TestApi(TestCase):
 
         headers = {
             "identity": "0x0000000000000000000000000000000000000001",
-            "signature": "Da1mAwK5abmXQCNsCE+YjsZbR9jTyEKqdrjxxMKwNzwr2NFnM35UiVQJWcg8rgL+X2PR60LoIUMlGU9OPaSoZwE="
+            "Authorization": "Signature Da1mAwK5abmXQCNsCE+YjsZbR9jTyEKqdrjxxMKwNzwr2NFnM35UiVQJWcg8rgL+X2PR60LoIUMlGU9OPaSoZwE="
         }
 
         re = self.client.post(
@@ -61,3 +61,18 @@ class TestApi(TestCase):
 
         self.assertEqual({'error': 'payload was not signed with provided identity'}, re.json)
         self.assertEqual(401, re.status_code)
+
+
+    def test_incorrectly_authentication_type(self):
+            headers = {
+                "Authorization": "Basic Da1mAwK5abmXQCNsCE+YjsZbR9jTyEKqdrjxxMKwNzwr2NFnM35UiVQJWcg8rgL+X2PR60LoIUMlGU9OPaSoZwE="
+            }
+
+            re = self.client.post(
+                '/v1/signed_payload',
+                data=json.dumps({}),
+                headers=headers
+            )
+
+            self.assertEqual({'error': 'authentication type have to be Signature'}, re.json)
+            self.assertEqual(401, re.status_code)
