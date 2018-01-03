@@ -2,7 +2,7 @@ import unittest
 
 import json
 
-from models import Session
+from models import Session, Node
 from tests.test_case import TestCase, db
 
 
@@ -22,7 +22,7 @@ class TestApi(TestCase):
         re.json
 
     def test_proposals(self):
-        self._register_node()
+        self._create_sample_node()
 
         re = self._get('/v1/proposals')
 
@@ -35,7 +35,7 @@ class TestApi(TestCase):
             self.assertIsNotNone(proposal['id'])
 
     def test_proposals_filtering(self):
-        self._register_node()
+        self._create_sample_node()
 
         re = self._get('/v1/proposals', {'node_key': 'node1'})
 
@@ -49,13 +49,22 @@ class TestApi(TestCase):
         self.assertEqual('node1', proposal['provider_id'])
 
     def test_proposals_with_unknown_node_key(self):
-        self._register_node()
+        self._create_sample_node()
 
         re = self._get('/v1/proposals', {'node_key': 'UNKNOWN'})
 
         self.assertEqual(200, re.status_code)
         data = json.loads(re.data)
         self.assertEqual([], data['proposals'])
+
+    def test_proposals_with_invalid_node_proposals(self):
+        self._create_node("node1", "")
+        self._create_node("node2", "{}")
+
+        re = self._get('/v1/proposals')
+
+        self.assertEqual(200, re.status_code)
+        self.assertEqual({'proposals': []}, re.json)
 
     def test_session_stats_create_without_session(self):
         re = self._post('/v1/sessions/123/stats', {'bytes_sent': 20, 'bytes_received': 40})
@@ -140,15 +149,20 @@ class TestApi(TestCase):
     def _post(self, url, payload):
         return self.client.post(url, data=json.dumps(payload))
 
-    def _register_node(self):
-        payload = {
+    def _create_sample_node(self):
+        connection_config = json.dumps({
             "service_proposal": {
                 "id": 1,
                 "format": "service-proposal/v1",
                 "provider_id": "node1",
             }
-        }
-        self._post('/v1/node_register', payload)
+        })
+        self._create_node("node1", connection_config)
+
+    def _create_node(self, node_key, connection_config):
+        node = Node(node_key)
+        node.connection_config = connection_config
+        db.session.add(node)
 
 
 if __name__ == '__main__':
