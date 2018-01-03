@@ -43,3 +43,21 @@ class TestApi(TestCase):
 
         self.assertEqual({}, re.json)
         self.assertEqual(200, re.status_code)
+
+
+    def test_incorrectly_signed_payload(self):
+        payload = {}
+
+        headers = {
+            "identity": "0x0000000000000000000000000000000000000001",
+            "signature": "Da1mAwK5abmXQCNsCE+YjsZbR9jTyEKqdrjxxMKwNzwr2NFnM35UiVQJWcg8rgL+X2PR60LoIUMlGU9OPaSoZwE="
+        }
+
+        re = self.client.post(
+            '/v1/signed_payload',
+            data=json.dumps(payload),
+            headers=headers
+        )
+
+        self.assertEqual({'error': 'payload was not signed with provided identity'}, re.json)
+        self.assertEqual(401, re.status_code)
