@@ -2,7 +2,7 @@ import unittest
 
 import json
 
-from models import Session
+from models import Session, Node
 from tests.test_case import TestCase, db
 
 
@@ -22,7 +22,7 @@ class TestApi(TestCase):
         re.json
 
     def test_proposals(self):
-        self._register_node()
+        self._create_sample_node()
 
         re = self._get('/v1/proposals')
 
@@ -35,7 +35,7 @@ class TestApi(TestCase):
             self.assertIsNotNone(proposal['id'])
 
     def test_proposals_filtering(self):
-        self._register_node()
+        self._create_sample_node()
 
         re = self._get('/v1/proposals', {'node_key': 'node1'})
 
@@ -49,7 +49,7 @@ class TestApi(TestCase):
         self.assertEqual('node1', proposal['provider_id'])
 
     def test_proposals_with_unknown_node_key(self):
-        self._register_node()
+        self._create_sample_node()
 
         re = self._get('/v1/proposals', {'node_key': 'UNKNOWN'})
 
@@ -140,15 +140,14 @@ class TestApi(TestCase):
     def _post(self, url, payload):
         return self.client.post(url, data=json.dumps(payload))
 
-    def _register_node(self):
-        payload = {
-            "service_proposal": {
-                "id": 1,
-                "format": "service-proposal/v1",
-                "provider_id": "node1",
-            }
-        }
-        self._post('/v1/node_register', payload)
+    def _create_sample_node(self):
+        node = Node("node1")
+        node.proposal = json.dumps({
+            "id": 1,
+            "format": "service-proposal/v1",
+            "provider_id": "node1",
+        })
+        db.session.add(node)
 
 
 if __name__ == '__main__':
