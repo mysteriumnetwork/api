@@ -15,8 +15,8 @@ import settings
 
 helpers.setup_logger()
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://{}:{}@localhost/{}'.format(
-    settings.USER, settings.PASSWD, settings.DATABASE)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://{}:{}@{}/{}'.format(
+    settings.USER, settings.PASSWD, settings.DB_HOST, settings.DB_NAME)
 
 migrate = Migrate(app, db)
 
