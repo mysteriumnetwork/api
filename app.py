@@ -230,7 +230,8 @@ def save_identity(recovered_identity):
     if identity:
         return jsonify(error='identity already exists'), 400
 
-    identity = Identity(recovered_identity)
+    # TODO: pass signature and signed body to constructor
+    identity = Identity(recovered_identity, '', '')
     db.session.add(identity)
     db.session.commit()
 

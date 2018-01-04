@@ -79,8 +79,11 @@ class Identity(db.Model):
     __tablename__ = 'identity'
     identity = db.Column(db.String(42), primary_key=True)
     created_at = db.Column(db.DateTime)
-    # TODO: add signature field
+    signature = db.Column(db.Text)
+    signed_body = db.Column(db.Text)
 
-    def __init__(self, identity):
+    def __init__(self, identity, signature, signed_body):
         self.identity = identity
         self.created_at = datetime.utcnow()
+        self.signature = signature
+        self.signed_body = signed_body
