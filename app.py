@@ -7,7 +7,6 @@ from models import db, Node, Session, NodeAvailability, Identity
 from datetime import datetime
 import helpers
 import logging
-import json
 from signature import recover_public_address
 import base64
 import settings
