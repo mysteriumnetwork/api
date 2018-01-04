@@ -34,10 +34,22 @@ def validate_json(f):
 def recover_identity(f):
     @wraps(f)
     def wrapper(*args, **kw):
+        # Authorization request header format:
+        # Authorization: Signature <signature_base64_encoded>
         authorization = request.headers.get('Authorization')
+        if not authorization:
+            return jsonify(error='missing Authorization in request header'), 401
+
+        if authorization.count(' ') != 1:
+            return jsonify(error='invalid Authorization header value provided, correct format: Signature <signature_base64_encoded>'), 401
+
         authentication_type, signature_base64_encoded = authorization.split(' ')
+
         if authentication_type != 'Signature':
             return jsonify(error='authentication type have to be Signature'), 401
+
+        if signature_base64_encoded == '':
+            return jsonify(error='signature was not provided'), 401
 
         signature_bytes = base64.b64decode(signature_base64_encoded)
         recovered_public_address = recover_public_address(
