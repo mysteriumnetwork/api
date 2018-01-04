@@ -203,6 +203,25 @@ def client_send_stats():
     })
 
 
+def recover_identity(f):
+    @wraps(f)
+    def wrapper(*args, **kw):
+        authorization = request.headers.get('Authorization')
+        authentication_type, signature_base64_encoded = authorization.split(' ')
+        if authentication_type != 'Signature':
+            return jsonify(error='authentication type have to be Signature'), 401
+
+        signature_bytes = base64.b64decode(signature_base64_encoded)
+        recovered_public_address = recover_public_address(
+            request.data,
+            signature_bytes,
+        )
+        kw['recovered_identity'] = recovered_public_address
+        return f(*args, **kw)
+
+    return wrapper
+
+
 # End Point to save identity
 @app.route('/v1/identities', methods=['POST'])
 @validate_json
