@@ -44,7 +44,7 @@ def recover_identity(f):
             request.data,
             signature_bytes,
         )
-        kw['recovered_identity'] = recovered_public_address
+        kw['recovered_identity'] = recovered_public_address.lower()
         return f(*args, **kw)
 
     return wrapper
@@ -226,11 +226,11 @@ def client_send_stats():
 @validate_json
 @recover_identity
 def save_identity(recovered_identity):
-    identity = Identity.query.get(recovered_identity.lower())
+    identity = Identity.query.get(recovered_identity)
     if identity:
         return jsonify(error='identity already exists'), 400
 
-    identity = Identity(recovered_identity.lower())
+    identity = Identity(recovered_identity)
     db.session.add(identity)
     db.session.commit()
 
