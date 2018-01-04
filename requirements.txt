@@ -4,3 +4,4 @@ PyMySQL
 Flask-SSLify
 Flask-Migrate
 eth-keys==0.1.0b3
+pycodestyle==2.3.1
