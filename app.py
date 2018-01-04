@@ -225,15 +225,13 @@ def recover_identity(f):
 # End Point to save identity
 @app.route('/v1/identities', methods=['POST'])
 @validate_json
-def save_identity():
-    payload = request.get_json(force=True)
-
-    identity_arg = payload.get('identity', '').lower()
-    identity = Identity.query.get(identity_arg)
+@recover_identity
+def save_identity(recovered_identity):
+    identity = Identity.query.get(recovered_identity.lower())
     if identity:
         return jsonify(error='identity already exists'), 400
 
-    identity = Identity(identity_arg)
+    identity = Identity(recovered_identity.lower())
     db.session.add(identity)
     db.session.commit()
 
