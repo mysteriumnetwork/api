@@ -7,7 +7,7 @@ from models import db, Node, Session, NodeAvailability, Identity
 from datetime import datetime
 import helpers
 import logging
-from signature import recover_public_address
+from signature import recover_public_address, ValidationError as SignatureValidationError
 import base64
 import settings
 
@@ -51,11 +51,19 @@ def recover_identity(f):
         if signature_base64_encoded == '':
             return jsonify(error='signature was not provided'), 401
 
-        signature_bytes = base64.b64decode(signature_base64_encoded)
-        recovered_public_address = recover_public_address(
-            request.data,
-            signature_bytes,
-        )
+        try:
+            signature_bytes = base64.b64decode(signature_base64_encoded)
+        except Exception as err:
+            return jsonify(error='signature must be base64 encoded: {0}'.format(err)), 401
+
+        try:
+            recovered_public_address = recover_public_address(
+                request.data,
+                signature_bytes,
+            )
+        except SignatureValidationError as err:
+            return jsonify(error='invalid signature format: {0}'.format(err)), 401
+
         kw['recovered_identity'] = recovered_public_address.lower()
         return f(*args, **kw)
 
