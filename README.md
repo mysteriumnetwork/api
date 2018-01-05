@@ -36,3 +36,8 @@ To execute tests, start api service in background and run:
 ```bash
 python -m unittest discover
 ```
+
+To run linter:
+```bash
+./lint
+```
