@@ -40,10 +40,11 @@ def recover_identity(f):
         if not authorization:
             return jsonify(error='missing Authorization in request header'), 401
 
-        if authorization.count(' ') != 1:
+        authorization_parts = authorization.split(' ')
+        if len(authorization_parts) != 2:
             return jsonify(error='invalid Authorization header value provided, correct format: Signature <signature_base64_encoded>'), 401
 
-        authentication_type, signature_base64_encoded = authorization.split(' ')
+        authentication_type, signature_base64_encoded = authorization_parts
 
         if authentication_type != 'Signature':
             return jsonify(error='authentication type have to be Signature'), 401
