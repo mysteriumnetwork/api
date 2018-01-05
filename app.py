@@ -260,28 +260,13 @@ def save_identity():
 
 
 # End Point example which verifies payload signature
-@app.route('/v1/signed_payload', methods=['POST'])
+@app.route('/v1/test_signed_payload', methods=['POST'])
 @validate_json
-def signed_payload():
-    identity = request.headers.get('identity')
-
-    authorization = request.headers.get('Authorization')
-    authentication_type, signature_base64_encoded = authorization.split(' ')
-    if authentication_type != 'Signature':
-        return jsonify(error='authentication type have to be Signature'), 401
-
-    signature_bytes = base64.b64decode(signature_base64_encoded)
-    recovered_public_address = recover_public_address(
-        request.data,
-        signature_bytes,
-    )
-
-    # verify payload
-    if recovered_public_address.lower() == identity.lower():
-        return jsonify({})
-    else:
-        return jsonify(error='payload was not signed with provided identity'), 401
-
+@recover_identity
+def test_signed_payload(recovered_identity):
+    return jsonify({
+        'identity': recovered_identity
+    })
 
 @app.errorhandler(404)
 def method_not_found(e):
