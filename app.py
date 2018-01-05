@@ -244,14 +244,15 @@ def client_send_stats():
 # End Point to save identity
 @app.route('/v1/identities', methods=['POST'])
 @validate_json
-@recover_identity
-def save_identity(recovered_identity):
-    identity = Identity.query.get(recovered_identity)
+def save_identity():
+    payload = request.get_json(force=True)
+
+    identity_arg = payload.get('identity', '').lower()
+    identity = Identity.query.get(identity_arg)
     if identity:
         return jsonify(error='identity already exists'), 400
 
-    # TODO: pass signature and signed body to constructor
-    identity = Identity(recovered_identity, '', '')
+    identity = Identity(identity_arg)
     db.session.add(identity)
     db.session.commit()
 
