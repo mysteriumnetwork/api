@@ -54,7 +54,7 @@ def recover_identity(f):
 
         try:
             signature_bytes = base64.b64decode(signature_base64_encoded)
-        except Exception as err:
+        except TypeError as err:
             return jsonify(error='signature must be base64 encoded: {0}'.format(err)), 401
 
         try:
