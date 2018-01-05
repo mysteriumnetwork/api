@@ -17,7 +17,6 @@ class Node(db.Model):
     connection_config = db.Column(db.Text)
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
-    # TODO: add signature field
 
     def __init__(self, node_key):
         self.node_key = node_key
