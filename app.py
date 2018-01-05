@@ -1,7 +1,7 @@
 from flask import Flask, request, render_template, jsonify
 from flask_migrate import Migrate
 from flask_sslify import SSLify
-from  werkzeug.debug import get_current_traceback
+from werkzeug.debug import get_current_traceback
 from functools import wraps
 from models import db, Node, Session, NodeAvailability, Identity
 from datetime import datetime
@@ -139,10 +139,6 @@ def node_send_stats():
         session = Session.query.get(session_key)
         is_session_valid = False
 
-        if not session:
-            #logger.warning('session key not found')
-            pass
-
         if session:
             if session.established:
                 if bytes_sent >= 0 and bytes_received >= 0:
@@ -163,8 +159,7 @@ def node_send_stats():
     db.session.add(na)
     db.session.commit()
 
-    return jsonify(
-    {
+    return jsonify({
         'sessions': return_values
     })
 
@@ -187,7 +182,7 @@ def client_send_stats():
 
     if session:
         # TODO: add this checking as soon as send stats is implemented in node
-        #if session.established:
+        # if session.established:
         if bytes_sent >= 0 and bytes_received >= 0:
             session.client_bytes_sent = bytes_sent
             session.client_bytes_received = bytes_received
@@ -196,8 +191,7 @@ def client_send_stats():
             db.session.commit()
             is_session_valid = True
 
-    return jsonify(
-    {
+    return jsonify({
         'session_key': session_key,
         'is_session_valid': is_session_valid
     })
@@ -266,4 +260,3 @@ if __name__ == '__main__':
     sslify = SSLify(app)
     db.init_app(app)
     app.run(debug=True)
-

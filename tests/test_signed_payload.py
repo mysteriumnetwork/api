@@ -3,6 +3,7 @@ from eth_keys import keys
 import json
 import base64
 
+
 class TestApi(TestCase):
     def print_payload_signature(self):
         pk = keys.PrivateKey(b'\x01' * 32)
@@ -19,7 +20,6 @@ class TestApi(TestCase):
         print json.dumps(payload)
         print pk.public_key.to_checksum_address().lower()
         print base64.b64encode(signature.to_bytes())
-
 
     def test_signed_payload(self):
         payload = {
@@ -44,7 +44,6 @@ class TestApi(TestCase):
         self.assertEqual({}, re.json)
         self.assertEqual(200, re.status_code)
 
-
     def test_incorrectly_signed_payload(self):
         payload = {}
 
@@ -61,7 +60,6 @@ class TestApi(TestCase):
 
         self.assertEqual({'error': 'payload was not signed with provided identity'}, re.json)
         self.assertEqual(401, re.status_code)
-
 
     def test_incorrectly_authentication_type(self):
             headers = {

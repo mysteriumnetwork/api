@@ -6,7 +6,7 @@ import logging
 
 
 def generate_random_string():
-    N=10
+    N = 10
     # + string.ascii_uppercase
     return ''.join(random.SystemRandom().choice(string.ascii_lowercase + string.digits) for _ in range(N))
 
