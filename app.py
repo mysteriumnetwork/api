@@ -259,7 +259,7 @@ def save_identity():
     return jsonify({})
 
 
-# End Point example which verifies payload signature
+# End Point example which recovers public address from signed payload
 @app.route('/v1/test_signed_payload', methods=['POST'])
 @validate_json
 @recover_identity

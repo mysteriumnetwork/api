@@ -4,75 +4,119 @@ import json
 import base64
 
 class TestApi(TestCase):
-    def print_payload_signature(self):
+    def sign_message(self, message):
         pk = keys.PrivateKey(b'\x01' * 32)
+        signature = pk.sign_msg(message)
+        signature_bytes =signature.to_bytes()
+        public_address = pk.public_key.to_checksum_address()
+        return signature_bytes, public_address
 
-        payload = {
-            "service_proposal": {
-                "id": 1,
-                "format": "service-proposal/v1",
-                "provider_id": "node1",
-            }
-        }
-
-        signature = pk.sign_msg(json.dumps(payload))
-        print json.dumps(payload)
-        print pk.public_key.to_checksum_address().lower()
-        print base64.b64encode(signature.to_bytes())
-
-
-    def test_signed_payload(self):
-        payload = {
-            "service_proposal": {
-                "id": 1,
-                "format": "service-proposal/v1",
-                "provider_id": "node1",
-            }
-        }
-
+    def test_incorrect_authorization_header(self):
         headers = {
-            "identity": "0x1a642f0e3c3af545e7acbd38b07251b3990914f1",
-            "Authorization": "Signature Da1mAwK5abmXQCNsCE+YjsZbR9jTyEKqdrjxxMKwNzwr2NFnM35UiVQJWcg8rgL+X2PR60LoIUMlGU9OPaSoZwE="
+            "incorrectAuthorizationHeader": "Signature sig"
         }
 
         re = self.client.post(
-            '/v1/signed_payload',
-            data=json.dumps(payload),
+            '/v1/test_signed_payload',
+            data=json.dumps(''),
             headers=headers
         )
 
-        self.assertEqual({}, re.json)
-        self.assertEqual(200, re.status_code)
-
-
-    def test_incorrectly_signed_payload(self):
-        payload = {}
-
-        headers = {
-            "identity": "0x0000000000000000000000000000000000000001",
-            "Authorization": "Signature Da1mAwK5abmXQCNsCE+YjsZbR9jTyEKqdrjxxMKwNzwr2NFnM35UiVQJWcg8rgL+X2PR60LoIUMlGU9OPaSoZwE="
-        }
-
-        re = self.client.post(
-            '/v1/signed_payload',
-            data=json.dumps(payload),
-            headers=headers
-        )
-
-        self.assertEqual({'error': 'payload was not signed with provided identity'}, re.json)
         self.assertEqual(401, re.status_code)
+        self.assertEqual(re.json['error'], 'missing Authorization in request header')
 
+    def test_incorrect_authorization_header_value_format(self):
+        headers = {
+            "Authorization": "Signature"
+        }
 
-    def test_incorrectly_authentication_type(self):
-            headers = {
-                "Authorization": "Basic Da1mAwK5abmXQCNsCE+YjsZbR9jTyEKqdrjxxMKwNzwr2NFnM35UiVQJWcg8rgL+X2PR60LoIUMlGU9OPaSoZwE="
-            }
+        re = self.client.post(
+            '/v1/test_signed_payload',
+            data=json.dumps(''),
+            headers=headers
+        )
 
-            re = self.client.post(
-                '/v1/signed_payload',
-                data=json.dumps({}),
-                headers=headers
-            )
+        self.assertEqual(401, re.status_code)
+        self.assertEqual(re.json['error'], 'invalid Authorization header value provided, correct format: Signature <signature_base64_encoded>')
 
-            self.assertEqual({'error': 'authentication type have to be Signature'}, re.json)
-            self.assertEqual(401, re.status_code)
+    def test_incorrect_authorization_type(self):
+        headers = {
+            "Authorization": "incorrectType sig"
+        }
+
+        re = self.client.post(
+            '/v1/test_signed_payload',
+            data=json.dumps(''),
+            headers=headers
+        )
+
+        self.assertEqual(401, re.status_code)
+        self.assertEqual(re.json['error'], 'authentication type have to be Signature')
+
+    def test_empty_authorization_header_value(self):
+        headers = {
+            "Authorization": "Signature "
+        }
+
+        re = self.client.post(
+            '/v1/test_signed_payload',
+            data=json.dumps(''),
+            headers=headers
+        )
+
+        self.assertEqual(401, re.status_code)
+        self.assertEqual(re.json['error'], 'signature was not provided')
+
+    def test_signature_not_base64_encoded(self):
+        headers = {
+            "Authorization": "Signature not_base_64"
+        }
+
+        re = self.client.post(
+            '/v1/test_signed_payload',
+            data=json.dumps(''),
+            headers=headers
+        )
+
+        self.assertEqual(401, re.status_code)
+        self.assertEqual(re.json['error'], 'signature must be base64 encoded: Incorrect padding')
+
+    def test_incorrect_signature_format(self):
+        payload = {
+            "test": "test"
+        }
+
+        signature, public_address = self.sign_message(json.dumps(payload))
+
+        headers = {
+            "Authorization": "Signature {}".format(base64.b64encode(signature+'1'))
+        }
+
+        re = self.client.post(
+            '/v1/test_signed_payload',
+            data=json.dumps(payload),
+            headers=headers
+        )
+
+        self.assertEqual(401, re.status_code)
+        self.assertEqual(re.json['error'], 'invalid signature format: Unexpected signature format.  Must be length 65 byte string')
+
+    def test_successful_request(self):
+        payload = {
+            "test": "test"
+        }
+
+        signature, public_address = self.sign_message(json.dumps(payload))
+
+        headers = {
+            "Authorization": "Signature {}".format(base64.b64encode(signature))
+        }
+
+        re = self.client.post(
+            '/v1/test_signed_payload',
+            data=json.dumps(payload),
+            headers=headers
+        )
+
+        self.assertEqual(200, re.status_code)
+        self.assertEqual(public_address.lower(), re.json['identity'])
