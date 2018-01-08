@@ -1,14 +1,7 @@
-from eth_keys.datatypes import (
-    Signature,
-)
-
-from eth_utils import (
-    to_checksum_address,
-)
-
-from eth_keys.utils.address import (
-    public_key_bytes_to_address,
-)
+from eth_keys.datatypes import Signature
+from eth_keys.exceptions import ValidationError
+from eth_keys.utils.address import public_key_bytes_to_address
+from eth_utils import to_checksum_address
 
 
 def recover_public_key(message, signature_bytes):
@@ -19,5 +12,7 @@ def recover_public_key(message, signature_bytes):
 
 def recover_public_address(message, signature_bytes):
     public_key = recover_public_key(message, signature_bytes)
-    public_address = to_checksum_address(public_key_bytes_to_address(public_key.to_bytes()))
+    public_address = to_checksum_address(
+        public_key_bytes_to_address(public_key.to_bytes())
+    )
     return public_address

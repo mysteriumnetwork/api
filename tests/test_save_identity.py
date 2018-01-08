@@ -1,7 +1,5 @@
 import unittest
-
 import json
-
 from tests.test_case import TestCase
 
 
@@ -13,6 +11,8 @@ class TestApi(TestCase):
 
         re = self.client.post('/v1/identities', data=json.dumps(payload))
         self.assertEqual(200, re.status_code)
+
+    # TODO: test failure scenarios
 
 
 if __name__ == '__main__':
