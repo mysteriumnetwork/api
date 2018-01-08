@@ -76,7 +76,7 @@ def recover_identity(f):
         except ValueError as err:
             return jsonify(error=str(err)), 401
 
-        kw['recovered_identity'] = recovered_public_address
+        kw['caller_identity'] = recovered_public_address
         return f(*args, **kw)
 
     return wrapper
@@ -268,9 +268,9 @@ def save_identity():
 # End Point example which recovers public address from signed payload
 @app.route('/v1/me', methods=['GET'])
 @recover_identity
-def test_signed_payload(recovered_identity):
+def test_signed_payload(caller_identity):
     return jsonify({
-        'identity': recovered_identity
+        'identity': caller_identity
     })
 
 
