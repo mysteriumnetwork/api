@@ -14,5 +14,6 @@ class TestApi(TestCase):
 
     # TODO: test failure scenarios
 
+
 if __name__ == '__main__':
     unittest.main()

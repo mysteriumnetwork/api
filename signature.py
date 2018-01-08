@@ -12,5 +12,7 @@ def recover_public_key(message, signature_bytes):
 
 def recover_public_address(message, signature_bytes):
     public_key = recover_public_key(message, signature_bytes)
-    public_address = to_checksum_address(public_key_bytes_to_address(public_key.to_bytes()))
+    public_address = to_checksum_address(
+        public_key_bytes_to_address(public_key.to_bytes())
+    )
     return public_address

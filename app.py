@@ -7,7 +7,10 @@ from models import db, Node, Session, NodeAvailability, Identity
 from datetime import datetime
 import helpers
 import logging
-from signature import recover_public_address, ValidationError as SignatureValidationError
+from signature import (
+    recover_public_address,
+    ValidationError as SignatureValidationError
+)
 import base64
 import settings
 
@@ -40,7 +43,8 @@ def decode_authorization_header(headers):
 
     authorization_parts = authorization.split(' ')
     if len(authorization_parts) != 2:
-        raise ValueError('invalid Authorization header value provided, correct format: Signature <signature_base64_encoded>')
+        raise ValueError('invalid Authorization header value provided, correct'
+                         ' format: Signature <signature_base64_encoded>')
 
     authentication_type, signature_base64_encoded = authorization_parts
 
@@ -62,6 +66,7 @@ def decode_authorization_header(headers):
         ).lower()
     except SignatureValidationError as err:
         raise ValueError('invalid signature format: {0}'.format(err))
+
 
 def recover_identity(f):
     @wraps(f)
@@ -268,6 +273,7 @@ def test_signed_payload(recovered_identity):
         'identity': recovered_identity
     })
 
+
 @app.errorhandler(404)
 def method_not_found(e):
     return jsonify(error='unknown API method'), 404
@@ -280,7 +286,11 @@ def method_not_allowed(e):
 
 @app.errorhandler(Exception)
 def handle_error(e):
-    track = get_current_traceback(skip=1, show_hidden_frames=True, ignore_system_exceptions=False)
+    track = get_current_traceback(
+        skip=1,
+        show_hidden_frames=True,
+        ignore_system_exceptions=False
+    )
     logging.error(track.plaintext)
     return jsonify(error=str(e)), 500
 

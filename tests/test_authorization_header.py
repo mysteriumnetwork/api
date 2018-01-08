@@ -4,11 +4,12 @@ from app import decode_authorization_header
 from eth_keys import keys
 import base64
 
+
 class TestAuthorizationHeader(TestCase):
     def sign_message(self, message):
         pk = keys.PrivateKey(b'\x01' * 32)
         signature = pk.sign_msg(message)
-        signature_bytes =signature.to_bytes()
+        signature_bytes = signature.to_bytes()
         public_address = pk.public_key.to_checksum_address()
         return signature_bytes, public_address
 
@@ -19,7 +20,10 @@ class TestAuthorizationHeader(TestCase):
 
         with self.assertRaises(ValueError) as err:
             decode_authorization_header(headers)
-        self.assertEqual('missing Authorization in request header', str(err.exception))
+        self.assertEqual(
+            'missing Authorization in request header',
+            str(err.exception)
+        )
 
     def test_incorrect_authorization_header_value_format(self):
         headers = {
@@ -28,7 +32,11 @@ class TestAuthorizationHeader(TestCase):
 
         with self.assertRaises(ValueError) as err:
             decode_authorization_header(headers)
-        self.assertEqual('invalid Authorization header value provided, correct format: Signature <signature_base64_encoded>', str(err.exception))
+        self.assertEqual(
+            'invalid Authorization header value provided, correct'
+            ' format: Signature <signature_base64_encoded>',
+            str(err.exception)
+        )
 
     def test_incorrect_authorization_type(self):
         headers = {
@@ -37,7 +45,10 @@ class TestAuthorizationHeader(TestCase):
 
         with self.assertRaises(ValueError) as err:
             decode_authorization_header(headers)
-        self.assertEqual('authentication type have to be Signature', str(err.exception))
+        self.assertEqual(
+            'authentication type have to be Signature',
+            str(err.exception)
+        )
 
     def test_empty_authorization_header_value(self):
         headers = {
@@ -55,7 +66,10 @@ class TestAuthorizationHeader(TestCase):
 
         with self.assertRaises(ValueError) as err:
             decode_authorization_header(headers)
-        self.assertEqual('signature must be base64 encoded: Incorrect padding', str(err.exception))
+        self.assertEqual(
+            'signature must be base64 encoded: Incorrect padding',
+            str(err.exception)
+        )
 
     def test_incorrect_signature_format(self):
         signature, public_address = self.sign_message('')
@@ -66,7 +80,11 @@ class TestAuthorizationHeader(TestCase):
 
         with self.assertRaises(ValueError) as err:
             decode_authorization_header(headers)
-        self.assertEqual('invalid signature format: Unexpected signature format.  Must be length 65 byte string', str(err.exception))
+        self.assertEqual(
+            'invalid signature format: Unexpected signature format.'
+            '  Must be length 65 byte string',
+            str(err.exception)
+        )
 
     def test_successful(self):
         signature, public_address = self.sign_message('')
@@ -77,6 +95,7 @@ class TestAuthorizationHeader(TestCase):
 
         recovered_public_address = decode_authorization_header(headers)
         self.assertEqual(public_address.lower(), recovered_public_address)
+
 
 if __name__ == '__main__':
     unittest.main()
