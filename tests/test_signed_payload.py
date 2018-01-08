@@ -1,6 +1,5 @@
 from tests.test_case import TestCase
 from eth_keys import keys
-import json
 import base64
 
 class TestApi(TestCase):
@@ -25,3 +24,15 @@ class TestApi(TestCase):
 
         self.assertEqual(200, re.status_code)
         self.assertEqual(public_address.lower(), re.json['identity'])
+
+    def test_failure(self):
+        headers = {
+            "Authorization": ""
+        }
+
+        re = self.client.post(
+            '/v1/test_signed_payload',
+            headers=headers
+        )
+
+        self.assertEqual(401, re.status_code)
