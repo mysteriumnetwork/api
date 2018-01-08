@@ -13,27 +13,26 @@ class TestApi(TestCase):
 
     def test_successful_request(self):
         signature, public_address = self.sign_message('')
-
         headers = {
             "Authorization": "Signature {}".format(base64.b64encode(signature))
         }
 
-        re = self.client.post(
-            '/v1/test_signed_payload',
-            headers=headers
-        )
+        re = self.client.get('/v1/me', headers=headers)
 
         self.assertEqual(200, re.status_code)
-        self.assertEqual(public_address.lower(), re.json['identity'])
+        self.assertEqual(
+            re.json,
+            {'identity': public_address.lower()}
+        )
 
     def test_failure(self):
-        headers = {
-            "Authorization": ""
-        }
-
-        re = self.client.post(
-            '/v1/test_signed_payload',
-            headers=headers
+        re = self.client.get(
+            '/v1/me',
+            headers={"Authorization": ""}
         )
 
         self.assertEqual(401, re.status_code)
+        self.assertEqual(
+            re.json,
+            {'error': 'missing Authorization in request header'}
+        )
