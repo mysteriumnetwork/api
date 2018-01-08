@@ -69,7 +69,7 @@ def recover_identity(f):
         try:
             recovered_public_address = decode_authorization_header(request.headers)
         except ValueError as err:
-            return jsonify(error=err.__str__()), 401
+            return jsonify(error=str(err)), 401
 
         kw['recovered_identity'] = recovered_public_address
         return f(*args, **kw)
