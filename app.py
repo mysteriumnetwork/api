@@ -57,7 +57,7 @@ def node_register():
         node = Node(node_key)
 
     node.ip = request.remote_addr
-    node.connection_config = request.data
+    node.proposal = json.dumps(proposal)
     node.updated_at = datetime.utcnow()
     db.session.add(node)
     db.session.commit()

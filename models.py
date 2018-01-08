@@ -29,14 +29,10 @@ class Node(db.Model):
 
     def get_service_proposals(self):
         try:
-            config = json.loads(self.connection_config)
+            proposal = json.loads(self.proposal)
         except ValueError:
-            return None
-
-        service_proposal = config.get('service_proposal')
-        if service_proposal is None:
-            return None
-        return [service_proposal]
+            return []
+        return [proposal]
 
 
 class Session(db.Model):
