@@ -102,11 +102,7 @@ class TestApi(TestCase):
         self.assertEqual(re.json['error'], 'invalid signature format: Unexpected signature format.  Must be length 65 byte string')
 
     def test_successful_request(self):
-        payload = {
-            "test": "test"
-        }
-
-        signature, public_address = self.sign_message(json.dumps(payload))
+        signature, public_address = self.sign_message('')
 
         headers = {
             "Authorization": "Signature {}".format(base64.b64encode(signature))
@@ -114,7 +110,6 @@ class TestApi(TestCase):
 
         re = self.client.post(
             '/v1/test_signed_payload',
-            data=json.dumps(payload),
             headers=headers
         )
 

@@ -256,7 +256,6 @@ def save_identity():
 
 # End Point example which recovers public address from signed payload
 @app.route('/v1/test_signed_payload', methods=['POST'])
-@validate_json
 @recover_identity
 def test_signed_payload(recovered_identity):
     return jsonify({
