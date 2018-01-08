@@ -1,1 +1,1 @@
-pycodestyle . --exclude=./migrations/
+pycodestyle . --exclude=./migrations/,./venv/
