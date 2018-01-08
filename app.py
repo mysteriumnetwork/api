@@ -31,41 +31,47 @@ def validate_json(f):
     return wrapper
 
 
+def decode_authorization_header(headers):
+    # Authorization request header format:
+    # Authorization: Signature <signature_base64_encoded>
+    authorization = headers.get('Authorization')
+    if not authorization:
+        raise ValueError('missing Authorization in request header')
+
+    authorization_parts = authorization.split(' ')
+    if len(authorization_parts) != 2:
+        raise ValueError('invalid Authorization header value provided, correct format: Signature <signature_base64_encoded>')
+
+    authentication_type, signature_base64_encoded = authorization_parts
+
+    if authentication_type != 'Signature':
+        raise ValueError('authentication type have to be Signature')
+
+    if signature_base64_encoded == '':
+        raise ValueError('signature was not provided')
+
+    try:
+        signature_bytes = base64.b64decode(signature_base64_encoded)
+    except TypeError as err:
+        raise ValueError('signature must be base64 encoded: {0}'.format(err))
+
+    try:
+        return recover_public_address(
+            request.data,
+            signature_bytes,
+        ).lower()
+    except SignatureValidationError as err:
+        raise ValueError('invalid signature format: {0}'.format(err))
+
 def recover_identity(f):
     @wraps(f)
     def wrapper(*args, **kw):
-        # Authorization request header format:
-        # Authorization: Signature <signature_base64_encoded>
-        authorization = request.headers.get('Authorization')
-        if not authorization:
-            return jsonify(error='missing Authorization in request header'), 401
-
-        authorization_parts = authorization.split(' ')
-        if len(authorization_parts) != 2:
-            return jsonify(error='invalid Authorization header value provided, correct format: Signature <signature_base64_encoded>'), 401
-
-        authentication_type, signature_base64_encoded = authorization_parts
-
-        if authentication_type != 'Signature':
-            return jsonify(error='authentication type have to be Signature'), 401
-
-        if signature_base64_encoded == '':
-            return jsonify(error='signature was not provided'), 401
-
         try:
-            signature_bytes = base64.b64decode(signature_base64_encoded)
-        except TypeError as err:
-            return jsonify(error='signature must be base64 encoded: {0}'.format(err)), 401
+            recovered_public_address = decode_authorization_header(request.headers)
+        except ValueError as err:
+            return jsonify(error=err.__str__()), 401
 
-        try:
-            recovered_public_address = recover_public_address(
-                request.data,
-                signature_bytes,
-            )
-        except SignatureValidationError as err:
-            return jsonify(error='invalid signature format: {0}'.format(err)), 401
-
-        kw['recovered_identity'] = recovered_public_address.lower()
+        kw['recovered_identity'] = recovered_public_address
         return f(*args, **kw)
 
     return wrapper
