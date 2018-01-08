@@ -15,6 +15,7 @@ class Node(db.Model):
     node_key = db.Column(db.String(NODE_KEY_LIMIT), primary_key=True)
     ip = db.Column(db.String(45))
     connection_config = db.Column(db.Text)
+    proposal = db.Column(db.Text)
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
 
