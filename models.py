@@ -15,6 +15,7 @@ class Node(db.Model):
     node_key = db.Column(db.String(NODE_KEY_LIMIT), primary_key=True)
     ip = db.Column(db.String(45))
     connection_config = db.Column(db.Text)
+    proposal = db.Column(db.Text)
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
 
@@ -28,14 +29,10 @@ class Node(db.Model):
 
     def get_service_proposals(self):
         try:
-            config = json.loads(self.connection_config)
+            proposal = json.loads(self.proposal)
         except ValueError:
-            return None
-
-        service_proposal = config.get('service_proposal')
-        if service_proposal is None:
-            return None
-        return [service_proposal]
+            return []
+        return [proposal]
 
 
 class Session(db.Model):
