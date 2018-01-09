@@ -5,6 +5,7 @@ from werkzeug.debug import get_current_traceback
 from functools import wraps
 from models import db, Node, Session, NodeAvailability, Identity
 from datetime import datetime
+import json
 import helpers
 import logging
 from signature import (
