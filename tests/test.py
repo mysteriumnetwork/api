@@ -21,6 +21,17 @@ class TestApi(TestCase):
 
         re.json
 
+    def test_node_reg_with_string_json(self):
+        # string is actually a valid json, but out endpoints rely on json being a dictionary
+        re = self._post('/v1/node_register', 'some string')
+        self.assertEqual(400, re.status_code)
+        self.assertEqual({"error": 'payload must be a valid json'}, re.json)
+
+    def test_node_reg_with_invalid_json(self):
+        re = self._post('/v1/node_register', '{as"d}')
+        self.assertEqual(400, re.status_code)
+        self.assertEqual({"error": 'payload must be a valid json'}, re.json)
+
     def test_proposals(self):
         self._create_sample_node()
 

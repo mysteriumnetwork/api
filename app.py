@@ -27,9 +27,8 @@ migrate = Migrate(app, db)
 def validate_json(f):
     @wraps(f)
     def wrapper(*args, **kw):
-        try:
-            request.get_json(force=True)
-        except:
+        json_data = request.get_json(force=True)
+        if isinstance(json_data, basestring):
             return jsonify({"error": 'payload must be a valid json'}), 400
         return f(*args, **kw)
     return wrapper
