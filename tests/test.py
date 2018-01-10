@@ -69,7 +69,7 @@ class TestApi(TestCase):
         data = json.loads(re.data)
         self.assertEqual([], data['proposals'])
 
-    def test_session_stats_create_without_session(self):
+    def test_session_stats_create_without_session_record(self):
         re = self._post('/v1/sessions/123/stats', {
             'bytes_sent': 20,
             'bytes_received': 40
@@ -86,7 +86,7 @@ class TestApi(TestCase):
         self.assertIsNotNone(session.client_updated_at)
         self.assertEqual('127.0.0.1', session.client_ip)
 
-    def test_session_stats_create_with_session(self):
+    def test_session_stats_create_with_session_record(self):
         session = Session('123')
         db.session.add(session)
         db.session.commit()
