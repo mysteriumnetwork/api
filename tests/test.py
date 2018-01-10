@@ -22,7 +22,8 @@ class TestApi(TestCase):
         re.json
 
     def test_node_reg_with_string_json(self):
-        # string is actually a valid json, but out endpoints rely on json being a dictionary
+        # string is actually a valid json,
+        # but endpoints rely on json being a dictionary
         re = self._post('/v1/node_register', 'some string')
         self.assertEqual(400, re.status_code)
         self.assertEqual({"error": 'payload must be a valid json'}, re.json)
@@ -69,7 +70,10 @@ class TestApi(TestCase):
         self.assertEqual([], data['proposals'])
 
     def test_session_stats_create_without_session(self):
-        re = self._post('/v1/sessions/123/stats', {'bytes_sent': 20, 'bytes_received': 40})
+        re = self._post('/v1/sessions/123/stats', {
+            'bytes_sent': 20,
+            'bytes_received': 40
+        })
         self.assertEqual(200, re.status_code)
         self.assertEqual({}, re.json)
 
@@ -87,7 +91,10 @@ class TestApi(TestCase):
         db.session.add(session)
         db.session.commit()
 
-        re = self._post('/v1/sessions/123/stats', {'bytes_sent': 20, 'bytes_received': 40})
+        re = self._post('/v1/sessions/123/stats', {
+            'bytes_sent': 20,
+            'bytes_received': 40,
+        })
         self.assertEqual(200, re.status_code)
         self.assertEqual({}, re.json)
 
@@ -100,13 +107,25 @@ class TestApi(TestCase):
         self.assertIsNotNone(session.client_updated_at)
 
     def test_session_stats_create_with_negative_values(self):
-        re = self._post('/v1/sessions/123/stats', {'bytes_sent': -20, 'bytes_received': 40})
+        re = self._post('/v1/sessions/123/stats', {
+            'bytes_sent': -20,
+            'bytes_received': 40
+        })
         self.assertEqual(400, re.status_code)
-        self.assertEqual({'error': 'bytes_sent should not be negative'}, re.json)
+        self.assertEqual(
+            {'error': 'bytes_sent should not be negative'},
+            re.json
+        )
 
-        re = self._post('/v1/sessions/123/stats', {'bytes_sent': 20, 'bytes_received': -40})
+        re = self._post('/v1/sessions/123/stats', {
+            'bytes_sent': 20,
+            'bytes_received': -40
+        })
         self.assertEqual(400, re.status_code)
-        self.assertEqual({'error': 'bytes_received should not be negative'}, re.json)
+        self.assertEqual(
+            {'error': 'bytes_received should not be negative'},
+            re.json
+        )
 
         sessions = Session.query.all()
         self.assertEqual(0, len(sessions))

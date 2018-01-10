@@ -72,11 +72,11 @@ def recover_identity(f):
     @wraps(f)
     def wrapper(*args, **kw):
         try:
-            recovered_public_address = decode_authorization_header(request.headers)
+            caller_identity = decode_authorization_header(request.headers)
         except ValueError as err:
             return jsonify(error=str(err)), 401
 
-        kw['caller_identity'] = recovered_public_address
+        kw['caller_identity'] = caller_identity
         return f(*args, **kw)
 
     return wrapper

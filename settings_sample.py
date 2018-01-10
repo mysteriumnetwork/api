@@ -1,4 +1,5 @@
-DB_HOST = 'localhost'  # Use "docker.for.mac.localhost" to access host from docker container on Mac
+# Use "docker.for.mac.localhost" host to access host from docker on Mac
+DB_HOST = 'localhost'
 DB_NAME = ''
 USER = ''
 PASSWD = ''
