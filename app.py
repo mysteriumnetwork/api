@@ -251,7 +251,8 @@ def client_send_stats():
 # End Point to save identity
 @app.route('/v1/identities', methods=['POST'])
 @validate_json
-def save_identity():
+@recover_identity
+def save_identity(caller_identity):
     payload = request.get_json(force=True)
 
     identity_arg = payload.get('identity', '').lower()
