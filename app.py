@@ -24,11 +24,20 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://{}:{}@{}/{}'.format(
 migrate = Migrate(app, db)
 
 
+def is_json_dict(data):
+    try:
+        json_data = json.loads(data)
+    except ValueError:
+        return False
+    if not isinstance(json_data, dict):
+        return False
+    return True
+
+
 def validate_json(f):
     @wraps(f)
     def wrapper(*args, **kw):
-        json_data = request.get_json(force=True)
-        if isinstance(json_data, basestring):
+        if not is_json_dict(request.data):
             return jsonify({"error": 'payload must be a valid json'}), 400
         return f(*args, **kw)
     return wrapper

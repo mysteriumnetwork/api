@@ -21,15 +21,22 @@ class TestApi(TestCase):
 
         re.json
 
-    def test_node_reg_with_string_json(self):
-        # string is actually a valid json,
-        # but endpoints rely on json being a dictionary
-        re = self._post('/v1/node_register', 'some string')
+    def test_node_reg_with_invalid_json(self):
+        re = self.client.post('/v1/node_register', data='{asd}')
         self.assertEqual(400, re.status_code)
         self.assertEqual({"error": 'payload must be a valid json'}, re.json)
 
-    def test_node_reg_with_invalid_json(self):
-        re = self._post('/v1/node_register', '{as"d}')
+    def test_node_reg_with_string_json(self):
+        # string is actually a valid json,
+        # but endpoints rely on json being a dictionary
+        re = self.client.post('/v1/node_register', data='"some string"')
+        self.assertEqual(400, re.status_code)
+        self.assertEqual({"error": 'payload must be a valid json'}, re.json)
+
+    def test_node_reg_with_array_json(self):
+        # string is actually a valid json,
+        # but endpoints rely on json being a dictionary
+        re = self.client.post('/v1/node_register', data='[]')
         self.assertEqual(400, re.status_code)
         self.assertEqual({"error": 'payload must be a valid json'}, re.json)
 
