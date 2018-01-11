@@ -1,18 +1,11 @@
 import unittest
 from tests.test_case import TestCase
 from app import decode_authorization_header
-from eth_keys import keys
 import base64
+import helpers
 
 
 class TestAuthorizationHeader(TestCase):
-    def sign_message(self, message):
-        pk = keys.PrivateKey(b'\x01' * 32)
-        signature = pk.sign_msg(message)
-        signature_bytes = signature.to_bytes()
-        public_address = pk.public_key.to_checksum_address()
-        return signature_bytes, public_address
-
     def test_incorrect_authorization_header(self):
         headers = {
             "incorrectAuthorizationHeader": "Signature sig"
@@ -72,7 +65,7 @@ class TestAuthorizationHeader(TestCase):
         )
 
     def test_incorrect_signature_format(self):
-        signature, public_address = self.sign_message('')
+        signature, public_address = helpers.sign_message_with_static_key('')
         invalid_signature = base64.b64encode(signature+'1')
 
         headers = {
@@ -88,7 +81,7 @@ class TestAuthorizationHeader(TestCase):
         )
 
     def test_successful(self):
-        signature, public_address = self.sign_message('')
+        signature, public_address = helpers.sign_message_with_static_key('')
 
         headers = {
             "Authorization": "Signature {}".format(base64.b64encode(signature))

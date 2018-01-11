@@ -1,18 +1,11 @@
 from tests.test_case import TestCase
-from eth_keys import keys
 import base64
+import helpers
 
 
 class TestApi(TestCase):
-    def sign_message(self, message):
-        pk = keys.PrivateKey(b'\x01' * 32)
-        signature = pk.sign_msg(message)
-        signature_bytes = signature.to_bytes()
-        public_address = pk.public_key.to_checksum_address()
-        return signature_bytes, public_address
-
     def test_successful_request(self):
-        signature, public_address = self.sign_message('')
+        signature, public_address = helpers.sign_message_with_static_key('')
         headers = {
             "Authorization": "Signature {}".format(base64.b64encode(signature))
         }
