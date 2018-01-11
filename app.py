@@ -24,12 +24,20 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://{}:{}@{}/{}'.format(
 migrate = Migrate(app, db)
 
 
+def is_json_dict(data):
+    try:
+        json_data = json.loads(data)
+    except ValueError:
+        return False
+    if not isinstance(json_data, dict):
+        return False
+    return True
+
+
 def validate_json(f):
     @wraps(f)
     def wrapper(*args, **kw):
-        try:
-            request.get_json(force=True)
-        except:
+        if not is_json_dict(request.data):
             return jsonify({"error": 'payload must be a valid json'}), 400
         return f(*args, **kw)
     return wrapper
@@ -73,11 +81,11 @@ def recover_identity(f):
     @wraps(f)
     def wrapper(*args, **kw):
         try:
-            recovered_public_address = decode_authorization_header(request.headers)
+            caller_identity = decode_authorization_header(request.headers)
         except ValueError as err:
             return jsonify(error=str(err)), 401
 
-        kw['caller_identity'] = recovered_public_address
+        kw['caller_identity'] = caller_identity
         return f(*args, **kw)
 
     return wrapper
@@ -212,39 +220,6 @@ def node_send_stats():
 
     return jsonify({
         'sessions': return_values
-    })
-
-
-# Client call this function each minute.
-@app.route('/v1/client_send_stats', methods=['POST'])
-@validate_json
-def client_send_stats():
-    payload = request.get_json(force=True)
-    session_key = payload.get('session_key', '')
-    bytes_sent = payload.get('bytes_sent', 0)
-    bytes_received = payload.get('bytes_received', 0)
-
-    # get session by key
-    session = Session.query.get(session_key)
-    is_session_valid = False
-
-    if not session:
-        return jsonify(error='session key not found'), 400
-
-    if session:
-        # TODO: add this checking as soon as send stats is implemented in node
-        # if session.established:
-        if bytes_sent >= 0 and bytes_received >= 0:
-            session.client_bytes_sent = bytes_sent
-            session.client_bytes_received = bytes_received
-            session.client_updated_at = datetime.utcnow()
-            db.session.add(session)
-            db.session.commit()
-            is_session_valid = True
-
-    return jsonify({
-        'session_key': session_key,
-        'is_session_valid': is_session_valid
     })
 
 

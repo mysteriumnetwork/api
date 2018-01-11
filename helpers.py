@@ -8,7 +8,11 @@ import logging
 def generate_random_string():
     N = 10
     # + string.ascii_uppercase
-    return ''.join(random.SystemRandom().choice(string.ascii_lowercase + string.digits) for _ in range(N))
+    return ''.join(random_character() for _ in range(N))
+
+
+def random_character():
+    return random.SystemRandom().choice(string.ascii_lowercase + string.digits)
 
 
 def get_app_path():

@@ -73,9 +73,10 @@ class TestAuthorizationHeader(TestCase):
 
     def test_incorrect_signature_format(self):
         signature, public_address = self.sign_message('')
+        invalid_signature = base64.b64encode(signature+'1')
 
         headers = {
-            "Authorization": "Signature {}".format(base64.b64encode(signature+'1'))
+            "Authorization": "Signature {}".format(invalid_signature)
         }
 
         with self.assertRaises(ValueError) as err:
