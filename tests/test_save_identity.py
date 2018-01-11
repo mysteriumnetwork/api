@@ -1,8 +1,7 @@
 import unittest
 import json
 from tests.test_case import TestCase
-import base64
-from tests.utils import sign_message_with_static_key
+from tests.utils import generate_test_authorization
 
 
 class TestApi(TestCase):
@@ -11,18 +10,11 @@ class TestApi(TestCase):
             'identity': '0x0000000000000000000000000000000000000001',
         }
 
-        signature, _ = sign_message_with_static_key(
-            json.dumps(payload)
-        )
-
-        headers = {
-            "Authorization": "Signature {}".format(base64.b64encode(signature))
-        }
-
+        auth = generate_test_authorization(json.dumps(payload))
         re = self.client.post(
             '/v1/identities',
             data=json.dumps(payload),
-            headers=headers
+            headers=auth['headers']
         )
         self.assertEqual(200, re.status_code)
 
