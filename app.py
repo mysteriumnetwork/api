@@ -164,7 +164,8 @@ def session_stats_create(session_key):
 # Node call this function each minute.
 @app.route('/v1/node_send_stats', methods=['POST'])
 @validate_json
-def node_send_stats():
+@recover_identity
+def node_send_stats(caller_identity):
     payload = request.get_json(force=True)
     node_key = payload.get('node_key', '')
     sessions = payload.get('sessions', [])
