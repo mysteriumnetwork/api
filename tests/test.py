@@ -2,8 +2,7 @@ import unittest
 import json
 from models import Session, Node
 from tests.test_case import TestCase, db
-from tests.utils import sign_message_with_static_key
-import base64
+from tests.utils import generate_test_authorization
 
 
 class TestApi(TestCase):
@@ -16,12 +15,8 @@ class TestApi(TestCase):
             }
         }
 
-        signature, _ = sign_message_with_static_key('')
-        headers = {
-            "Authorization": "Signature {}".format(base64.b64encode(signature))
-        }
-
-        re = self._post('/v1/node_register', payload, headers=headers)
+        auth = generate_test_authorization()
+        re = self._post('/v1/node_register', payload, headers=auth['headers'])
         self.assertEqual(200, re.status_code)
 
         re.json
@@ -82,17 +77,14 @@ class TestApi(TestCase):
         self.assertEqual([], data['proposals'])
 
     def test_session_stats_create_without_session_record(self):
-        signature, _ = sign_message_with_static_key('')
-        headers = {
-            "Authorization": "Signature {}".format(base64.b64encode(signature))
-        }
+        auth = generate_test_authorization()
         re = self._post(
             '/v1/sessions/123/stats',
             {
                 'bytes_sent': 20,
                 'bytes_received': 40
             },
-            headers=headers
+            headers=auth['headers']
         )
 
         self.assertEqual(200, re.status_code)
@@ -112,17 +104,14 @@ class TestApi(TestCase):
         db.session.add(session)
         db.session.commit()
 
-        signature, _ = sign_message_with_static_key('')
-        headers = {
-            "Authorization": "Signature {}".format(base64.b64encode(signature))
-        }
+        auth = generate_test_authorization()
         re = self._post(
             '/v1/sessions/123/stats',
             {
                 'bytes_sent': 20,
                 'bytes_received': 40,
             },
-            headers=headers
+            headers=auth['headers']
         )
         self.assertEqual(200, re.status_code)
         self.assertEqual({}, re.json)
@@ -136,17 +125,14 @@ class TestApi(TestCase):
         self.assertIsNotNone(session.client_updated_at)
 
     def test_session_stats_create_with_negative_values(self):
-        signature, _ = sign_message_with_static_key('')
-        headers = {
-            "Authorization": "Signature {}".format(base64.b64encode(signature))
-        }
+        auth = generate_test_authorization()
         re = self._post(
             '/v1/sessions/123/stats',
             {
                 'bytes_sent': -20,
                 'bytes_received': 40
             },
-            headers=headers
+            headers=auth['headers']
         )
         self.assertEqual(400, re.status_code)
         self.assertEqual(
@@ -160,7 +146,7 @@ class TestApi(TestCase):
                 'bytes_sent': 20,
                 'bytes_received': -40
             },
-            headers=headers
+            headers=auth['headers']
         )
         self.assertEqual(400, re.status_code)
         self.assertEqual(
