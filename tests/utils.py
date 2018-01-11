@@ -9,6 +9,7 @@ def sign_message_with_static_key(message):
     public_address = pk.public_key.to_checksum_address()
     return signature_bytes, public_address
 
+
 def generate_test_authorization(message=''):
     signature, public_address = sign_message_with_static_key(message)
     headers = {
