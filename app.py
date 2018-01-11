@@ -100,7 +100,8 @@ def home():
 
 @app.route('/v1/node_register', methods=['POST'])
 @validate_json
-def node_register():
+@recover_identity
+def node_register(caller_identity):
     payload = request.get_json(force=True)
 
     proposal = payload.get('service_proposal', None)
@@ -144,7 +145,8 @@ def proposals():
 # Node and client should call this endpoint each minute.
 @app.route('/v1/sessions/<session_key>/stats', methods=['POST'])
 @validate_json
-def session_stats_create(session_key):
+@recover_identity
+def session_stats_create(session_key, caller_identity):
     payload = request.get_json(force=True)
 
     bytes_sent = payload.get('bytes_sent')
@@ -172,7 +174,8 @@ def session_stats_create(session_key):
 # Node call this function each minute.
 @app.route('/v1/node_send_stats', methods=['POST'])
 @validate_json
-def node_send_stats():
+@recover_identity
+def node_send_stats(caller_identity):
     payload = request.get_json(force=True)
     node_key = payload.get('node_key', '')
     sessions = payload.get('sessions', [])
@@ -226,7 +229,8 @@ def node_send_stats():
 # End Point to save identity
 @app.route('/v1/identities', methods=['POST'])
 @validate_json
-def save_identity():
+@recover_identity
+def save_identity(caller_identity):
     payload = request.get_json(force=True)
 
     identity_arg = payload.get('identity', '').lower()
