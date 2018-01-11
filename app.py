@@ -144,7 +144,8 @@ def proposals():
 # Node and client should call this endpoint each minute.
 @app.route('/v1/sessions/<session_key>/stats', methods=['POST'])
 @validate_json
-def session_stats_create(session_key):
+@recover_identity
+def session_stats_create(session_key, caller_identity):
     payload = request.get_json(force=True)
 
     bytes_sent = payload.get('bytes_sent')
