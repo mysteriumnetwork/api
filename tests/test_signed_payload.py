@@ -1,11 +1,11 @@
 from tests.test_case import TestCase
 import base64
-import helpers
+from tests.utils import sign_message_with_static_key
 
 
 class TestApi(TestCase):
     def test_successful_request(self):
-        signature, public_address = helpers.sign_message_with_static_key('')
+        signature, public_address = sign_message_with_static_key('')
         headers = {
             "Authorization": "Signature {}".format(base64.b64encode(signature))
         }

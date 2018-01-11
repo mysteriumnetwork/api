@@ -2,7 +2,7 @@ import unittest
 import json
 from tests.test_case import TestCase
 import base64
-import helpers
+from tests.utils import sign_message_with_static_key
 
 
 class TestApi(TestCase):
@@ -11,7 +11,7 @@ class TestApi(TestCase):
             'identity': '0x0000000000000000000000000000000000000001',
         }
 
-        signature, public_address = helpers.sign_message_with_static_key(
+        signature, public_address = sign_message_with_static_key(
             json.dumps(payload)
         )
 

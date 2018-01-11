@@ -1,10 +1,8 @@
 import unittest
-
 import json
-
 from models import Session, Node
 from tests.test_case import TestCase, db
-import helpers
+from tests.utils import sign_message_with_static_key
 import base64
 
 
@@ -18,7 +16,7 @@ class TestApi(TestCase):
             }
         }
 
-        signature, public_address = helpers.sign_message_with_static_key('')
+        signature, public_address = sign_message_with_static_key('')
         headers = {
             "Authorization": "Signature {}".format(base64.b64encode(signature))
         }
@@ -84,7 +82,7 @@ class TestApi(TestCase):
         self.assertEqual([], data['proposals'])
 
     def test_session_stats_create_without_session_record(self):
-        signature, public_address = helpers.sign_message_with_static_key('')
+        signature, public_address = sign_message_with_static_key('')
         headers = {
             "Authorization": "Signature {}".format(base64.b64encode(signature))
         }
@@ -114,7 +112,7 @@ class TestApi(TestCase):
         db.session.add(session)
         db.session.commit()
 
-        signature, public_address = helpers.sign_message_with_static_key('')
+        signature, public_address = sign_message_with_static_key('')
         headers = {
             "Authorization": "Signature {}".format(base64.b64encode(signature))
         }
@@ -138,7 +136,7 @@ class TestApi(TestCase):
         self.assertIsNotNone(session.client_updated_at)
 
     def test_session_stats_create_with_negative_values(self):
-        signature, public_address = helpers.sign_message_with_static_key('')
+        signature, public_address = sign_message_with_static_key('')
         headers = {
             "Authorization": "Signature {}".format(base64.b64encode(signature))
         }
