@@ -100,7 +100,8 @@ def home():
 
 @app.route('/v1/node_register', methods=['POST'])
 @validate_json
-def node_register():
+@recover_identity
+def node_register(caller_identity):
     payload = request.get_json(force=True)
 
     proposal = payload.get('service_proposal', None)

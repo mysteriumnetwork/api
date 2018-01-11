@@ -18,7 +18,12 @@ class TestApi(TestCase):
             }
         }
 
-        re = self._post('/v1/node_register', payload)
+        signature, public_address = helpers.sign_message_with_static_key('')
+        headers = {
+            "Authorization": "Signature {}".format(base64.b64encode(signature))
+        }
+
+        re = self._post('/v1/node_register', payload, headers=headers)
         self.assertEqual(200, re.status_code)
 
         re.json
