@@ -11,7 +11,7 @@ class TestApi(TestCase):
             'identity': '0x0000000000000000000000000000000000000001',
         }
 
-        signature, public_address = sign_message_with_static_key(
+        signature, _ = sign_message_with_static_key(
             json.dumps(payload)
         )
 

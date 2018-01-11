@@ -65,7 +65,7 @@ class TestAuthorizationHeader(TestCase):
         )
 
     def test_incorrect_signature_format(self):
-        signature, public_address = sign_message_with_static_key('')
+        signature, _ = sign_message_with_static_key('')
         invalid_signature = base64.b64encode(signature+'1')
 
         headers = {
