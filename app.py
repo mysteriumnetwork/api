@@ -160,7 +160,10 @@ def session_stats_create(session_key, caller_identity):
     if session is None:
         session = Session(session_key)
         session.client_ip = request.remote_addr
+        session.consumer_id = caller_identity
 
+    if session.consumer_id != caller_identity:
+        return jsonify({}), 403
     session.client_bytes_sent = bytes_sent
     session.client_bytes_received = bytes_received
     session.client_updated_at = datetime.utcnow()

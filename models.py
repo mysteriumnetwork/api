@@ -7,7 +7,7 @@ db = SQLAlchemy()
 
 
 NODE_KEY_LIMIT = 42
-SESSION_KEY_LIMIT = 36
+IDENTITY_LENGTH_LIMIT = 36
 
 
 class Node(db.Model):
@@ -38,13 +38,14 @@ class Node(db.Model):
 class Session(db.Model):
     __tablename__ = 'session'
 
-    session_key = db.Column(db.String(SESSION_KEY_LIMIT), primary_key=True)
+    session_key = db.Column(db.String(IDENTITY_LENGTH_LIMIT), primary_key=True)
     node_key = db.Column(db.String(NODE_KEY_LIMIT))
     created_at = db.Column(db.DateTime)
     node_updated_at = db.Column(db.DateTime)
     client_updated_at = db.Column(db.DateTime)
     node_bytes_sent = db.Column(db.BigInteger)
     node_bytes_received = db.Column(db.BigInteger)
+    consumer_id = db.Column(db.String(IDENTITY_LENGTH_LIMIT))
     client_bytes_sent = db.Column(db.BigInteger)
     client_bytes_received = db.Column(db.BigInteger)
     client_ip = db.Column(db.String(45))

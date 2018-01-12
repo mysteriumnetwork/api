@@ -77,52 +77,73 @@ class TestApi(TestCase):
         self.assertEqual([], data['proposals'])
 
     def test_session_stats_create_without_session_record(self):
-        auth = generate_test_authorization()
+        payload = {
+            'bytes_sent': 20,
+            'bytes_received': 40
+        }
+        auth = generate_test_authorization(json.dumps(payload))
         re = self._post(
             '/v1/sessions/123/stats',
-            {
-                'bytes_sent': 20,
-                'bytes_received': 40
-            },
-            headers=auth['headers']
+            payload,
+            headers=auth['headers'],
         )
 
         self.assertEqual(200, re.status_code)
         self.assertEqual({}, re.json)
 
-        sessions = Session.query.all()
-        self.assertEqual(1, len(sessions))
-        session = sessions[0]
-        self.assertEqual('123', session.session_key)
+        session = Session.query.get('123')
         self.assertEqual(20, session.client_bytes_sent)
         self.assertEqual(40, session.client_bytes_received)
         self.assertIsNotNone(session.client_updated_at)
         self.assertEqual('127.0.0.1', session.client_ip)
+        self.assertEqual(auth['public_address'], session.consumer_id)
 
-    def test_session_stats_create_with_session_record(self):
+    def test_session_stats_create_successful(self):
+        payload = {
+            'bytes_sent': 20,
+            'bytes_received': 40,
+        }
+        auth = generate_test_authorization(json.dumps(payload))
+
         session = Session('123')
+        session.consumer_id = auth['public_address']
         db.session.add(session)
         db.session.commit()
 
-        auth = generate_test_authorization()
         re = self._post(
             '/v1/sessions/123/stats',
-            {
-                'bytes_sent': 20,
-                'bytes_received': 40,
-            },
-            headers=auth['headers']
+            payload,
+            headers=auth['headers'],
         )
         self.assertEqual(200, re.status_code)
         self.assertEqual({}, re.json)
 
-        sessions = Session.query.all()
-        self.assertEqual(1, len(sessions))
-        session = sessions[0]
-        self.assertEqual('123', session.session_key)
+        session = Session.query.get('123')
         self.assertEqual(20, session.client_bytes_sent)
         self.assertEqual(40, session.client_bytes_received)
         self.assertIsNotNone(session.client_updated_at)
+
+    def test_session_stats_create_with_different_consumer_id(self):
+        session = Session('123')
+        session.consumer_id = 'different'
+        db.session.add(session)
+        db.session.commit()
+
+        payload = {
+            'bytes_sent': 20,
+            'bytes_received': 40,
+        }
+        auth = generate_test_authorization(json.dumps(payload))
+        re = self._post(
+            '/v1/sessions/123/stats',
+            payload,
+            headers=auth['headers'],
+        )
+        self.assertEqual(403, re.status_code)
+        self.assertEqual({}, re.json)
+
+        session = Session.query.get('123')
+        self.assertEqual(0, session.client_bytes_sent)
 
     def test_session_stats_create_with_negative_values(self):
         auth = generate_test_authorization()
