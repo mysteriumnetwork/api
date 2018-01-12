@@ -1,5 +1,4 @@
 import unittest
-import json
 from tests.test_case import TestCase, db
 from tests.utils import generate_test_authorization
 from models import Identity
