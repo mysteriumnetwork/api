@@ -157,25 +157,31 @@ class TestApi(TestCase):
         sessions = Session.query.all()
         self.assertEqual(0, len(sessions))
 
-    # TODO: fix test
-    def _test_node_send_stats(self):
-        session = {
-            'session_key': 'X2d9gyQk1j',
-            'bytes_sent': 20,
-            'bytes_received': 10,
-        }
+    def test_node_send_stats(self):
+        payload = {}
+        auth = generate_test_authorization(json.dumps(payload))
 
-        payload = {
-            'node_key': 'node key',
-            'sessions': [session]
-        }
+        self._create_node(auth['public_address'])
 
-        re = self._post('/v1/node_send_stats', payload)
+        re = self._post(
+            '/v1/node_send_stats',
+            payload,
+            headers=auth['headers']
+        )
+        self.assertEqual(200, re.status_code)
+        self.assertEqual({}, re.json)
 
-        data = json.loads(re.data)
-        for el in data['sessions']:
-            el['is_session_valid']
-            el['session_key']
+    def test_node_send_stats_with_unknown_node(self):
+        payload = {}
+        auth = generate_test_authorization(json.dumps(payload))
+
+        re = self._post(
+            '/v1/node_send_stats',
+            payload,
+            headers=auth['headers']
+        )
+        self.assertEqual(400, re.status_code)
+        self.assertEqual({'error': 'node key not found'}, re.json)
 
     def _get(self, url, params={}):
         return self.client.get(url, query_string=params)
@@ -184,11 +190,14 @@ class TestApi(TestCase):
         return self.client.post(url, data=json.dumps(payload), headers=headers)
 
     def _create_sample_node(self):
-        node = Node("node1")
+        self._create_node("node1")
+
+    def _create_node(self, node_key):
+        node = Node(node_key)
         node.proposal = json.dumps({
             "id": 1,
             "format": "service-proposal/v1",
-            "provider_id": "node1",
+            "provider_id": node_key,
         })
         db.session.add(node)
 

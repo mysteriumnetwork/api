@@ -176,13 +176,7 @@ def session_stats_create(session_key, caller_identity):
 @validate_json
 @recover_identity
 def node_send_stats(caller_identity):
-    payload = request.get_json(force=True)
-    node_key = payload.get('node_key', '')
-    sessions = payload.get('sessions', [])
-
-    return_values = []
-
-    node = Node.query.get(node_key)
+    node = Node.query.get(caller_identity)
     if not node:
         return jsonify(error='node key not found'), 400
 
@@ -191,39 +185,12 @@ def node_send_stats(caller_identity):
     db.session.add(node)
     db.session.commit()
 
-    # update sessions
-    for se in sessions:
-        session_key = se.get('session_key', '')
-        bytes_sent = se.get('bytes_sent', 0)
-        bytes_received = se.get('bytes_received', 0)
-
-        # get session by key
-        session = Session.query.get(session_key)
-        is_session_valid = False
-
-        if session:
-            if session.established:
-                if bytes_sent >= 0 and bytes_received >= 0:
-                    session.node_bytes_sent = bytes_sent
-                    session.node_bytes_received = bytes_received
-                    session.node_updated_at = datetime.utcnow()
-                    db.session.add(session)
-                    db.session.commit()
-                    is_session_valid = True
-
-        return_values.append({
-            'session_key': session_key,
-            'is_session_valid': is_session_valid
-        })
-
     # add record to NodeAvailability
-    na = NodeAvailability(node_key)
+    na = NodeAvailability(caller_identity)
     db.session.add(na)
     db.session.commit()
 
-    return jsonify({
-        'sessions': return_values
-    })
+    return jsonify({})
 
 
 # End Point to save identity
