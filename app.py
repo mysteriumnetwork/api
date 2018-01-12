@@ -198,14 +198,11 @@ def node_send_stats(caller_identity):
 @validate_json
 @recover_identity
 def save_identity(caller_identity):
-    payload = request.get_json(force=True)
-
-    identity_arg = payload.get('identity', '').lower()
-    identity = Identity.query.get(identity_arg)
+    identity = Identity.query.get(caller_identity)
     if identity:
         return jsonify(error='identity already exists'), 400
 
-    identity = Identity(identity_arg)
+    identity = Identity(caller_identity)
     db.session.add(identity)
     db.session.commit()
 

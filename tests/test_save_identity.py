@@ -2,10 +2,11 @@ import unittest
 import json
 from tests.test_case import TestCase
 from tests.utils import generate_test_authorization
+from models import Identity
 
 
-class TestApi(TestCase):
-    def test_save_identity(self):
+class TestSaveIdentity(TestCase):
+    def test_successful(self):
         payload = {
             'identity': '0x0000000000000000000000000000000000000001',
         }
@@ -17,6 +18,9 @@ class TestApi(TestCase):
             headers=auth['headers']
         )
         self.assertEqual(200, re.status_code)
+
+        identity_record = Identity.query.get(auth['public_address'])
+        self.assertIsNotNone(identity_record)
 
     # TODO: test failure scenarios
 
