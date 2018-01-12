@@ -27,7 +27,7 @@ class TestSaveIdentity(TestCase):
             '/v1/identities',
             headers=auth['headers']
         )
-        self.assertEqual(400, re.status_code)
+        self.assertEqual(403, re.status_code)
         self.assertEqual({"error": 'identity already exists'}, re.json)
 
 

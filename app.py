@@ -199,7 +199,7 @@ def node_send_stats(caller_identity):
 def save_identity(caller_identity):
     identity = Identity.query.get(caller_identity)
     if identity:
-        return jsonify(error='identity already exists'), 400
+        return jsonify(error='identity already exists'), 403
 
     identity = Identity(caller_identity)
     db.session.add(identity)
