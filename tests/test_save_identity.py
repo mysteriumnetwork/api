@@ -7,11 +7,9 @@ from models import Identity
 
 class TestSaveIdentity(TestCase):
     def test_successful(self):
-        payload = json.dumps({})
-        auth = generate_test_authorization(payload)
+        auth = generate_test_authorization()
         re = self.client.post(
             '/v1/identities',
-            data=payload,
             headers=auth['headers']
         )
         self.assertEqual(200, re.status_code)
@@ -21,15 +19,13 @@ class TestSaveIdentity(TestCase):
         self.assertIsNotNone(identity_record)
 
     def test_failure_identity_already_exists(self):
-        payload = json.dumps({})
-        auth = generate_test_authorization(payload)
+        auth = generate_test_authorization()
 
         identity_record = Identity(auth['public_address'])
         db.session.add(identity_record)
 
         re = self.client.post(
             '/v1/identities',
-            data=payload,
             headers=auth['headers']
         )
         self.assertEqual(400, re.status_code)

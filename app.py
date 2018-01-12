@@ -195,7 +195,6 @@ def node_send_stats(caller_identity):
 
 # End Point to save identity
 @app.route('/v1/identities', methods=['POST'])
-@validate_json
 @recover_identity
 def save_identity(caller_identity):
     identity = Identity.query.get(caller_identity)
