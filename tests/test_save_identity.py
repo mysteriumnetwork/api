@@ -7,14 +7,11 @@ from models import Identity
 
 class TestSaveIdentity(TestCase):
     def test_successful(self):
-        payload = {
-            'identity': '0x0000000000000000000000000000000000000001',
-        }
-
-        auth = generate_test_authorization(json.dumps(payload))
+        payload = json.dumps({})
+        auth = generate_test_authorization(payload)
         re = self.client.post(
             '/v1/identities',
-            data=json.dumps(payload),
+            data=payload,
             headers=auth['headers']
         )
         self.assertEqual(200, re.status_code)
