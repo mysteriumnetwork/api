@@ -6,13 +6,13 @@ import json
 db = SQLAlchemy()
 
 
-NODE_KEY_LIMIT = 42
-IDENTITY_LENGTH_LIMIT = 36
+IDENTITY_LENGTH_LIMIT = 42
+SESSION_KEY_LIMIT = 36
 
 
 class Node(db.Model):
     __tablename__ = 'node'
-    node_key = db.Column(db.String(NODE_KEY_LIMIT), primary_key=True)
+    node_key = db.Column(db.String(IDENTITY_LENGTH_LIMIT), primary_key=True)
     ip = db.Column(db.String(45))
     connection_config = db.Column(db.Text)
     proposal = db.Column(db.Text)
@@ -38,8 +38,8 @@ class Node(db.Model):
 class Session(db.Model):
     __tablename__ = 'session'
 
-    session_key = db.Column(db.String(IDENTITY_LENGTH_LIMIT), primary_key=True)
-    node_key = db.Column(db.String(NODE_KEY_LIMIT))
+    session_key = db.Column(db.String(SESSION_KEY_LIMIT), primary_key=True)
+    node_key = db.Column(db.String(IDENTITY_LENGTH_LIMIT))
     created_at = db.Column(db.DateTime)
     node_updated_at = db.Column(db.DateTime)
     client_updated_at = db.Column(db.DateTime)
