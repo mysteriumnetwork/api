@@ -152,9 +152,9 @@ def session_stats_create(session_key, caller_identity):
     bytes_sent = payload.get('bytes_sent')
     bytes_received = payload.get('bytes_received')
     if bytes_sent < 0:
-        return jsonify({'error': 'bytes_sent should not be negative'}), 400
+        return jsonify(error='bytes_sent should not be negative'), 400
     if bytes_received < 0:
-        return jsonify({'error': 'bytes_received should not be negative'}), 400
+        return jsonify(error='bytes_received should not be negative'), 400
 
     session = Session.query.get(session_key)
     if session is None:
@@ -163,7 +163,8 @@ def session_stats_create(session_key, caller_identity):
         session.consumer_id = caller_identity
 
     if session.consumer_id != caller_identity:
-        return jsonify({}), 403
+        message = 'session identity does not match current one'
+        return jsonify(error=message), 403
     session.client_bytes_sent = bytes_sent
     session.client_bytes_received = bytes_received
     session.client_updated_at = datetime.utcnow()

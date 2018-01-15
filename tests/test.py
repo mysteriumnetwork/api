@@ -140,7 +140,10 @@ class TestApi(TestCase):
             headers=auth['headers'],
         )
         self.assertEqual(403, re.status_code)
-        self.assertEqual({}, re.json)
+        self.assertEqual(
+            {'error': 'session identity does not match current one'},
+            re.json
+        )
 
         session = Session.query.get('123')
         self.assertEqual(0, session.client_bytes_sent)
