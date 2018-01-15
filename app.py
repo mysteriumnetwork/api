@@ -112,6 +112,10 @@ def node_register(caller_identity):
     if node_key is None:
         return jsonify(error='missing provider_id'), 400
 
+    if node_key.lower() != caller_identity:
+        message = 'provider_id does not match current identity'
+        return jsonify(error=message), 403
+
     node = Node.query.get(node_key)
     if not node:
         node = Node(node_key)

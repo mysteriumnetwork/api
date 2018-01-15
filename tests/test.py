@@ -2,22 +2,45 @@ import unittest
 import json
 from models import Session, Node
 from tests.test_case import TestCase, db
-from tests.utils import generate_test_authorization
+from tests.utils import (
+    generate_test_authorization,
+    generate_static_public_address,
+)
 
 
 class TestApi(TestCase):
-    def test_node_reg(self):
+    def test_node_reg_successful(self):
+        public_address = generate_static_public_address()
         payload = {
             "service_proposal": {
                 "id": 1,
                 "format": "service-proposal/v1",
-                "provider_id": "node1",
+                "provider_id": public_address,
             }
         }
 
-        auth = generate_test_authorization()
+        auth = generate_test_authorization(json.dumps(payload))
         re = self._post('/v1/node_register', payload, headers=auth['headers'])
         self.assertEqual(200, re.status_code)
+
+        re.json
+
+    def test_node_reg_unauthorized(self):
+        payload = {
+            "service_proposal": {
+                "id": 1,
+                "format": "service-proposal/v1",
+                "provider_id": "incorrect",
+            }
+        }
+
+        auth = generate_test_authorization(json.dumps(payload))
+        re = self._post('/v1/node_register', payload, headers=auth['headers'])
+        self.assertEqual(403, re.status_code)
+        self.assertEqual(
+            {'error': 'provider_id does not match current identity'},
+            re.json
+        )
 
         re.json
 
