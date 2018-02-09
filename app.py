@@ -121,6 +121,7 @@ def node_register(caller_identity):
         node = Node(node_key)
 
     node.ip = request.remote_addr
+    node.country = 'lt'
     node.proposal = json.dumps(proposal)
     node.updated_at = datetime.utcnow()
     db.session.add(node)
@@ -164,6 +165,7 @@ def session_stats_create(session_key, caller_identity):
     if session is None:
         session = Session(session_key)
         session.client_ip = request.remote_addr
+        session.client_country = 'lt'
         session.consumer_id = caller_identity
 
     if session.consumer_id != caller_identity:

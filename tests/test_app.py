@@ -22,8 +22,10 @@ class TestApi(TestCase):
         auth = generate_test_authorization(json.dumps(payload))
         re = self._post('/v1/node_register', payload, headers=auth['headers'])
         self.assertEqual(200, re.status_code)
+        self.assertIsNotNone(re.json)
 
-        re.json
+        node = Node.query.get(public_address)
+        self.assertEqual('lt', node.country)
 
     def test_node_reg_unauthorized(self):
         payload = {
@@ -41,8 +43,7 @@ class TestApi(TestCase):
             {'error': 'provider_id does not match current identity'},
             re.json
         )
-
-        re.json
+        self.assertIsNotNone(re.json)
 
     def test_node_reg_with_invalid_json(self):
         re = self.client.post('/v1/node_register', data='{asd}')
@@ -120,6 +121,7 @@ class TestApi(TestCase):
         self.assertIsNotNone(session.client_updated_at)
         self.assertEqual('127.0.0.1', session.client_ip)
         self.assertEqual(auth['public_address'], session.consumer_id)
+        self.assertEqual('lt', session.client_country)
 
     def test_session_stats_create_successful(self):
         payload = {
