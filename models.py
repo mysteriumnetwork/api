@@ -14,6 +14,7 @@ class Node(db.Model):
     __tablename__ = 'node'
     node_key = db.Column(db.String(IDENTITY_LENGTH_LIMIT), primary_key=True)
     ip = db.Column(db.String(45))
+    country = db.Column(db.String(255))
     connection_config = db.Column(db.Text)
     proposal = db.Column(db.Text)
     created_at = db.Column(db.DateTime)
@@ -49,6 +50,7 @@ class Session(db.Model):
     client_bytes_sent = db.Column(db.BigInteger)
     client_bytes_received = db.Column(db.BigInteger)
     client_ip = db.Column(db.String(45))
+    client_country = db.Column(db.String(255))
     established = db.Column(db.Boolean)
 
     def __init__(self, session_key):
