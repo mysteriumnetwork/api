@@ -9,6 +9,8 @@ from tests.utils import (
 
 
 class TestApi(TestCase):
+    REMOTE_ADDR = '8.8.8.8'
+
     def test_node_reg_successful(self):
         public_address = generate_static_public_address()
         payload = {
@@ -25,7 +27,32 @@ class TestApi(TestCase):
         self.assertIsNotNone(re.json)
 
         node = Node.query.get(public_address)
-        self.assertEqual('lt', node.country)
+        self.assertEqual(self.REMOTE_ADDR, node.ip)
+        self.assertEqual('US', node.country)
+
+    def test_node_reg_with_unknown_ip(self):
+        public_address = generate_static_public_address()
+        payload = {
+            "service_proposal": {
+                "id": 1,
+                "format": "service-proposal/v1",
+                "provider_id": public_address,
+            }
+        }
+
+        auth = generate_test_authorization(json.dumps(payload))
+        re = self._post(
+            '/v1/node_register',
+            payload,
+            headers=auth['headers'],
+            remote_addr='127.0.0.1'
+        )
+        self.assertEqual(200, re.status_code)
+        self.assertIsNotNone(re.json)
+
+        node = Node.query.get(public_address)
+        self.assertEqual('127.0.0.1', node.ip)
+        self.assertEqual('', node.country)
 
     def test_node_reg_unauthorized(self):
         payload = {
@@ -119,9 +146,33 @@ class TestApi(TestCase):
         self.assertEqual(20, session.client_bytes_sent)
         self.assertEqual(40, session.client_bytes_received)
         self.assertIsNotNone(session.client_updated_at)
+        self.assertEqual(self.REMOTE_ADDR, session.client_ip)
+        self.assertEqual(auth['public_address'], session.consumer_id)
+        self.assertEqual('US', session.client_country)
+
+    def test_session_stats_create_without_session_record_with_unknown_ip(self):
+        payload = {
+            'bytes_sent': 20,
+            'bytes_received': 40
+        }
+        auth = generate_test_authorization(json.dumps(payload))
+        re = self._post(
+            '/v1/sessions/123/stats',
+            payload,
+            headers=auth['headers'],
+            remote_addr='127.0.0.1',
+        )
+
+        self.assertEqual(200, re.status_code)
+        self.assertEqual({}, re.json)
+
+        session = Session.query.get('123')
+        self.assertEqual(20, session.client_bytes_sent)
+        self.assertEqual(40, session.client_bytes_received)
+        self.assertIsNotNone(session.client_updated_at)
         self.assertEqual('127.0.0.1', session.client_ip)
         self.assertEqual(auth['public_address'], session.consumer_id)
-        self.assertEqual('lt', session.client_country)
+        self.assertEqual('', session.client_country)
 
     def test_session_stats_create_successful(self):
         payload = {
@@ -233,10 +284,19 @@ class TestApi(TestCase):
         self.assertEqual({'error': 'node key not found'}, re.json)
 
     def _get(self, url, params={}):
-        return self.client.get(url, query_string=params)
+        return self.client.get(
+            url,
+            query_string=params,
+            environ_base={'REMOTE_ADDR': self.REMOTE_ADDR}
+        )
 
-    def _post(self, url, payload, headers=None):
-        return self.client.post(url, data=json.dumps(payload), headers=headers)
+    def _post(self, url, payload, headers=None, remote_addr=None):
+        return self.client.post(
+            url,
+            data=json.dumps(payload),
+            headers=headers,
+            environ_base={'REMOTE_ADDR': remote_addr or self.REMOTE_ADDR}
+        )
 
     def _create_sample_node(self):
         self._create_node("node1")
