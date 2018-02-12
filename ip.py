@@ -8,7 +8,7 @@ def detect_country(ip):
     return match.country
 
 
-def anonymize_ip(ip):
+def mask_ip_partially(ip):
     parts = ip.split('.')
     if len(parts) != 4:
         raise ValueError('Incorrect ip address')
