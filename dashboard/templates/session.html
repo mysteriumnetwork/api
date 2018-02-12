@@ -1,0 +1,87 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+
+    <div class="page-title">
+      <div class="title_left">
+        <h3>Session Details <small> {{ session.session_key }}</small></h3>
+      </div>
+    </div>
+
+    <div class="clearfix"></div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="x_panel">
+          <div class="x_title">
+            <h2>Stats</h2>
+            <ul class="nav navbar-right panel_toolbox">
+              <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+              </li>
+              <li><a class="close-link"><i class="fa fa-close"></i></a>
+              </li>
+            </ul>
+            <div class="clearfix"></div>
+          </div>
+
+          <div class="x_content">
+            <div class="col-md-12 col-sm-6 col-xs-12">
+              <ul class="stats-overview session">
+                <li>
+                  <span class="name">Status</span>
+                  <span class="value">{{ session.status }}</span>
+                </li>
+                <li>
+                  <span class="name">Duration</span>
+                  <span class="value">{{ session.duration }}</span>
+                </li>
+                <li>
+                  <span class="name">Started</span>
+                  <span class="value">{{ session.started }}</span>
+                </li>
+                <li>
+                  <span class="name">Node</span>
+                  <span class="value"><a href="/node/{{ session.node_key }}">{{ session.node_key }}</a></span>
+                </li>
+                <li>
+                  <span class="name">Protocol</span>
+                  <span class="value">OpenVPN (UDP)</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="x_content">
+            <div class="col-md-12 col-sm-6 col-xs-12">
+              <ul class="stats-overview session">
+                <li>
+                  <span class="name">Data Transferred Total (KB)</span>
+                  <span class="value">{{ session.data_transferred }}</span>
+                </li>
+                <!--
+                <li>
+                  <span class="name">Node Bytes (Sent / Received)</span>
+                  <span class="value">{{ session.node_bytes_sent }} / {{ session.node_bytes_received }}</span>
+                </li>
+                -->
+                <li>
+                  <span class="name">Client Bytes (Sent / Received)</span>
+                  <span class="value">{{ session.client_bytes_sent }} / {{ session.client_bytes_received }}</span>
+                </li>
+                <li>
+                  <span class="name">Latency</span>
+                  <span class="value">N/A</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+
+
+{% endblock %}
