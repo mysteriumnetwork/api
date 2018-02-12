@@ -146,8 +146,8 @@ class TestApi(TestCase):
         self.assertEqual(20, session.client_bytes_sent)
         self.assertEqual(40, session.client_bytes_received)
         self.assertIsNotNone(session.client_updated_at)
-        self.assertEqual(self.REMOTE_ADDR, session.client_ip)
         self.assertEqual(auth['public_address'], session.consumer_id)
+        self.assertEqual('8.8.8.X', session.client_ip)
         self.assertEqual('US', session.client_country)
 
     def test_session_stats_create_without_session_record_with_unknown_ip(self):
@@ -170,8 +170,8 @@ class TestApi(TestCase):
         self.assertEqual(20, session.client_bytes_sent)
         self.assertEqual(40, session.client_bytes_received)
         self.assertIsNotNone(session.client_updated_at)
-        self.assertEqual('127.0.0.1', session.client_ip)
         self.assertEqual(auth['public_address'], session.consumer_id)
+        self.assertEqual('127.0.0.X', session.client_ip)
         self.assertEqual('', session.client_country)
 
     def test_session_stats_create_successful(self):
