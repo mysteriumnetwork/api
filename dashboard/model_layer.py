@@ -2,7 +2,7 @@ import sys
 from os import path
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 import models
-from models import db
+from models import db  # used for importing from other places
 from datetime import datetime, timedelta
 import humanize
 from geoip import geolite2

@@ -2,11 +2,16 @@ from flask import Flask, render_template
 from flask_sslify import SSLify
 import model_layer
 from werkzeug.contrib.cache import SimpleCache
+# TODO: refactor settings?
+import settings
 
 app = Flask(__name__)
 model_layer.db.init_app(app)
 
 cache = SimpleCache()
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://{}:{}@{}/{}'.format(
+    settings.USER, settings.PASSWD, settings.DB_HOST, settings.DB_NAME)
 
 
 @app.route('/')
