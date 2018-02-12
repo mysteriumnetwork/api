@@ -3,6 +3,8 @@ from flask_migrate import Migrate
 from flask_sslify import SSLify
 from werkzeug.debug import get_current_traceback
 from functools import wraps
+
+from ip import detect_country
 from models import db, Node, Session, NodeAvailability, Identity
 from datetime import datetime
 import json
@@ -121,6 +123,7 @@ def node_register(caller_identity):
         node = Node(node_key)
 
     node.ip = request.remote_addr
+    node.country = detect_country(node.ip) or ''
     node.proposal = json.dumps(proposal)
     node.updated_at = datetime.utcnow()
     db.session.add(node)
@@ -164,6 +167,8 @@ def session_stats_create(session_key, caller_identity):
     if session is None:
         session = Session(session_key)
         session.client_ip = request.remote_addr
+        session.client_country = detect_country(session.client_ip) or ''
+
         session.consumer_id = caller_identity
 
     if session.consumer_id != caller_identity:
