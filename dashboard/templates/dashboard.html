@@ -1,0 +1,172 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+          <!-- top tiles -->
+          <div class="row tile_count">
+            <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
+              <span class="count_top"><i class="fa fa-wifi"></i> Available Nodes</span>
+              <div class="count green">{{active_nodes_count}}</div>
+            </div>
+            <!--
+            <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
+              <span class="count_top"><i class="fa fa-bolt"></i> Active Sessions</span>
+              <div class="count">{{active_sessions_count}}</div>
+            </div>
+            -->
+            <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
+              <span class="count_top"><i class="fa fa-users"></i> Sessions Total</span>
+              <div class="count">{{sessions_count}}</div>
+            </div>
+            <div class="col-md-3 col-sm-4 col-xs-6 tile_stats_count">
+              <span class="count_top"><i class="fa fa-clock-o"></i> Average Session Time (minutes)</span>
+              <div class="count">{{average_session_time}}</div>
+            </div>
+            <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
+              <span class="count_top"><i class="fa fa-globe"></i> Data Transferred (MB)</span>
+              <div class="count">{{total_data_transferred}}</div>
+            </div>
+
+
+          </div>
+          <!-- /top tiles -->
+
+
+          <br />
+
+
+
+          <div class="row">
+            <div class="col-md-6 col-sm-6 col-xs-12">
+              <div class="x_panel">
+                <div class="x_title">
+                  <h2>Available Nodes <small><a href="/nodes">view all</a></small></h2>
+                  <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                    </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a>
+                    </li>
+                  </ul>
+                  <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+
+                  <table class="table table-hover clickable">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Node Key</th>
+                        <th>Sessions</th>
+                        <th>Availability</th>
+                        <th>Country</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for node in available_nodes %}
+                      <tr onclick="window.document.location='/node/{{node.node_key}}'">
+                        <th scope="row">{{loop.index}}</th>
+                        <td>{{node.node_key}}</td>
+                        <td>{{node.sessions_count}}</td>
+                        <td>{{node.uptime}}</td>
+                        <td>{{node.country}}</td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+
+                </div>
+              </div>
+            </div>
+
+
+            <div class="col-md-6 col-sm-6 col-xs-12">
+              <div class="x_panel">
+                <div class="x_title">
+                  <h2>All Nodes <small><a href="/nodes">view all</a></small></h2>
+                  <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                    </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a>
+                    </li>
+                  </ul>
+                  <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+
+                  <table class="table table-hover clickable">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Node Key</th>
+                        <th>Country</th>
+                        <th>Seen</th>
+                        <th>Sessions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for node in nodes %}
+                      <tr onclick="window.document.location='/node/{{node.node_key}}'">
+                        <th scope="row">{{loop.index}}</th>
+                        <td>{{node.node_key}}</td>
+                        <td>{{node.country}}</td>
+                        <td>{{node.last_seen}}</td>
+                        <td>{{node.sessions_count}}</td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+
+                </div>
+              </div>
+            </div>
+
+
+            <div class="col-md-12 col-sm-12 col-xs-12">
+              <div class="x_panel">
+                <div class="x_title">
+                  <h2>Last Sessions</h2>
+                  <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                    </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a>
+                    </li>
+                  </ul>
+                  <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+
+                  <table class="table table-hover clickable">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Session Key</th>
+                        <th>Status</th>
+                        <th>Started</th>
+                        <th>Duration</th>
+                        <th>Data Transferred (KB)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+
+                    {% for se in sessions %}
+                    <tr onclick="window.document.location='/session/{{se.session_key}}'">
+                      <th scope="row">{{loop.index}}</th>
+                      <td>{{se.session_key}}</td>
+                      <td>{{se.status}}</td>
+                      <td>{{se.started}}</td>
+                      <td>{{se.duration}}</td>
+                      <td>{{se.data_transferred}}</td>
+                    </tr>
+                    {% endfor %}
+
+                    </tbody>
+                  </table>
+
+                </div>
+              </div>
+            </div>
+
+
+          </div>
+
+{% endblock %}
