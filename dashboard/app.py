@@ -4,10 +4,10 @@ import model_layer
 from werkzeug.contrib.cache import SimpleCache
 
 app = Flask(__name__)
-sslify = SSLify(app)
 model_layer.db.init_app(app)
 
 cache = SimpleCache()
+
 
 @app.route('/')
 def main():
@@ -68,4 +68,5 @@ def session(key):
     )
 
 if __name__ == '__main__':
+    sslify = SSLify(app)
     app.run(debug=True)
