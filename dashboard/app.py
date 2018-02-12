@@ -2,7 +2,6 @@ from flask import Flask, render_template
 from flask_sslify import SSLify
 import model_layer
 from werkzeug.contrib.cache import SimpleCache
-# TODO: refactor settings?
 import settings
 
 app = Flask(__name__)
