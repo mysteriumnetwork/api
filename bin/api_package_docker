@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ###########################################################################
-# Creates Docker image and uploads it DockerHub https://hub.docker.com/r/mysteriumnetwork/mysterium-node/
+# Creates Docker image and uploads it DockerHub https://hub.docker.com/r/mysteriumnetwork/mysterium-api/
 #
 # To create a release, simple execute:
 #> bin/api_package_docker <version> [<docker_tag>]
