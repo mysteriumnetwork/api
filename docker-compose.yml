@@ -1,9 +1,20 @@
 version: '3'
 services:
-  web:
-    build: .
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mysterium-api
     ports:
-      - "5000:5000"
+      - 8001:5000
+    environment:
+      DB_HOST: mysterium-mysql
+      DB_NAME: myst_api
+      DB_USER: myst_api
+      DB_PASSWORD: myst_api
+    volumes:
+      - .:/code
     depends_on:
       - db
 
@@ -11,14 +22,28 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dashboard
+    container_name: mysterium-dashboard
     ports:
-      - "8080:8080"
+      - 8002:8080
+    environment:
+      DB_HOST: mysterium-dashboard-mysql
+      DB_NAME: myst_api
+      DB_USER: myst_api
+      DB_PASSWORD: myst_api
+
+    volumes:
+      - .:/code
     depends_on:
       - db
 
   db:
-    image: mysql
+    image: mysql:5.5
+    container_name: mysterium-mysql
     restart: always
+    ports:
+      - 33061:3306
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: myst_api
+      MYSQL_USER: myst_api
+      MYSQL_PASSWORD: myst_api
