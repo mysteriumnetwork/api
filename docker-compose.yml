@@ -26,7 +26,7 @@ services:
     ports:
       - 8002:8080
     environment:
-      DB_HOST: mysterium-dashboard-mysql
+      DB_HOST: mysterium-mysql
       DB_NAME: myst_api
       DB_USER: myst_api
       DB_PASSWORD: myst_api
