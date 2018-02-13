@@ -1,1 +1,1 @@
-pycodestyle . --exclude=./migrations/,./venv/
+pycodestyle . --exclude=./migrations/,./venv/,./dashboard/
