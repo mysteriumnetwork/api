@@ -12,9 +12,8 @@ docker-compose up -d
 - Wait ~10s for database to setup.
 
 - Run database migrations:
-
 ```bash
-docker-compose exec -e FLASK_APP=app.py api flask db upgrade
+docker-compose exec api bin/db-migrate
 ```
 
 - Service should be running on http://127.0.0.1:8001/
