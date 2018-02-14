@@ -5,9 +5,9 @@ WORKDIR /code/dashboard
 ADD dashboard/requirements.txt .
 RUN pip install -r requirements.txt
 
-ADD dashboard .
-ADD models.py .
-ADD settings.py .
+ADD dashboard /code/dashboard
+ADD models.py /code/models.py
+ADD settings.py /code/settings.py
 
 ENTRYPOINT ["python", "server.py"]
 EXPOSE 8080
