@@ -251,7 +251,15 @@ def handle_error(e):
     return jsonify(error=str(e)), 500
 
 
-if __name__ == '__main__':
+def start_debug_app():
     sslify = SSLify(app)
-    db.init_app(app)
+    init_db()
     app.run(debug=True)
+
+
+def init_db():
+    db.init_app(app)
+
+
+if __name__ == '__main__':
+    start_debug_app()

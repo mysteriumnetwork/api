@@ -66,7 +66,7 @@ class Session(db.Model):
 class NodeAvailability(db.Model):
     __tablename__ = 'node_availability'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    node_key = db.Column(db.String(34))
+    node_key = db.Column(db.String(IDENTITY_LENGTH_LIMIT))
     date = db.Column(db.DateTime)
 
     def __init__(self, node_key):
@@ -76,7 +76,7 @@ class NodeAvailability(db.Model):
 
 class Identity(db.Model):
     __tablename__ = 'identity'
-    identity = db.Column(db.String(42), primary_key=True)
+    identity = db.Column(db.String(IDENTITY_LENGTH_LIMIT), primary_key=True)
     created_at = db.Column(db.DateTime)
 
     def __init__(self, identity):
