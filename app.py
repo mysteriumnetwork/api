@@ -4,7 +4,7 @@ from flask_sslify import SSLify
 from werkzeug.debug import get_current_traceback
 from functools import wraps
 
-from ip import detect_country
+from ip import detect_country, mask_ip_partially
 from models import db, Node, Session, NodeAvailability, Identity
 from datetime import datetime
 import json
@@ -166,8 +166,9 @@ def session_stats_create(session_key, caller_identity):
     session = Session.query.get(session_key)
     if session is None:
         session = Session(session_key)
-        session.client_ip = request.remote_addr
-        session.client_country = detect_country(session.client_ip) or ''
+        ip = request.remote_addr
+        session.client_ip = mask_ip_partially(ip)
+        session.client_country = detect_country(ip) or ''
 
         session.consumer_id = caller_identity
 
