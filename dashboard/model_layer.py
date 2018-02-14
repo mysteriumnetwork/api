@@ -5,7 +5,6 @@ import models
 from models import db  # used for importing from other places
 from datetime import datetime, timedelta
 import humanize
-from geoip import geolite2
 
 NODE_AVAILABILITY_TIMEOUT = 2
 
@@ -65,12 +64,8 @@ def get_total_data_transferred():
     return '{0:.1f}'.format(total_bytes / 1024.0 / 1024.0)
 
 
-def get_country_from_ip(ip):
-    match = geolite2.lookup(ip)
-    if match:
-        return match.country
-
-    return 'N/A'
+def get_country_string(country):
+    return country or 'N/A'
 
 
 def get_nodes(limit=None):
@@ -82,7 +77,7 @@ def get_nodes(limit=None):
     nodes = nodes.all()
 
     for node in nodes:
-        node.country = get_country_from_ip(node.ip)
+        node.country_string = get_country_string(node.country)
         node.sessions_count = get_sessions_count(node_key=node.node_key)
         node.last_seen = humanize.naturaltime((datetime.utcnow() - node.updated_at).total_seconds())
         node.status = get_node_status(node)
@@ -101,7 +96,7 @@ def get_available_nodes(limit=None):
     nodes = nodes.all()
 
     for node in nodes:
-        node.country = get_country_from_ip(node.ip)
+        node.country_string = get_country_string(node.country)
         node.sessions_count = get_sessions_count(node_key=node.node_key)
         node.uptime = 'N/A'
     return nodes

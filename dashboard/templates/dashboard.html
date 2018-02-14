@@ -68,7 +68,7 @@
                         <td>{{node.node_key}}</td>
                         <td>{{node.sessions_count}}</td>
                         <td>{{node.uptime}}</td>
-                        <td>{{node.country}}</td>
+                        <td>{{node.country_string}}</td>
                       </tr>
                       {% endfor %}
                     </tbody>
@@ -108,7 +108,7 @@
                       <tr onclick="window.document.location='/node/{{node.node_key}}'">
                         <th scope="row">{{loop.index}}</th>
                         <td>{{node.node_key}}</td>
-                        <td>{{node.country}}</td>
+                        <td>{{node.country_string}}</td>
                         <td>{{node.last_seen}}</td>
                         <td>{{node.sessions_count}}</td>
                       </tr>
