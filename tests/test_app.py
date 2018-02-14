@@ -257,6 +257,24 @@ class TestApi(TestCase):
         sessions = Session.query.all()
         self.assertEqual(0, len(sessions))
 
+    def test_session_stats_with_provider_id(self):
+        payload = {
+            'bytes_sent': 20,
+            'bytes_received': 40,
+            'provider_id': '0x1',
+        }
+        auth = generate_test_authorization(json.dumps(payload))
+        re = self._post(
+            '/v1/sessions/123/stats',
+            payload,
+            headers=auth['headers'],
+        )
+
+        self.assertEqual(200, re.status_code)
+
+        session = Session.query.get('123')
+        self.assertEqual('0x1', session.node_key)
+
     def test_node_send_stats(self):
         payload = {}
         auth = generate_test_authorization(json.dumps(payload))
