@@ -10,4 +10,4 @@ ADD models.py /code/models.py
 ADD settings.py /code/settings.py
 
 ENTRYPOINT ["python", "server.py"]
-EXPOSE 8080
+EXPOSE 80

@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: mysterium-api
     ports:
-      - 8001:5000
+      - 8001:80
     environment:
       DB_HOST: mysterium-mysql
       DB_NAME: myst_api
@@ -24,7 +24,7 @@ services:
       dockerfile: Dockerfile.dashboard
     container_name: mysterium-dashboard
     ports:
-      - 8002:8080
+      - 8002:80
     environment:
       DB_HOST: mysterium-mysql
       DB_NAME: myst_api

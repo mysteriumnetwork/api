@@ -6,5 +6,5 @@ from app import app, db
 db.init_app(app)
 
 http_server = HTTPServer(WSGIContainer(app))
-http_server.listen(5000)
+http_server.listen(80)
 IOLoop.instance().start()
