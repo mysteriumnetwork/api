@@ -287,14 +287,14 @@ class TestApi(TestCase):
         session = Session.query.get('123')
         self.assertIsNone(session)
 
-    def test_node_send_stats(self):
+    def test_ping_proposal(self):
         payload = {}
         auth = generate_test_authorization(json.dumps(payload))
 
         self._create_node(auth['public_address'])
 
         re = self._post(
-            '/v1/node_send_stats',
+            '/v1/ping_proposal',
             payload,
             headers=auth['headers']
         )

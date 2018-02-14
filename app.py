@@ -190,10 +190,12 @@ def session_stats_create(session_key, caller_identity):
 
 
 # Node call this function each minute.
+@app.route('/v1/ping_proposal', methods=['POST'])
+# TODO: remove deprecated route when it's not used anymore
 @app.route('/v1/node_send_stats', methods=['POST'])
 @validate_json
 @recover_identity
-def node_send_stats(caller_identity):
+def ping_proposal(caller_identity):
     node = Node.query.get(caller_identity)
     if not node:
         return jsonify(error='node key not found'), 400
