@@ -100,10 +100,12 @@ def home():
     )
 
 
+@app.route('/v1/register_proposal', methods=['POST'])
+# TODO: remove deprecated route when it's not used anymore
 @app.route('/v1/node_register', methods=['POST'])
 @validate_json
 @recover_identity
-def node_register(caller_identity):
+def register_proposal(caller_identity):
     payload = request.get_json(force=True)
 
     proposal = payload.get('service_proposal', None)
