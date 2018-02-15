@@ -96,10 +96,11 @@ def recover_identity(f):
 def whitelisted_ip(f):
     @wraps(f)
     def wrapper(*args, **kw):
-        if request.remote_addr in settings.NODE_WHITELISTED_IP_ADDRESSES.split(','):
-            return f(*args, **kw)
+        if settings.NODE_WHITELIST_ENABLED:
+            if request.remote_addr not in settings.NODE_WHITELISTED_IP_ADDRESSES.split(','):
+                return jsonify(error='resource is forbidden'), 403
 
-        return jsonify(error='resource is forbidden'), 403
+        return f(*args, **kw)
 
     return wrapper
 

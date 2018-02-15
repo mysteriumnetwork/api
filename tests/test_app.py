@@ -11,9 +11,8 @@ import settings
 
 class TestApi(TestCase):
     REMOTE_ADDR = '8.8.8.8'
-    settings.NODE_WHITELISTED_IP_ADDRESSES = ','.join(
-        ['127.0.0.1', REMOTE_ADDR]
-    )
+    settings.NODE_WHITELIST_ENABLED = False
+
 
     def test_register_proposal_successful(self):
         public_address = generate_static_public_address()
