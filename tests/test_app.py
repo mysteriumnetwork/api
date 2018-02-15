@@ -11,26 +11,7 @@ from tests.utils import (
 class TestApi(TestCase):
     REMOTE_ADDR = '8.8.8.8'
 
-    def test_node_reg_successful(self):
-        public_address = generate_static_public_address()
-        payload = {
-            "service_proposal": {
-                "id": 1,
-                "format": "service-proposal/v1",
-                "provider_id": public_address,
-            }
-        }
-
-        auth = generate_test_authorization(json.dumps(payload))
-        re = self._post('/v1/node_register', payload, headers=auth['headers'])
-        self.assertEqual(200, re.status_code)
-        self.assertIsNotNone(re.json)
-
-        node = Node.query.get(public_address)
-        self.assertEqual(self.REMOTE_ADDR, node.ip)
-        self.assertEqual('US', node.country)
-
-    def test_node_reg_with_unknown_ip(self):
+    def test_register_proposal_successful(self):
         public_address = generate_static_public_address()
         payload = {
             "service_proposal": {
@@ -42,7 +23,29 @@ class TestApi(TestCase):
 
         auth = generate_test_authorization(json.dumps(payload))
         re = self._post(
-            '/v1/node_register',
+            '/v1/register_proposal',
+            payload,
+            headers=auth['headers'])
+        self.assertEqual(200, re.status_code)
+        self.assertIsNotNone(re.json)
+
+        node = Node.query.get(public_address)
+        self.assertEqual(self.REMOTE_ADDR, node.ip)
+        self.assertEqual('US', node.country)
+
+    def test_register_proposal_with_unknown_ip(self):
+        public_address = generate_static_public_address()
+        payload = {
+            "service_proposal": {
+                "id": 1,
+                "format": "service-proposal/v1",
+                "provider_id": public_address,
+            }
+        }
+
+        auth = generate_test_authorization(json.dumps(payload))
+        re = self._post(
+            '/v1/register_proposal',
             payload,
             headers=auth['headers'],
             remote_addr='127.0.0.1'
@@ -54,7 +57,7 @@ class TestApi(TestCase):
         self.assertEqual('127.0.0.1', node.ip)
         self.assertEqual('', node.country)
 
-    def test_node_reg_unauthorized(self):
+    def test_register_proposal_unauthorized(self):
         payload = {
             "service_proposal": {
                 "id": 1,
@@ -64,7 +67,10 @@ class TestApi(TestCase):
         }
 
         auth = generate_test_authorization(json.dumps(payload))
-        re = self._post('/v1/node_register', payload, headers=auth['headers'])
+        re = self._post(
+            '/v1/register_proposal',
+            payload,
+            headers=auth['headers'])
         self.assertEqual(403, re.status_code)
         self.assertEqual(
             {'error': 'provider_id does not match current identity'},
@@ -72,22 +78,22 @@ class TestApi(TestCase):
         )
         self.assertIsNotNone(re.json)
 
-    def test_node_reg_with_invalid_json(self):
-        re = self.client.post('/v1/node_register', data='{asd}')
+    def test_register_proposal_with_invalid_json(self):
+        re = self.client.post('/v1/register_proposal', data='{asd}')
         self.assertEqual(400, re.status_code)
         self.assertEqual({"error": 'payload must be a valid json'}, re.json)
 
-    def test_node_reg_with_string_json(self):
+    def test_register_proposal_with_string_json(self):
         # string is actually a valid json,
         # but endpoints rely on json being a dictionary
-        re = self.client.post('/v1/node_register', data='"some string"')
+        re = self.client.post('/v1/register_proposal', data='"some string"')
         self.assertEqual(400, re.status_code)
         self.assertEqual({"error": 'payload must be a valid json'}, re.json)
 
-    def test_node_reg_with_array_json(self):
+    def test_register_proposal_with_array_json(self):
         # string is actually a valid json,
         # but endpoints rely on json being a dictionary
-        re = self.client.post('/v1/node_register', data='[]')
+        re = self.client.post('/v1/register_proposal', data='[]')
         self.assertEqual(400, re.status_code)
         self.assertEqual({"error": 'payload must be a valid json'}, re.json)
 
@@ -287,14 +293,14 @@ class TestApi(TestCase):
         session = Session.query.get('123')
         self.assertIsNone(session)
 
-    def test_node_send_stats(self):
+    def test_ping_proposal(self):
         payload = {}
         auth = generate_test_authorization(json.dumps(payload))
 
         self._create_node(auth['public_address'])
 
         re = self._post(
-            '/v1/node_send_stats',
+            '/v1/ping_proposal',
             payload,
             headers=auth['headers']
         )
