@@ -287,7 +287,7 @@ class TestApi(TestCase):
         session = Session.query.get('123')
         self.assertIsNone(session)
 
-    def test_session_stats_without_bytes_sent_received(self):
+    def test_session_stats_without_bytes_sent(self):
         payload = {
             'bytes_received': 40,
             'provider_id': '0x1',
@@ -305,6 +305,10 @@ class TestApi(TestCase):
             re.json
         )
 
+        sessions = Session.query.all()
+        self.assertEqual(0, len(sessions))
+
+    def test_session_stats_without_bytes_received(self):
         payload = {
             'bytes_sent': 20,
             'provider_id': '0x1',
