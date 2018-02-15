@@ -122,7 +122,7 @@ def get_node_info(node_key):
 
     node = models.Node.query.get(node_key)
     node.last_seen = humanize.naturaltime((datetime.utcnow() - node.updated_at).total_seconds())
-    node.country = get_country_from_ip(node.ip)
+    node.country = get_country_string(node.country)
     node.sessions = get_sessions(node_key=node_key)
 
     total_bytes = 0
