@@ -4,4 +4,5 @@ DB_NAME = ''
 USER = ''
 PASSWD = ''
 NODE_WHITELIST_ENABLED = False
+# IP addresses separated by comma
 NODE_WHITELISTED_IP_ADDRESSES = ''
