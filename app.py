@@ -157,13 +157,13 @@ def session_stats_create(session_key, caller_identity):
     payload = request.get_json(force=True)
 
     bytes_sent = payload.get('bytes_sent')
-    if not bytes_sent or not isinstance(bytes_sent, int) or bytes_sent < 0:
+    if not isinstance(bytes_sent, int) or bytes_sent < 0:
         return jsonify(
             error='bytes_sent missing or value is not unsigned int'
         ), 400
 
     bytes_received = payload.get('bytes_received')
-    if not bytes_received or not isinstance(bytes_received, int) or bytes_received < 0:
+    if not isinstance(bytes_received, int) or bytes_received < 0:
         return jsonify(
             error='bytes_received missing or value is not unsigned int'
         ), 400
