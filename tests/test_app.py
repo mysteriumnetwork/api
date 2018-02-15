@@ -244,7 +244,7 @@ class TestApi(TestCase):
         )
         self.assertEqual(400, re.status_code)
         self.assertEqual(
-            {'error': 'bytes_sent should not be negative'},
+            {'error': 'bytes_sent missing or value is not unsigned int'},
             re.json
         )
 
@@ -259,7 +259,7 @@ class TestApi(TestCase):
         )
         self.assertEqual(400, re.status_code)
         self.assertEqual(
-            {'error': 'bytes_received should not be negative'},
+            {'error': 'bytes_received missing or value is not unsigned int'},
             re.json
         )
 
@@ -286,6 +286,44 @@ class TestApi(TestCase):
 
         session = Session.query.get('123')
         self.assertIsNone(session)
+
+    def test_session_stats_without_bytes_sent_received(self):
+        payload = {
+            'bytes_received': 40,
+            'provider_id': '0x1',
+        }
+        auth = generate_test_authorization(json.dumps(payload))
+        re = self._post(
+            '/v1/sessions/123/stats',
+            payload,
+            headers=auth['headers'],
+        )
+
+        self.assertEqual(400, re.status_code)
+        self.assertEqual(
+            {'error': 'bytes_sent missing or value is not unsigned int'},
+            re.json
+        )
+
+        payload = {
+            'bytes_sent': 20,
+            'provider_id': '0x1',
+        }
+        auth = generate_test_authorization(json.dumps(payload))
+        re = self._post(
+            '/v1/sessions/123/stats',
+            payload,
+            headers=auth['headers'],
+        )
+
+        self.assertEqual(400, re.status_code)
+        self.assertEqual(
+            {'error': 'bytes_received missing or value is not unsigned int'},
+            re.json
+        )
+
+        sessions = Session.query.all()
+        self.assertEqual(0, len(sessions))
 
     def test_node_send_stats(self):
         payload = {}
