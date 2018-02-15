@@ -1,7 +1,6 @@
 tornado==4.5.2
 Flask==0.12.2
 Flask-SQLAlchemy==2.1
-Flask-SSLify==0.1.5
 Jinja2==2.9.6
 MarkupSafe==1.0
 PyMySQL==0.7.11
