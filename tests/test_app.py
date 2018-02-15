@@ -130,7 +130,8 @@ class TestApi(TestCase):
     def test_session_stats_create_without_session_record(self):
         payload = {
             'bytes_sent': 20,
-            'bytes_received': 40
+            'bytes_received': 40,
+            'provider_id': '0x1',
         }
         auth = generate_test_authorization(json.dumps(payload))
         re = self._post(
@@ -149,11 +150,13 @@ class TestApi(TestCase):
         self.assertEqual(auth['public_address'], session.consumer_id)
         self.assertEqual('8.8.8.X', session.client_ip)
         self.assertEqual('US', session.client_country)
+        self.assertEqual('0x1', session.node_key)
 
     def test_session_stats_create_without_session_record_with_unknown_ip(self):
         payload = {
             'bytes_sent': 20,
-            'bytes_received': 40
+            'bytes_received': 40,
+            'provider_id': '0x1',
         }
         auth = generate_test_authorization(json.dumps(payload))
         re = self._post(
@@ -173,11 +176,13 @@ class TestApi(TestCase):
         self.assertEqual(auth['public_address'], session.consumer_id)
         self.assertEqual('127.0.0.X', session.client_ip)
         self.assertEqual('', session.client_country)
+        self.assertEqual('0x1', session.node_key)
 
     def test_session_stats_create_successful(self):
         payload = {
             'bytes_sent': 20,
             'bytes_received': 40,
+            'provider_id': '0x1',
         }
         auth = generate_test_authorization(json.dumps(payload))
 
@@ -198,6 +203,7 @@ class TestApi(TestCase):
         self.assertEqual(20, session.client_bytes_sent)
         self.assertEqual(40, session.client_bytes_received)
         self.assertIsNotNone(session.client_updated_at)
+        self.assertIsNone(session.node_key)
 
     def test_session_stats_create_with_different_consumer_id(self):
         session = Session('123')
@@ -208,6 +214,7 @@ class TestApi(TestCase):
         payload = {
             'bytes_sent': 20,
             'bytes_received': 40,
+            'provider_id': '0x1',
         }
         auth = generate_test_authorization(json.dumps(payload))
         re = self._post(
@@ -230,7 +237,8 @@ class TestApi(TestCase):
             '/v1/sessions/123/stats',
             {
                 'bytes_sent': -20,
-                'bytes_received': 40
+                'bytes_received': 40,
+                'provider_id': '0x1',
             },
             headers=auth['headers']
         )
@@ -244,7 +252,8 @@ class TestApi(TestCase):
             '/v1/sessions/123/stats',
             {
                 'bytes_sent': 20,
-                'bytes_received': -40
+                'bytes_received': -40,
+                'provider_id': '0x1',
             },
             headers=auth['headers']
         )
@@ -257,11 +266,10 @@ class TestApi(TestCase):
         sessions = Session.query.all()
         self.assertEqual(0, len(sessions))
 
-    def test_session_stats_with_provider_id(self):
+    def test_session_stats_without_provider_id(self):
         payload = {
             'bytes_sent': 20,
             'bytes_received': 40,
-            'provider_id': '0x1',
         }
         auth = generate_test_authorization(json.dumps(payload))
         re = self._post(
@@ -270,10 +278,14 @@ class TestApi(TestCase):
             headers=auth['headers'],
         )
 
-        self.assertEqual(200, re.status_code)
+        self.assertEqual(400, re.status_code)
+        self.assertEqual(
+            {'error': 'provider_id missing'},
+            re.json
+        )
 
         session = Session.query.get('123')
-        self.assertEqual('0x1', session.node_key)
+        self.assertIsNone(session)
 
     def test_node_send_stats(self):
         payload = {}

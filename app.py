@@ -164,6 +164,8 @@ def session_stats_create(session_key, caller_identity):
         return jsonify(error='bytes_received should not be negative'), 400
 
     provider_id = payload.get('provider_id')
+    if not provider_id:
+        return jsonify(error='provider_id missing'), 400
 
     session = Session.query.get(session_key)
     if session is None:
