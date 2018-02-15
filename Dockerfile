@@ -8,4 +8,3 @@ RUN pip install -r requirements.txt
 ADD . .
 
 ENTRYPOINT ["python", "server.py"]
-EXPOSE 80

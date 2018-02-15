@@ -9,6 +9,7 @@ services:
     ports:
       - 8001:80
     environment:
+      APP_PORT: 80
       DB_HOST: mysterium-mysql
       DB_NAME: myst_api
       DB_USER: myst_api
@@ -26,6 +27,7 @@ services:
     ports:
       - 8002:80
     environment:
+      APP_PORT: 80
       DB_HOST: mysterium-mysql
       DB_NAME: myst_api
       DB_USER: myst_api
