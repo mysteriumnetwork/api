@@ -163,14 +163,18 @@ def session_stats_create(session_key, caller_identity):
     if bytes_received < 0:
         return jsonify(error='bytes_received should not be negative'), 400
 
+    provider_id = payload.get('provider_id')
+    if not provider_id:
+        return jsonify(error='provider_id missing'), 400
+
     session = Session.query.get(session_key)
     if session is None:
         session = Session(session_key)
         ip = request.remote_addr
         session.client_ip = mask_ip_partially(ip)
         session.client_country = detect_country(ip) or ''
-
         session.consumer_id = caller_identity
+        session.node_key = provider_id
 
     if session.consumer_id != caller_identity:
         message = 'session identity does not match current one'
