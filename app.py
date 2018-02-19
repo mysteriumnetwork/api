@@ -1,6 +1,5 @@
 from flask import Flask, request, render_template, jsonify
 from flask_migrate import Migrate
-from flask_sslify import SSLify
 from werkzeug.debug import get_current_traceback
 from functools import wraps
 
@@ -266,7 +265,6 @@ def handle_error(e):
 
 
 def start_debug_app():
-    sslify = SSLify(app)
     init_db()
     app.run(debug=True)
 
