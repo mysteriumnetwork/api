@@ -97,7 +97,8 @@ def whitelisted_ip(f):
     @wraps(f)
     def wrapper(*args, **kw):
         if settings.NODE_WHITELIST_ENABLED:
-            if request.remote_addr not in settings.NODE_WHITELISTED_IP_ADDRESSES.split(','):
+            if request.remote_addr not in \
+                    settings.NODE_WHITELISTED_IP_ADDRESSES.split(','):
                 return jsonify(error='resource is forbidden'), 403
 
         return f(*args, **kw)

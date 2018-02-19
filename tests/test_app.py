@@ -13,7 +13,6 @@ class TestApi(TestCase):
     REMOTE_ADDR = '8.8.8.8'
     settings.NODE_WHITELIST_ENABLED = False
 
-
     def test_register_proposal_successful(self):
         public_address = generate_static_public_address()
         payload = {
