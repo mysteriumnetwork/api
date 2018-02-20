@@ -102,11 +102,13 @@ class TestApi(TestCase):
         self.assertEqual({"error": 'payload must be a valid json'}, re.json)
 
     def test_proposals(self):
-        self._create_node("node1")
+        node1 = self._create_node("node1")
+        node1.update_timestamp()
 
-        node2 = self._create_node("node2")
-        node2.update_timestamp()
+        # node.updated_at == None
+        self._create_node("node2")
 
+        #  node.updated_at timeout passed
         node3 = self._create_node("node3")
         timeout_delta = NODE_AVAILABILITY_TIMEOUT + timedelta(minutes=1)
         node3.updated_at = datetime.utcnow() - timeout_delta
@@ -117,13 +119,13 @@ class TestApi(TestCase):
         self.assertEqual(200, re.status_code)
         data = re.json
         proposals = data['proposals']
-        self.assertEqual(2, len(proposals))
-        provider_ids = [proposal['provider_id'] for proposal in proposals]
-        self.assertIn('node1', provider_ids)
-        self.assertIn('node2', provider_ids)
+        self.assertEqual(1, len(proposals))
+        self.assertIn('node1', proposals[0]['provider_id'])
 
     def test_proposals_filtering(self):
-        self._create_sample_node()
+        node = self._create_sample_node()
+        node.update_timestamp()
+        db.session.commit()
 
         re = self._get('/v1/proposals', {'node_key': 'node1'})
 

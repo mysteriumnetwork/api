@@ -26,8 +26,9 @@ class Node(db.Model):
         self.created_at = datetime.utcnow()
 
     def is_active(self):
-        last_ping = self.updated_at or self.created_at
-        return last_ping > datetime.utcnow() - NODE_AVAILABILITY_TIMEOUT
+        if self.updated_at is None:
+            return False
+        return self.updated_at > datetime.utcnow() - NODE_AVAILABILITY_TIMEOUT
 
     def update_timestamp(self):
         self.updated_at = datetime.utcnow()
