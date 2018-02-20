@@ -139,7 +139,7 @@ def register_proposal(caller_identity):
     node.ip = request.remote_addr
     node.country = detect_country(node.ip) or ''
     node.proposal = json.dumps(proposal)
-    node.updated_at = datetime.utcnow()
+    node.update_timestamp()
     db.session.add(node)
     db.session.commit()
 
