@@ -96,8 +96,7 @@ def restrict_by_ip(f):
     @wraps(f)
     def wrapper(*args, **kw):
         if settings.RESTRICT_BY_IP_ENABLED:
-            if request.remote_addr not in \
-                    settings.ALLOWED_IP_ADDRESSES.split(','):
+            if request.remote_addr not in settings.ALLOWED_IP_ADDRESSES:
                 return jsonify(error='resource is forbidden'), 403
 
         return f(*args, **kw)

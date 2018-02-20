@@ -372,7 +372,7 @@ class TestApi(TestCase):
 
     def test_restrict_by_ip_fail(self):
         settings.RESTRICT_BY_IP_ENABLED = True
-        settings.ALLOWED_IP_ADDRESSES = ''
+        settings.ALLOWED_IP_ADDRESSES = []
         payload = {}
         auth = generate_test_authorization(json.dumps(payload))
 
@@ -388,11 +388,11 @@ class TestApi(TestCase):
 
     def test_restrict_by_ip_success(self):
         settings.RESTRICT_BY_IP_ENABLED = True
-        settings.ALLOWED_IP_ADDRESSES = ','.join([
+        settings.ALLOWED_IP_ADDRESSES = [
             '1.1.1.1',
             '2.2.2.2',
             self.REMOTE_ADDR
-        ])
+        ]
         payload = {}
         auth = generate_test_authorization(json.dumps(payload))
 
