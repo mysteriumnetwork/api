@@ -105,11 +105,10 @@ class TestApi(TestCase):
 
         self.assertEqual(200, re.status_code)
 
-        data = json.loads(re.data)
+        data = re.json
         proposals = data['proposals']
-        self.assertGreater(len(proposals), 0)
-        for proposal in proposals:
-            self.assertIsNotNone(proposal['id'])
+        self.assertEqual(1, len(proposals))
+        self.assertEqual(1, proposals[0]['id'])
 
     def test_proposals_filtering(self):
         self._create_sample_node()
