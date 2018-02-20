@@ -12,9 +12,9 @@ PASSWD = os.environ.get('DB_PASSWORD')
 # True values are y, yes, t, true, on and 1;
 # False values are n, no, f, false, off and 0.
 # Raises ValueError if val is anything else.
-RESTRICT_BY_IP_ENABLED = util.strtobool(
+RESTRICT_BY_IP_ENABLED = bool(util.strtobool(
     os.environ.get('RESTRICT_BY_IP_ENABLED') or 'no'
-)
+))
 ALLOWED_IP_ADDRESSES = (
     os.environ.get('ALLOWED_IP_ADDRESSES') or ''
 ).split(',')
