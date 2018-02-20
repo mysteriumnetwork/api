@@ -13,7 +13,7 @@ class TestApi(TestCase):
     REMOTE_ADDR = '8.8.8.8'
 
     def test_register_proposal_successful(self):
-        settings.NODE_WHITELIST_ENABLED = False
+        settings.RESTRICT_BY_IP_ENABLED = False
         public_address = generate_static_public_address()
         payload = {
             "service_proposal": {
@@ -36,7 +36,7 @@ class TestApi(TestCase):
         self.assertEqual('US', node.country)
 
     def test_register_proposal_with_unknown_ip(self):
-        settings.NODE_WHITELIST_ENABLED = False
+        settings.RESTRICT_BY_IP_ENABLED = False
         public_address = generate_static_public_address()
         payload = {
             "service_proposal": {
@@ -61,7 +61,7 @@ class TestApi(TestCase):
         self.assertEqual('', node.country)
 
     def test_register_proposal_unauthorized(self):
-        settings.NODE_WHITELIST_ENABLED = False
+        settings.RESTRICT_BY_IP_ENABLED = False
         payload = {
             "service_proposal": {
                 "id": 1,
@@ -83,13 +83,13 @@ class TestApi(TestCase):
         self.assertIsNotNone(re.json)
 
     def test_register_proposal_with_invalid_json(self):
-        settings.NODE_WHITELIST_ENABLED = False
+        settings.RESTRICT_BY_IP_ENABLED = False
         re = self.client.post('/v1/register_proposal', data='{asd}')
         self.assertEqual(400, re.status_code)
         self.assertEqual({"error": 'payload must be a valid json'}, re.json)
 
     def test_register_proposal_with_string_json(self):
-        settings.NODE_WHITELIST_ENABLED = False
+        settings.RESTRICT_BY_IP_ENABLED = False
         # string is actually a valid json,
         # but endpoints rely on json being a dictionary
         re = self.client.post('/v1/register_proposal', data='"some string"')
@@ -97,7 +97,7 @@ class TestApi(TestCase):
         self.assertEqual({"error": 'payload must be a valid json'}, re.json)
 
     def test_register_proposal_with_array_json(self):
-        settings.NODE_WHITELIST_ENABLED = False
+        settings.RESTRICT_BY_IP_ENABLED = False
         # string is actually a valid json,
         # but endpoints rely on json being a dictionary
         re = self.client.post('/v1/register_proposal', data='[]')
@@ -343,7 +343,7 @@ class TestApi(TestCase):
         self.assertEqual(0, len(sessions))
 
     def test_ping_proposal(self):
-        settings.NODE_WHITELIST_ENABLED = False
+        settings.RESTRICT_BY_IP_ENABLED = False
         payload = {}
         auth = generate_test_authorization(json.dumps(payload))
 
@@ -358,7 +358,7 @@ class TestApi(TestCase):
         self.assertEqual({}, re.json)
 
     def test_node_send_stats_with_unknown_node(self):
-        settings.NODE_WHITELIST_ENABLED = False
+        settings.RESTRICT_BY_IP_ENABLED = False
         payload = {}
         auth = generate_test_authorization(json.dumps(payload))
 
@@ -370,9 +370,9 @@ class TestApi(TestCase):
         self.assertEqual(400, re.status_code)
         self.assertEqual({'error': 'node key not found'}, re.json)
 
-    def test_whitelist_fail(self):
-        settings.NODE_WHITELIST_ENABLED = True
-        settings.NODE_WHITELISTED_IP_ADDRESSES = ''
+    def test_restrict_by_ip_fail(self):
+        settings.RESTRICT_BY_IP_ENABLED = True
+        settings.ALLOWED_IP_ADDRESSES = ''
         payload = {}
         auth = generate_test_authorization(json.dumps(payload))
 
@@ -386,9 +386,9 @@ class TestApi(TestCase):
         self.assertEqual(403, re.status_code)
         self.assertEqual({'error': 'resource is forbidden'}, re.json)
 
-    def test_whitelist_success(self):
-        settings.NODE_WHITELIST_ENABLED = True
-        settings.NODE_WHITELISTED_IP_ADDRESSES = ','.join([
+    def test_restrict_by_ip_success(self):
+        settings.RESTRICT_BY_IP_ENABLED = True
+        settings.ALLOWED_IP_ADDRESSES = ','.join([
             '1.1.1.1',
             '2.2.2.2',
             self.REMOTE_ADDR
