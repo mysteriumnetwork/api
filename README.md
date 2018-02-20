@@ -27,10 +27,10 @@ $ pip install -r requirements.txt
 
 To execute tests, start api service in background and run:
 ```bash
-python -m unittest discover
+bin/test
 ```
 
 To run linter:
 ```bash
-./bin/lint
+bin/lint
 ```

@@ -4,5 +4,5 @@ python:
   - "2.7"
 
 script:
-  - python -m unittest discover
-  - ./bin/lint
+  - bin/test
+  - bin/lint
