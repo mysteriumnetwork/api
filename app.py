@@ -1,6 +1,5 @@
 from flask import Flask, request, render_template, jsonify
 from flask_migrate import Migrate
-from flask_sslify import SSLify
 from werkzeug.debug import get_current_traceback
 from functools import wraps
 
@@ -159,11 +158,16 @@ def session_stats_create(session_key, caller_identity):
     payload = request.get_json(force=True)
 
     bytes_sent = payload.get('bytes_sent')
+    if not isinstance(bytes_sent, int) or bytes_sent < 0:
+        return jsonify(
+            error='bytes_sent missing or value is not unsigned int'
+        ), 400
+
     bytes_received = payload.get('bytes_received')
-    if bytes_sent < 0:
-        return jsonify(error='bytes_sent should not be negative'), 400
-    if bytes_received < 0:
-        return jsonify(error='bytes_received should not be negative'), 400
+    if not isinstance(bytes_received, int) or bytes_received < 0:
+        return jsonify(
+            error='bytes_received missing or value is not unsigned int'
+        ), 400
 
     provider_id = payload.get('provider_id')
     if not provider_id:
@@ -261,7 +265,6 @@ def handle_error(e):
 
 
 def start_debug_app():
-    sslify = SSLify(app)
     init_db()
     app.run(debug=True)
 

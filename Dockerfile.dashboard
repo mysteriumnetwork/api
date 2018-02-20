@@ -2,12 +2,11 @@ FROM python:2.7
 
 WORKDIR /code/dashboard
 
-ADD dashboard/requirements_prod.txt /code/dashboard/requirements_prod.txt
-RUN pip install -r requirements_prod.txt
-ADD dashboard/requirements.txt /code/dashboard/requirements.txt
+ADD dashboard/requirements.txt .
 RUN pip install -r requirements.txt
 
+ADD dashboard /code/dashboard
 ADD models.py /code/models.py
 ADD settings.py /code/settings.py
-ADD dashboard /code/dashboard
-CMD ["python", "server.py"]
+
+ENTRYPOINT ["python", "server.py"]
