@@ -6,6 +6,7 @@ from tests.utils import (
     generate_test_authorization,
     generate_static_public_address,
 )
+import settings
 
 
 class TestApi(TestCase):
@@ -360,6 +361,47 @@ class TestApi(TestCase):
         )
         self.assertEqual(400, re.status_code)
         self.assertEqual({'error': 'node key not found'}, re.json)
+
+    def test_restrict_by_ip_fail(self):
+        settings.RESTRICT_BY_IP_ENABLED = True
+        settings.ALLOWED_IP_ADDRESSES = [
+            '1.1.1.1',
+            '2.2.2.2',
+        ]
+        payload = {}
+        auth = generate_test_authorization(json.dumps(payload))
+
+        self._create_node(auth['public_address'])
+
+        re = self._post(
+            '/v1/ping_proposal',
+            payload,
+            headers=auth['headers']
+        )
+        self.assertEqual(403, re.status_code)
+        self.assertEqual({'error': 'resource is forbidden'}, re.json)
+        settings.RESTRICT_BY_IP_ENABLED = False
+
+    def test_restrict_by_ip_success(self):
+        settings.RESTRICT_BY_IP_ENABLED = True
+        settings.ALLOWED_IP_ADDRESSES = [
+            '1.1.1.1',
+            '2.2.2.2',
+            self.REMOTE_ADDR
+        ]
+        payload = {}
+        auth = generate_test_authorization(json.dumps(payload))
+
+        self._create_node(auth['public_address'])
+
+        re = self._post(
+            '/v1/ping_proposal',
+            payload,
+            headers=auth['headers']
+        )
+        self.assertEqual(200, re.status_code)
+        self.assertEqual({}, re.json)
+        settings.RESTRICT_BY_IP_ENABLED = False
 
     def _get(self, url, params={}):
         return self.client.get(

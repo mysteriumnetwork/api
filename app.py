@@ -92,6 +92,18 @@ def recover_identity(f):
     return wrapper
 
 
+def restrict_by_ip(f):
+    @wraps(f)
+    def wrapper(*args, **kw):
+        if settings.RESTRICT_BY_IP_ENABLED:
+            if request.remote_addr not in settings.ALLOWED_IP_ADDRESSES:
+                return jsonify(error='resource is forbidden'), 403
+
+        return f(*args, **kw)
+
+    return wrapper
+
+
 @app.route('/', methods=['GET'])
 def home():
     return render_template(
@@ -102,6 +114,7 @@ def home():
 @app.route('/v1/register_proposal', methods=['POST'])
 # TODO: remove deprecated route when it's not used anymore
 @app.route('/v1/node_register', methods=['POST'])
+@restrict_by_ip
 @validate_json
 @recover_identity
 def register_proposal(caller_identity):
@@ -199,6 +212,7 @@ def session_stats_create(session_key, caller_identity):
 @app.route('/v1/ping_proposal', methods=['POST'])
 # TODO: remove deprecated route when it's not used anymore
 @app.route('/v1/node_send_stats', methods=['POST'])
+@restrict_by_ip
 @validate_json
 @recover_identity
 def ping_proposal(caller_identity):
