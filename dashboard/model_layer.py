@@ -158,7 +158,7 @@ def enrich_session_info(se):
     se.data_transferred = se.client_bytes_sent + se.client_bytes_received
     se.started = humanize.naturaltime((datetime.utcnow() - se.created_at).total_seconds())
     se.status = 'Ongoing' if ((se.node_updated_at or se.client_updated_at) >= datetime.utcnow() - timedelta(minutes=NODE_AVAILABILITY_TIMEOUT)) else 'Completed'
-
+    se.client_country = se.client_country if se.client_country else 'N/A'
 
 def get_sessions(node_key=None, limit=None):
     if node_key:
