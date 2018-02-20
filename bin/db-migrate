@@ -1,0 +1,4 @@
+#!/bin/bash
+
+printf "Migrating database ..\n" \
+    && FLASK_APP=app.py flask db upgrade

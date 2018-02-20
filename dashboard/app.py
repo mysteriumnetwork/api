@@ -1,5 +1,4 @@
 from flask import Flask, render_template
-from flask_sslify import SSLify
 import model_layer
 from werkzeug.contrib.cache import SimpleCache
 import settings
@@ -72,5 +71,4 @@ def session(key):
     )
 
 if __name__ == '__main__':
-    sslify = SSLify(app)
     app.run(debug=True)
