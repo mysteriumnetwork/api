@@ -156,8 +156,9 @@ def proposals():
     else:
         nodes = Node.query.all()
 
+    active_nodes = [node for node in nodes if node.is_active()]
     service_proposals = []
-    for node in nodes:
+    for node in active_nodes:
         service_proposals += node.get_service_proposals()
 
     return jsonify({'proposals': service_proposals})
@@ -221,8 +222,7 @@ def ping_proposal(caller_identity):
         return jsonify(error='node key not found'), 400
 
     # update node updated_at
-    node.updated_at = datetime.utcnow()
-    db.session.add(node)
+    node.update_timestamp()
     db.session.commit()
 
     # add record to NodeAvailability

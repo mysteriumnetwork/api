@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 
 
@@ -8,6 +8,7 @@ db = SQLAlchemy()
 
 IDENTITY_LENGTH_LIMIT = 42
 SESSION_KEY_LIMIT = 36
+NODE_AVAILABILITY_TIMEOUT = timedelta(minutes=2)
 
 
 class Node(db.Model):
@@ -24,9 +25,12 @@ class Node(db.Model):
         self.node_key = node_key
         self.created_at = datetime.utcnow()
 
-    def get_status(self):
-        # TODO: implement status checking
-        return 'active'
+    def is_active(self):
+        last_ping = self.updated_at or self.created_at
+        return last_ping > datetime.utcnow() - NODE_AVAILABILITY_TIMEOUT
+
+    def update_timestamp(self):
+        self.updated_at = datetime.utcnow()
 
     def get_service_proposals(self):
         try:
