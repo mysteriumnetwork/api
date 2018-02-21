@@ -103,7 +103,7 @@ class TestApi(TestCase):
 
     def test_proposals(self):
         node1 = self._create_node("node1")
-        node1.update_timestamp()
+        node1.mark_activity()
 
         # node.updated_at == None
         self._create_node("node2")
@@ -124,7 +124,7 @@ class TestApi(TestCase):
 
     def test_proposals_filtering(self):
         node = self._create_sample_node()
-        node.update_timestamp()
+        node.mark_activity()
         db.session.commit()
 
         re = self._get('/v1/proposals', {'node_key': 'node1'})

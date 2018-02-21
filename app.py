@@ -139,7 +139,7 @@ def register_proposal(caller_identity):
     node.ip = request.remote_addr
     node.country = detect_country(node.ip) or ''
     node.proposal = json.dumps(proposal)
-    node.update_timestamp()
+    node.mark_activity()
     db.session.add(node)
     db.session.commit()
 
@@ -222,7 +222,7 @@ def ping_proposal(caller_identity):
         return jsonify(error='node key not found'), 400
 
     # update node updated_at
-    node.update_timestamp()
+    node.mark_activity()
     db.session.commit()
 
     # add record to NodeAvailability

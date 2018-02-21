@@ -30,7 +30,7 @@ class Node(db.Model):
             return False
         return self.updated_at > datetime.utcnow() - NODE_AVAILABILITY_TIMEOUT
 
-    def update_timestamp(self):
+    def mark_activity(self):
         self.updated_at = datetime.utcnow()
 
     def get_service_proposals(self):
