@@ -158,7 +158,8 @@ def enrich_session_info(se):
     se.data_transferred = se.client_bytes_sent + se.client_bytes_received
     se.started = humanize.naturaltime((datetime.utcnow() - se.created_at).total_seconds())
     se.status = 'Ongoing' if ((se.node_updated_at or se.client_updated_at) >= datetime.utcnow() - timedelta(minutes=NODE_AVAILABILITY_TIMEOUT)) else 'Completed'
-
+    se.shortened_node_key = (se.node_key[:6] + '..' + se.node_key[-4:]) \
+        if len(se.node_key) == models.IDENTITY_LENGTH_LIMIT else se.node_key
 
 def get_sessions(node_key=None, limit=None):
     if node_key:
