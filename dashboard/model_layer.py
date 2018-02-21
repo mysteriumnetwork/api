@@ -3,18 +3,19 @@ from os import path
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 import models
 from models import NODE_AVAILABILITY_TIMEOUT
-from models import db, filter_active  # used for importing from other places
+from models import db # used for importing from other places
+from queries import filter_active_sessions, filter_active_nodes
 from datetime import datetime, timedelta
 import humanize
 
 
 def get_active_nodes_count():
-    count = filter_active(models.Node).count()
+    count = filter_active_nodes().count()
     return count
 
 
 def get_active_sessions_count(node_key=None):
-    query = filter_active(models.Session)
+    query = filter_active_sessions()
 
     if node_key:
         query = query.filter(models.Session.node_key == node_key)
@@ -82,7 +83,7 @@ def get_nodes(limit=None):
 
 
 def get_available_nodes(limit=None):
-    nodes = filter_active(models.Node)
+    nodes = filter_active_nodes()
 
     if limit:
         nodes = nodes.limit(limit)
