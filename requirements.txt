@@ -5,5 +5,4 @@ PyMySQL
 Flask-Migrate
 eth-keys==0.1.0b3
 pycodestyle==2.3.1
-python-geoip==1.2
-python-geoip-geolite2==2015.0303
+maxminddb-geolite2==2017.803
