@@ -7,6 +7,7 @@ RUN pip install -r requirements.txt
 
 ADD dashboard /code/dashboard
 ADD models.py /code/models.py
+ADD queries.py /code/queries.py
 ADD settings.py /code/settings.py
 
 ENTRYPOINT ["python", "server.py"]
