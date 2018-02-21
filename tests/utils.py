@@ -6,7 +6,8 @@ import settings
 
 def sign_message_with_static_key(message):
     pk = _generate_static_private_key()
-    signature = pk.sign_msg(message)
+    message_bytes = message.encode()
+    signature = pk.sign_msg(message_bytes)
     signature_bytes = signature.to_bytes()
     return signature_bytes
 
@@ -19,8 +20,9 @@ def generate_static_public_address():
 
 def generate_test_authorization(message=''):
     signature = sign_message_with_static_key(message)
+    signature_value = base64.b64encode(signature).decode("utf-8")
     headers = {
-        "Authorization": "Signature {}".format(base64.b64encode(signature))
+        "Authorization": "Signature {}".format(signature_value)
     }
 
     return {

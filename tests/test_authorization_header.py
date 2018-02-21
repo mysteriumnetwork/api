@@ -69,7 +69,7 @@ class TestAuthorizationHeader(TestCase):
 
     def test_incorrect_signature_format(self):
         signature = sign_message_with_static_key('')
-        invalid_signature = base64.b64encode(signature+'1')
+        invalid_signature = base64.b64encode(signature+b'1').decode("utf-8")
 
         headers = {
             "Authorization": "Signature {}".format(invalid_signature)
@@ -87,8 +87,9 @@ class TestAuthorizationHeader(TestCase):
         signature = sign_message_with_static_key('')
         public_address = generate_static_public_address()
 
+        signature_value = base64.b64encode(signature).decode("utf-8")
         headers = {
-            "Authorization": "Signature {}".format(base64.b64encode(signature))
+            "Authorization": "Signature {}".format(signature_value)
         }
 
         recovered_public_address = decode_authorization_header(headers)

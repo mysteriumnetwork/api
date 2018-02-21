@@ -3,6 +3,7 @@ flask_sqlalchemy==2.1
 Flask-Testing==0.7.1
 PyMySQL
 Flask-Migrate
-eth-keys==0.1.0b3
+eth-keys==0.2.0b3
+eth-hash[pycryptodome]==0.1.0
 pycodestyle==2.3.1
 maxminddb-geolite2==2017.803
