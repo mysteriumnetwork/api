@@ -9,6 +9,8 @@ from datetime import datetime
 import json
 import helpers
 import logging
+
+from queries import filter_active_nodes
 from signature import (
     recover_public_address,
     ValidationError as SignatureValidationError
@@ -148,17 +150,14 @@ def register_proposal(caller_identity):
 
 @app.route('/v1/proposals', methods=['GET'])
 def proposals():
+    nodes = filter_active_nodes()
+
     node_key = request.args.get('node_key')
-
     if node_key:
-        node = Node.query.get(node_key)
-        nodes = [node] if node else []
-    else:
-        nodes = Node.query.all()
+        nodes = nodes.filter_by(node_key=node_key)
 
-    active_nodes = [node for node in nodes if node.is_active()]
     service_proposals = []
-    for node in active_nodes:
+    for node in nodes:
         service_proposals += node.get_service_proposals()
 
     return jsonify({'proposals': service_proposals})
@@ -221,9 +220,7 @@ def ping_proposal(caller_identity):
     if not node:
         return jsonify(error='node key not found'), 400
 
-    # update node updated_at
     node.mark_activity()
-    db.session.commit()
 
     # add record to NodeAvailability
     na = NodeAvailability(caller_identity)
