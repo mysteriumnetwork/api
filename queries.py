@@ -1,5 +1,5 @@
 from datetime import datetime
-from models import Node, Session, NODE_AVAILABILITY_TIMEOUT
+from models import Node, Session, AVAILABILITY_TIMEOUT
 
 
 def filter_active_nodes():
@@ -13,5 +13,5 @@ def filter_active_sessions():
 def _filter_active_models(model, column):
     updated_timestamp = getattr(model, column)
     return model.query.filter(
-        updated_timestamp >= datetime.utcnow() - NODE_AVAILABILITY_TIMEOUT
+        updated_timestamp >= datetime.utcnow() - AVAILABILITY_TIMEOUT
     )

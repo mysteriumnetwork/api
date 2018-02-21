@@ -3,7 +3,7 @@ import json
 
 from datetime import datetime, timedelta
 
-from models import Session, Node, NODE_AVAILABILITY_TIMEOUT
+from models import Session, Node, AVAILABILITY_TIMEOUT
 from tests.test_case import TestCase, db
 from tests.utils import (
     generate_test_authorization,
@@ -110,7 +110,7 @@ class TestApi(TestCase):
 
         #  node.updated_at timeout passed
         node3 = self._create_node("node3")
-        timeout_delta = NODE_AVAILABILITY_TIMEOUT + timedelta(minutes=1)
+        timeout_delta = AVAILABILITY_TIMEOUT + timedelta(minutes=1)
         node3.updated_at = datetime.utcnow() - timeout_delta
 
         db.session.commit()

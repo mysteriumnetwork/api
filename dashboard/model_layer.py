@@ -2,7 +2,6 @@ import sys
 from os import path
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 import models
-from models import NODE_AVAILABILITY_TIMEOUT
 from models import db # used for importing from other places
 from queries import filter_active_sessions, filter_active_nodes
 from datetime import datetime, timedelta
@@ -98,7 +97,7 @@ def get_available_nodes(limit=None):
 
 
 def get_node_status(node):
-    return 'Online' if datetime.utcnow() - node.updated_at <= NODE_AVAILABILITY_TIMEOUT else 'Offline'
+    return 'Online' if node.is_active() else 'Offline'
 
 
 def get_node_info(node_key):
@@ -152,7 +151,7 @@ def enrich_session_info(se):
     se.client_bytes_received = se.client_bytes_received / 1024
     se.data_transferred = se.client_bytes_sent + se.client_bytes_received
     se.started = humanize.naturaltime((datetime.utcnow() - se.created_at).total_seconds())
-    se.status = 'Ongoing' if ((se.node_updated_at or se.client_updated_at) >= datetime.utcnow() - NODE_AVAILABILITY_TIMEOUT) else 'Completed'
+    se.status = 'Ongoing' if se.is_active() else 'Completed'
 
 
 def get_sessions(node_key=None, limit=None):

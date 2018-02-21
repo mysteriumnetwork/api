@@ -8,7 +8,7 @@ db = SQLAlchemy()
 
 IDENTITY_LENGTH_LIMIT = 42
 SESSION_KEY_LIMIT = 36
-NODE_AVAILABILITY_TIMEOUT = timedelta(minutes=2)
+AVAILABILITY_TIMEOUT = timedelta(minutes=2)
 
 
 class Node(db.Model):
@@ -26,9 +26,7 @@ class Node(db.Model):
         self.created_at = datetime.utcnow()
 
     def is_active(self):
-        if self.updated_at is None:
-            return False
-        return self.updated_at > datetime.utcnow() - NODE_AVAILABILITY_TIMEOUT
+        return _is_active(self.updated_at)
 
     def mark_activity(self):
         self.updated_at = datetime.utcnow()
@@ -67,6 +65,9 @@ class Session(db.Model):
         self.client_bytes_sent = 0
         self.client_bytes_received = 0
 
+    def is_active(self):
+        return _is_active(self.client_updated_at)
+
 
 class NodeAvailability(db.Model):
     __tablename__ = 'node_availability'
@@ -87,3 +88,9 @@ class Identity(db.Model):
     def __init__(self, identity):
         self.identity = identity
         self.created_at = datetime.utcnow()
+
+
+def _is_active(last_update_time):
+    if last_update_time is None:
+        return False
+    return last_update_time > datetime.utcnow() - AVAILABILITY_TIMEOUT
