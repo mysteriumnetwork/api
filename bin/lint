@@ -1,3 +1,3 @@
 #!/bin/bash
 
-pycodestyle . --exclude=./migrations/,./venv/,./dashboard/
+pycodestyle . --exclude=./migrations/,./venv/,./dashboard/static

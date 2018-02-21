@@ -45,6 +45,7 @@ def node(key):
         node=node,
     )
 
+
 @app.route('/nodes')
 def nodes():
 
@@ -62,6 +63,7 @@ def nodes():
         nodes=nodes
     )
 
+
 @app.route('/session/<key>')
 def session(key):
     session = model_layer.get_session_info(key)
@@ -69,6 +71,7 @@ def session(key):
         'session.html',
         session=session,
     )
+
 
 if __name__ == '__main__':
     app.run(debug=True)
