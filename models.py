@@ -11,6 +11,12 @@ SESSION_KEY_LIMIT = 36
 NODE_AVAILABILITY_TIMEOUT = timedelta(minutes=2)
 
 
+def filter_active(model):
+    return model.query.filter(
+        Node.updated_at >= datetime.utcnow() - NODE_AVAILABILITY_TIMEOUT
+    )
+
+
 class Node(db.Model):
     __tablename__ = 'node'
     node_key = db.Column(db.String(IDENTITY_LENGTH_LIMIT), primary_key=True)
