@@ -8,6 +8,7 @@ from tests.test_case import TestCase, db
 from tests.utils import (
     generate_test_authorization,
     generate_static_public_address,
+    updated_setting
 )
 import settings
 
@@ -381,20 +382,17 @@ class TestApi(TestCase):
 
         self._create_node(auth['public_address'])
 
-        try:
-            settings.RESTRICT_BY_IP_ENABLED = True
-            settings.ALLOWED_IP_ADDRESSES = [
-                '1.1.1.1',
-                '2.2.2.2',
-            ]
+        ips = [
+            '1.1.1.1',
+            '2.2.2.2',
+        ]
+        with updated_setting('RESTRICT_BY_IP_ENABLED', True),\
+                updated_setting('ALLOWED_IP_ADDRESSES', ips):
             re = self._post(
                 '/v1/ping_proposal',
                 payload,
                 headers=auth['headers']
             )
-        finally:
-            settings.RESTRICT_BY_IP_ENABLED = False
-            settings.ALLOWED_IP_ADDRESSES = []
 
         self.assertEqual(403, re.status_code)
         self.assertEqual({'error': 'resource is forbidden'}, re.json)
@@ -405,21 +403,18 @@ class TestApi(TestCase):
 
         self._create_node(auth['public_address'])
 
-        try:
-            settings.RESTRICT_BY_IP_ENABLED = True
-            settings.ALLOWED_IP_ADDRESSES = [
-                '1.1.1.1',
-                '2.2.2.2',
-                self.REMOTE_ADDR
-            ]
+        ips = [
+            '1.1.1.1',
+            '2.2.2.2',
+            self.REMOTE_ADDR,
+        ]
+        with updated_setting('RESTRICT_BY_IP_ENABLED', True),\
+                updated_setting('ALLOWED_IP_ADDRESSES', ips):
             re = self._post(
                 '/v1/ping_proposal',
                 payload,
                 headers=auth['headers']
             )
-        finally:
-            settings.RESTRICT_BY_IP_ENABLED = False
-            settings.ALLOWED_IP_ADDRESSES = []
 
         self.assertEqual(200, re.status_code)
         self.assertEqual({}, re.json)
