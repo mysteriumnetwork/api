@@ -1,11 +1,12 @@
-from geoip import geolite2
+from geolite2 import geolite2
 
 
 def detect_country(ip):
-    match = geolite2.lookup(ip)
+    reader = geolite2.reader()
+    match = reader.get(ip)
     if match is None:
         return None
-    return match.country
+    return match['country']['iso_code']
 
 
 def mask_ip_partially(ip):
