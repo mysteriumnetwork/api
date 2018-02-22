@@ -1,10 +1,14 @@
 import unittest
 import json
-from models import Session, Node
+
+from datetime import datetime, timedelta
+
+from models import Session, Node, AVAILABILITY_TIMEOUT
 from tests.test_case import TestCase, db
 from tests.utils import (
     generate_test_authorization,
     generate_static_public_address,
+    updated_setting
 )
 import settings
 
@@ -99,20 +103,30 @@ class TestApi(TestCase):
         self.assertEqual({"error": 'payload must be a valid json'}, re.json)
 
     def test_proposals(self):
-        self._create_sample_node()
+        node1 = self._create_node("node1")
+        node1.mark_activity()
+
+        # node.updated_at == None
+        self._create_node("node2")
+
+        #  node.updated_at timeout passed
+        node3 = self._create_node("node3")
+        timeout_delta = AVAILABILITY_TIMEOUT + timedelta(minutes=1)
+        node3.updated_at = datetime.utcnow() - timeout_delta
+
+        db.session.commit()
 
         re = self._get('/v1/proposals')
-
         self.assertEqual(200, re.status_code)
-
-        data = json.loads(re.data)
+        data = re.json
         proposals = data['proposals']
-        self.assertGreater(len(proposals), 0)
-        for proposal in proposals:
-            self.assertIsNotNone(proposal['id'])
+        self.assertEqual(1, len(proposals))
+        self.assertIn('node1', proposals[0]['provider_id'])
 
     def test_proposals_filtering(self):
-        self._create_sample_node()
+        node = self._create_sample_node()
+        node.mark_activity()
+        db.session.commit()
 
         re = self._get('/v1/proposals', {'node_key': 'node1'})
 
@@ -363,45 +377,47 @@ class TestApi(TestCase):
         self.assertEqual({'error': 'node key not found'}, re.json)
 
     def test_restrict_by_ip_fail(self):
-        settings.RESTRICT_BY_IP_ENABLED = True
-        settings.ALLOWED_IP_ADDRESSES = [
-            '1.1.1.1',
-            '2.2.2.2',
-        ]
         payload = {}
         auth = generate_test_authorization(json.dumps(payload))
 
         self._create_node(auth['public_address'])
 
-        re = self._post(
-            '/v1/ping_proposal',
-            payload,
-            headers=auth['headers']
-        )
+        ips = [
+            '1.1.1.1',
+            '2.2.2.2',
+        ]
+        with updated_setting('RESTRICT_BY_IP_ENABLED', True),\
+                updated_setting('ALLOWED_IP_ADDRESSES', ips):
+            re = self._post(
+                '/v1/ping_proposal',
+                payload,
+                headers=auth['headers']
+            )
+
         self.assertEqual(403, re.status_code)
         self.assertEqual({'error': 'resource is forbidden'}, re.json)
-        settings.RESTRICT_BY_IP_ENABLED = False
 
     def test_restrict_by_ip_success(self):
-        settings.RESTRICT_BY_IP_ENABLED = True
-        settings.ALLOWED_IP_ADDRESSES = [
-            '1.1.1.1',
-            '2.2.2.2',
-            self.REMOTE_ADDR
-        ]
         payload = {}
         auth = generate_test_authorization(json.dumps(payload))
 
         self._create_node(auth['public_address'])
 
-        re = self._post(
-            '/v1/ping_proposal',
-            payload,
-            headers=auth['headers']
-        )
+        ips = [
+            '1.1.1.1',
+            '2.2.2.2',
+            self.REMOTE_ADDR,
+        ]
+        with updated_setting('RESTRICT_BY_IP_ENABLED', True),\
+                updated_setting('ALLOWED_IP_ADDRESSES', ips):
+            re = self._post(
+                '/v1/ping_proposal',
+                payload,
+                headers=auth['headers']
+            )
+
         self.assertEqual(200, re.status_code)
         self.assertEqual({}, re.json)
-        settings.RESTRICT_BY_IP_ENABLED = False
 
     def _get(self, url, params={}):
         return self.client.get(
@@ -419,7 +435,7 @@ class TestApi(TestCase):
         )
 
     def _create_sample_node(self):
-        self._create_node("node1")
+        return self._create_node("node1")
 
     def _create_node(self, node_key):
         node = Node(node_key)
@@ -429,6 +445,7 @@ class TestApi(TestCase):
             "provider_id": node_key,
         })
         db.session.add(node)
+        return node
 
 
 if __name__ == '__main__':

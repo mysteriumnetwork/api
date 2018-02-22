@@ -1,6 +1,8 @@
 from eth_keys import keys
 import base64
 
+import settings
+
 
 def sign_message_with_static_key(message):
     pk = _generate_static_private_key()
@@ -29,3 +31,16 @@ def generate_test_authorization(message=''):
 
 def _generate_static_private_key():
     return keys.PrivateKey(b'\x01' * 32)
+
+
+class updated_setting():
+    def __init__(self, key, value):
+        self.key = key
+        self.value = value
+
+    def __enter__(self):
+        self.initial_value = getattr(settings, self.key)
+        setattr(settings, self.key, self.value)
+
+    def __exit__(self, type, value, traceback):
+        setattr(settings, self.key, self.initial_value)
