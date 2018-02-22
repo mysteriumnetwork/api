@@ -8,9 +8,8 @@ from tests.test_case import TestCase, db
 from tests.utils import (
     generate_test_authorization,
     generate_static_public_address,
-    updated_setting
+    setting
 )
-import settings
 
 
 class TestApi(TestCase):
@@ -386,8 +385,8 @@ class TestApi(TestCase):
             '1.1.1.1',
             '2.2.2.2',
         ]
-        with updated_setting('RESTRICT_BY_IP_ENABLED', True),\
-                updated_setting('ALLOWED_IP_ADDRESSES', ips):
+        with setting('RESTRICT_BY_IP_ENABLED', True), \
+                setting('ALLOWED_IP_ADDRESSES', ips):
             re = self._post(
                 '/v1/ping_proposal',
                 payload,
@@ -408,8 +407,8 @@ class TestApi(TestCase):
             '2.2.2.2',
             self.REMOTE_ADDR,
         ]
-        with updated_setting('RESTRICT_BY_IP_ENABLED', True),\
-                updated_setting('ALLOWED_IP_ADDRESSES', ips):
+        with setting('RESTRICT_BY_IP_ENABLED', True), \
+                setting('ALLOWED_IP_ADDRESSES', ips):
             re = self._post(
                 '/v1/ping_proposal',
                 payload,

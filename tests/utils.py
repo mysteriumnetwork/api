@@ -33,7 +33,7 @@ def _generate_static_private_key():
     return keys.PrivateKey(b'\x01' * 32)
 
 
-class updated_setting():
+class setting():
     def __init__(self, key, value):
         self.key = key
         self.value = value
