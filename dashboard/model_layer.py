@@ -5,8 +5,10 @@ import models
 from models import db  # used for importing from other places
 from datetime import datetime, timedelta
 import humanize
+import dashboard.helpers as helpers
 
 NODE_AVAILABILITY_TIMEOUT = 2
+
 
 def get_active_nodes_count():
     count = models.Node.query.filter(
@@ -158,9 +160,7 @@ def enrich_session_info(se):
     se.data_transferred = se.client_bytes_sent + se.client_bytes_received
     se.started = humanize.naturaltime((datetime.utcnow() - se.created_at).total_seconds())
     se.status = 'Ongoing' if ((se.node_updated_at or se.client_updated_at) >= datetime.utcnow() - timedelta(minutes=NODE_AVAILABILITY_TIMEOUT)) else 'Completed'
-    se.shortened_node_key = (se.node_key[:6] + '..' + se.node_key[-4:]) \
-        if se.node_key and len(se.node_key) == models.IDENTITY_LENGTH_LIMIT \
-        else se.node_key
+    se.shortened_node_key = helpers.shorten_node_key(se.node_key)
 
 def get_sessions(node_key=None, limit=None):
     if node_key:
