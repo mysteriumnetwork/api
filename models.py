@@ -38,6 +38,15 @@ class Node(db.Model):
             return []
         return [proposal]
 
+    def get_country_from_service_proposal(self):
+        proposals = self.get_service_proposals()
+
+        try:
+            pr = proposals[0]
+            return pr['service_definition']['location_originate']['country']
+        except KeyError:
+            return None
+
 
 class Session(db.Model):
     __tablename__ = 'session'
