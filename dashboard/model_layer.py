@@ -5,6 +5,8 @@ from models import db  # used for importing from other places
 from queries import filter_active_sessions, filter_active_nodes
 from datetime import datetime, timedelta
 import humanize
+import dashboard.helpers as helpers
+
 
 
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
@@ -165,6 +167,7 @@ def enrich_session_info(se):
     session_time = datetime.utcnow() - se.created_at
     se.started = humanize.naturaltime(session_time.total_seconds())
     se.status = 'Ongoing' if se.is_active() else 'Completed'
+    se.shortened_node_key = helpers.shorten_node_key(se.node_key)
 
 
 def get_sessions(node_key=None, limit=None):
