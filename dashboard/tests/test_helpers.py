@@ -1,6 +1,7 @@
 import unittest
 from dashboard.helpers import shorten_node_key
 
+
 class TestHelpers(unittest.TestCase):
     def test_shorten_node_key_success(self):
         self.assertEqual(

@@ -8,7 +8,6 @@ import humanize
 import dashboard.helpers as helpers
 
 
-
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
 
