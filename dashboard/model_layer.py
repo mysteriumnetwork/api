@@ -161,9 +161,11 @@ def enrich_session_info(se):
     m, s = divmod(duration_seconds, 60)
     h, m = divmod(m, 60)
     se.duration = "%d:%02d:%02d" % (h, m, s)
-    se.client_bytes_sent = se.client_bytes_sent / 1024
-    se.client_bytes_received = se.client_bytes_received / 1024
-    se.data_transferred = se.client_bytes_sent + se.client_bytes_received
+    se.data_sent = humanize.naturalsize(se.client_bytes_sent)
+    se.data_received = humanize.naturalsize(se.client_bytes_received)
+    se.data_transferred = humanize.naturalsize(
+        se.client_bytes_sent + se.client_bytes_received
+    )
     session_time = datetime.utcnow() - se.created_at
     se.started = humanize.naturaltime(session_time.total_seconds())
     se.status = 'Ongoing' if se.is_active() else 'Completed'
