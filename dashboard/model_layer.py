@@ -1,5 +1,6 @@
 import sys
 from os import path
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))  # noqa
 import models
 from models import db  # used for importing from other places
 from queries import filter_active_sessions, filter_active_nodes
