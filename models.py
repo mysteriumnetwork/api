@@ -15,7 +15,6 @@ class Node(db.Model):
     __tablename__ = 'node'
     node_key = db.Column(db.String(IDENTITY_LENGTH_LIMIT), primary_key=True)
     ip = db.Column(db.String(45))
-    country = db.Column(db.String(255))
     connection_config = db.Column(db.Text)
     proposal = db.Column(db.Text)
     created_at = db.Column(db.DateTime)
