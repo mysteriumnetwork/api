@@ -78,7 +78,9 @@ def get_nodes(limit=None):
     nodes = nodes.all()
 
     for node in nodes:
-        node.country_string = get_country_string(node.country)
+        node.country_string = get_country_string(
+            node.get_country_from_service_proposal()
+        )
         node.sessions_count = get_sessions_count(node_key=node.node_key)
         delta = datetime.utcnow() - node.updated_at
         node.last_seen = humanize.naturaltime(delta.total_seconds())
@@ -96,7 +98,9 @@ def get_available_nodes(limit=None):
     nodes = nodes.all()
 
     for node in nodes:
-        node.country_string = get_country_string(node.country)
+        node.country_string = get_country_string(
+            node.get_country_from_service_proposal()
+        )
         node.sessions_count = get_sessions_count(node_key=node.node_key)
         node.uptime = 'N/A'
     return nodes
@@ -123,7 +127,9 @@ def get_node_info(node_key):
     node = models.Node.query.get(node_key)
     delta = datetime.utcnow() - node.updated_at
     node.last_seen = humanize.naturaltime(delta.total_seconds())
-    node.country = get_country_string(node.country)
+    node.country_string = get_country_string(
+        node.get_country_from_service_proposal()
+    )
     node.sessions = get_sessions(node_key=node_key)
 
     total_bytes = 0
