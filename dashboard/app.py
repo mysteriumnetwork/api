@@ -73,5 +73,21 @@ def session(key):
     )
 
 
+@app.route('/sessions')
+def sessions():
+    sessions = cache.get('all-sessions')
+    if sessions is None:
+        sessions = model_layer.get_sessions(limit=500)
+        cache.set(
+            'all-sessions',
+            sessions,
+            timeout=1 * 60
+        )
+
+    return render_template(
+        'sessions.html',
+        sessions=sessions
+    )
+
 if __name__ == '__main__':
     app.run(debug=True)
