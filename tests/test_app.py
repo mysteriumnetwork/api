@@ -35,7 +35,6 @@ class TestApi(TestCase):
 
         node = Node.query.get(public_address)
         self.assertEqual(self.REMOTE_ADDR, node.ip)
-        self.assertEqual('US', node.country)
 
     def test_register_proposal_with_unknown_ip(self):
         public_address = generate_static_public_address()
@@ -59,7 +58,6 @@ class TestApi(TestCase):
 
         node = Node.query.get(public_address)
         self.assertEqual('127.0.0.1', node.ip)
-        self.assertEqual('', node.country)
 
     def test_register_proposal_unauthorized(self):
         payload = {

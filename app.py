@@ -139,7 +139,6 @@ def register_proposal(caller_identity):
         node = Node(node_key)
 
     node.ip = request.remote_addr
-    node.country = detect_country(node.ip) or ''
     node.proposal = json.dumps(proposal)
     node.mark_activity()
     db.session.add(node)

@@ -15,7 +15,6 @@ class Node(db.Model):
     __tablename__ = 'node'
     node_key = db.Column(db.String(IDENTITY_LENGTH_LIMIT), primary_key=True)
     ip = db.Column(db.String(45))
-    country = db.Column(db.String(255))
     connection_config = db.Column(db.Text)
     proposal = db.Column(db.Text)
     created_at = db.Column(db.DateTime)
@@ -37,6 +36,15 @@ class Node(db.Model):
         except ValueError:
             return []
         return [proposal]
+
+    def get_country_from_service_proposal(self):
+        proposals = self.get_service_proposals()
+
+        try:
+            pr = proposals[0]
+            return pr['service_definition']['location_originate']['country']
+        except KeyError:
+            return None
 
 
 class Session(db.Model):
