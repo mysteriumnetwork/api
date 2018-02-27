@@ -9,9 +9,6 @@ import humanize
 import dashboard.helpers as helpers
 
 
-sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
-
-
 def get_active_nodes_count():
     count = filter_active_nodes().count()
     return count
