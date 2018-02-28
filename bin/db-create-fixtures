@@ -1,0 +1,4 @@
+#!/bin/bash
+
+printf "Creating data fixtures for testing ..\n" \
+    && FLASK_APP=app.py python fixtures.py
