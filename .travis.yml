@@ -3,6 +3,9 @@ language: python
 python:
   - "3.6"
 
+before_install:
+  - pip install -r dashboard/requirements.txt
+
 script:
   - bin/test
   - bin/lint
