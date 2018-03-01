@@ -1,3 +1,5 @@
+import base64
+
 from eth_keys.datatypes import Signature
 from eth_keys.exceptions import ValidationError
 from eth_keys.utils.address import public_key_bytes_to_address
