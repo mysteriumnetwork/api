@@ -4,8 +4,8 @@ python:
   - "3.6"
 
 install:
-  - pip install -r requirements.txt
   - pip install -r dashboard/requirements.txt
+  - pip install -r requirements.txt
 
 script:
   - bin/test
