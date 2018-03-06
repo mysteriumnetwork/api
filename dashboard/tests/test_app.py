@@ -1,4 +1,4 @@
-from test_case import TestCase
+from dashboard.tests.test_case import TestCase
 
 
 class TestEndpoints(TestCase):
