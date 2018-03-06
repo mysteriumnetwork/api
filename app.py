@@ -1,3 +1,4 @@
+import binascii
 from flask import Flask, request, render_template, jsonify
 from flask_migrate import Migrate
 from werkzeug.debug import get_current_traceback
@@ -68,7 +69,7 @@ def decode_authorization_header(headers):
 
     try:
         signature_bytes = base64.b64decode(signature_base64_encoded)
-    except TypeError as err:
+    except binascii.Error as err:
         raise ValueError('signature must be base64 encoded: {0}'.format(err))
 
     try:
