@@ -21,8 +21,26 @@ class TestHelpers(unittest.TestCase):
             shorten_node_key(None)
         )
 
-    def test_get_natural_size(self):
+    def test_get_natural_size_1byte(self):
         self.assertEqual(
-            '1.07 GB',
+            '1 Byte',
+            get_natural_size(1)
+        )
+
+    def test_get_natural_size_1kb(self):
+        self.assertEqual(
+            '1.00 KB',
+            get_natural_size(1024)
+        )
+
+    def test_get_natural_size_1mb(self):
+        self.assertEqual(
+            '1.00 MB',
+            get_natural_size(1024 * 1024)
+        )
+
+    def test_get_natural_size_1gb(self):
+        self.assertEqual(
+            '1.00 GB',
             get_natural_size(1024 * 1024 * 1024)
         )

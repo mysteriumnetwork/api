@@ -10,4 +10,6 @@ def shorten_node_key(node_key):
 
 
 def get_natural_size(value):
-    return humanize.naturalsize(value, format='%.2f')
+    str_value = humanize.naturalsize(value, format='%.2f', binary=True)
+    # KiB -> KB, MiB - > MB, ..
+    return str_value.replace('i', '')
