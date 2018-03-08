@@ -164,9 +164,9 @@ def enrich_session_info(se):
     m, s = divmod(duration_seconds, 60)
     h, m = divmod(m, 60)
     se.duration = "%d:%02d:%02d" % (h, m, s)
-    se.data_sent = humanize.naturalsize(se.client_bytes_sent)
-    se.data_received = humanize.naturalsize(se.client_bytes_received)
-    se.data_transferred = humanize.naturalsize(
+    se.data_sent = helpers.get_natural_size(se.client_bytes_sent)
+    se.data_received = helpers.get_natural_size(se.client_bytes_received)
+    se.data_transferred = helpers.get_natural_size(
         se.client_bytes_sent + se.client_bytes_received
     )
     session_time = datetime.utcnow() - se.created_at
