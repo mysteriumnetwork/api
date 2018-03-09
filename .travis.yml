@@ -1,3 +1,4 @@
+sudo: true #we need this to run job on virtual machine not inside docker container
 language: python
 
 python:
