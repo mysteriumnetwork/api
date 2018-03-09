@@ -2,9 +2,9 @@
 set -e
 
 tag=$1
-user=$2
-pass=$3
+username=$2
+password=$3
 
-docker login -u "$user" -p "$pass"
+docker login -u "$username" -p "$password"
 bin/api_package_docker "$tag"
 bin/dashboard_package_docker "$tag"
