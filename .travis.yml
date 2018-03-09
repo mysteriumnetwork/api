@@ -17,5 +17,5 @@ deploy:
     script: bash bin/deploy_to_dockerhub "$TRAVIS_TAG" "$DOCKER_USERNAME" "$DOCKER_PASSWORD"
     on:
       tags: true
-      #branch: master
+      branch: master
 
