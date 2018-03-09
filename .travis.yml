@@ -13,10 +13,7 @@ script:
 
 deploy:
   - provider: script
-    script:
-    - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSSWORD"
-    - bin/api_package_docker "$TRAVIS_TAG"
-    - bin/dashboard_package_docker "$TRAVIS_TAG"
+    script: bash bin/deploy_to_dockerhub "$TRAVIS_TAG" "$DOCKER_USERNAME" "$DOCKER_PASSWORD"
     on:
       tags: true
       #branch: master
