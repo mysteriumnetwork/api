@@ -4,7 +4,7 @@
 
     <div class="page-title">
       <div class="title_left">
-        <h3>Nodes</h3>
+        <h3>Sessions</h3>
       </div>
     </div>
 
@@ -14,7 +14,7 @@
       <div class="col-md-12 col-sm-6 col-xs-12">
         <div class="x_panel">
           <div class="x_title">
-            <h2>All Nodes</h2>
+            <h2>All Sessions</h2>
             <ul class="nav navbar-right panel_toolbox">
               <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
               </li>
@@ -29,24 +29,26 @@
               <thead>
                 <tr>
                   <th>#</th>
-                  <th>Node Key</th>
-                  <th>Country</th>
-                  <th>Seen</th>
-                  <th>Sessions Total</th>
+                  <th>Session Key</th>
                   <th>Status</th>
+                  <th>Started</th>
+                  <th>Duration</th>
+                  <th>Data Transferred (KB)</th>
                 </tr>
               </thead>
               <tbody>
-                {% for node in nodes %}
-                <tr onclick="window.document.location='/node/{{node.node_key}}'">
-                  <th scope="row">{{loop.index}}</th>
-                  <td>{{node.node_key}}</td>
-                  <td>{{node.country_string}}</td>
-                  <td>{{node.last_seen}}</td>
-                  <td>{{node.sessions_count}}</td>
-                  <td>{{node.status}}</td>
-                </tr>
-                {% endfor %}
+
+              {% for se in sessions %}
+              <tr onclick="window.document.location='/session/{{se.session_key}}'">
+                <th scope="row">{{loop.index}}</th>
+                <td>{{se.session_key}}</td>
+                <td>{{se.status}}</td>
+                <td>{{se.started}}</td>
+                <td>{{se.duration}}</td>
+                <td>{{se.data_transferred}}</td>
+              </tr>
+              {% endfor %}
+
               </tbody>
             </table>
 

@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 
 
@@ -8,13 +8,13 @@ db = SQLAlchemy()
 
 IDENTITY_LENGTH_LIMIT = 42
 SESSION_KEY_LIMIT = 36
+AVAILABILITY_TIMEOUT = timedelta(minutes=2)
 
 
 class Node(db.Model):
     __tablename__ = 'node'
     node_key = db.Column(db.String(IDENTITY_LENGTH_LIMIT), primary_key=True)
     ip = db.Column(db.String(45))
-    country = db.Column(db.String(255))
     connection_config = db.Column(db.Text)
     proposal = db.Column(db.Text)
     created_at = db.Column(db.DateTime)
@@ -24,9 +24,11 @@ class Node(db.Model):
         self.node_key = node_key
         self.created_at = datetime.utcnow()
 
-    def get_status(self):
-        # TODO: implement status checking
-        return 'active'
+    def is_active(self):
+        return _is_active(self.updated_at)
+
+    def mark_activity(self):
+        self.updated_at = datetime.utcnow()
 
     def get_service_proposals(self):
         try:
@@ -34,6 +36,15 @@ class Node(db.Model):
         except ValueError:
             return []
         return [proposal]
+
+    def get_country_from_service_proposal(self):
+        proposals = self.get_service_proposals()
+
+        try:
+            pr = proposals[0]
+            return pr['service_definition']['location_originate']['country']
+        except KeyError:
+            return None
 
 
 class Session(db.Model):
@@ -62,6 +73,9 @@ class Session(db.Model):
         self.client_bytes_sent = 0
         self.client_bytes_received = 0
 
+    def is_active(self):
+        return _is_active(self.client_updated_at)
+
 
 class NodeAvailability(db.Model):
     __tablename__ = 'node_availability'
@@ -82,3 +96,9 @@ class Identity(db.Model):
     def __init__(self, identity):
         self.identity = identity
         self.created_at = datetime.utcnow()
+
+
+def _is_active(last_update_time):
+    if last_update_time is None:
+        return False
+    return last_update_time > datetime.utcnow() - AVAILABILITY_TIMEOUT

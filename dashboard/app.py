@@ -1,5 +1,5 @@
 from flask import Flask, render_template
-import model_layer
+from dashboard import model_layer
 from werkzeug.contrib.cache import SimpleCache
 import settings
 
@@ -45,6 +45,7 @@ def node(key):
         node=node,
     )
 
+
 @app.route('/nodes')
 def nodes():
 
@@ -62,6 +63,7 @@ def nodes():
         nodes=nodes
     )
 
+
 @app.route('/session/<key>')
 def session(key):
     session = model_layer.get_session_info(key)
@@ -69,6 +71,24 @@ def session(key):
         'session.html',
         session=session,
     )
+
+
+@app.route('/sessions')
+def sessions():
+    sessions = cache.get('all-sessions')
+    if sessions is None:
+        sessions = model_layer.get_sessions(limit=500)
+        cache.set(
+            'all-sessions',
+            sessions,
+            timeout=1 * 60
+        )
+
+    return render_template(
+        'sessions.html',
+        sessions=sessions
+    )
+
 
 if __name__ == '__main__':
     app.run(debug=True)

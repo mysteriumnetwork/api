@@ -1,0 +1,21 @@
+sudo: true #we need this to run job on virtual machine not inside docker container
+language: python
+
+python:
+  - "3.6"
+
+install:
+  - pip install -r requirements.txt
+  - pip install -r dashboard/requirements.txt
+
+script:
+  - bin/test
+  - bin/lint
+
+deploy:
+  - provider: script
+    script: bash bin/deploy_to_dockerhub "$TRAVIS_TAG" "$DOCKER_USERNAME" "$DOCKER_PASSWORD"
+    on:
+      tags: true
+      branch: master
+

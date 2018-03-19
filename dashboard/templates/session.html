@@ -42,7 +42,7 @@
                 </li>
                 <li>
                   <span class="name">Node</span>
-                  <span class="value"><a href="/node/{{ session.node_key }}">{{ session.node_key }}</a></span>
+                  <span class="value"><a href="/node/{{ session.node_key }}">{{ session.shortened_node_key }}</a></span>
                 </li>
                 <li>
                   <span class="name">Protocol</span>
@@ -56,18 +56,12 @@
             <div class="col-md-12 col-sm-6 col-xs-12">
               <ul class="stats-overview session">
                 <li>
-                  <span class="name">Data Transferred Total (KB)</span>
+                  <span class="name">Data Transferred Total</span>
                   <span class="value">{{ session.data_transferred }}</span>
                 </li>
-                <!--
                 <li>
-                  <span class="name">Node Bytes (Sent / Received)</span>
-                  <span class="value">{{ session.node_bytes_sent }} / {{ session.node_bytes_received }}</span>
-                </li>
-                -->
-                <li>
-                  <span class="name">Client Bytes (Sent / Received)</span>
-                  <span class="value">{{ session.client_bytes_sent }} / {{ session.client_bytes_received }}</span>
+                  <span class="name">Data Sent / Received</span>
+                  <span class="value">{{ session.data_sent }} / {{ session.data_received }}</span>
                 </li>
                 <li>
                   <span class="name">Client Country</span>

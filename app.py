@@ -1,3 +1,4 @@
+import binascii
 from flask import Flask, request, render_template, jsonify
 from flask_migrate import Migrate
 from werkzeug.debug import get_current_traceback
@@ -9,6 +10,8 @@ from datetime import datetime
 import json
 import helpers
 import logging
+
+from queries import filter_active_nodes
 from signature import (
     recover_public_address,
     ValidationError as SignatureValidationError
@@ -66,7 +69,7 @@ def decode_authorization_header(headers):
 
     try:
         signature_bytes = base64.b64decode(signature_base64_encoded)
-    except TypeError as err:
+    except binascii.Error as err:
         raise ValueError('signature must be base64 encoded: {0}'.format(err))
 
     try:
@@ -92,6 +95,18 @@ def recover_identity(f):
     return wrapper
 
 
+def restrict_by_ip(f):
+    @wraps(f)
+    def wrapper(*args, **kw):
+        if settings.RESTRICT_BY_IP_ENABLED:
+            if request.remote_addr not in settings.ALLOWED_IP_ADDRESSES:
+                return jsonify(error='resource is forbidden'), 403
+
+        return f(*args, **kw)
+
+    return wrapper
+
+
 @app.route('/', methods=['GET'])
 def home():
     return render_template(
@@ -102,6 +117,7 @@ def home():
 @app.route('/v1/register_proposal', methods=['POST'])
 # TODO: remove deprecated route when it's not used anymore
 @app.route('/v1/node_register', methods=['POST'])
+@restrict_by_ip
 @validate_json
 @recover_identity
 def register_proposal(caller_identity):
@@ -124,9 +140,8 @@ def register_proposal(caller_identity):
         node = Node(node_key)
 
     node.ip = request.remote_addr
-    node.country = detect_country(node.ip) or ''
     node.proposal = json.dumps(proposal)
-    node.updated_at = datetime.utcnow()
+    node.mark_activity()
     db.session.add(node)
     db.session.commit()
 
@@ -135,13 +150,11 @@ def register_proposal(caller_identity):
 
 @app.route('/v1/proposals', methods=['GET'])
 def proposals():
-    node_key = request.args.get('node_key')
+    nodes = filter_active_nodes()
 
+    node_key = request.args.get('node_key')
     if node_key:
-        node = Node.query.get(node_key)
-        nodes = [node] if node else []
-    else:
-        nodes = Node.query.all()
+        nodes = nodes.filter_by(node_key=node_key)
 
     service_proposals = []
     for node in nodes:
@@ -199,6 +212,7 @@ def session_stats_create(session_key, caller_identity):
 @app.route('/v1/ping_proposal', methods=['POST'])
 # TODO: remove deprecated route when it's not used anymore
 @app.route('/v1/node_send_stats', methods=['POST'])
+@restrict_by_ip
 @validate_json
 @recover_identity
 def ping_proposal(caller_identity):
@@ -206,10 +220,7 @@ def ping_proposal(caller_identity):
     if not node:
         return jsonify(error='node key not found'), 400
 
-    # update node updated_at
-    node.updated_at = datetime.utcnow()
-    db.session.add(node)
-    db.session.commit()
+    node.mark_activity()
 
     # add record to NodeAvailability
     na = NodeAvailability(caller_identity)

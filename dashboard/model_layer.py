@@ -1,24 +1,21 @@
 import sys
 from os import path
-sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))  # noqa
 import models
 from models import db  # used for importing from other places
+from queries import filter_active_sessions, filter_active_nodes
 from datetime import datetime, timedelta
 import humanize
+import dashboard.helpers as helpers
 
-NODE_AVAILABILITY_TIMEOUT = 2
 
 def get_active_nodes_count():
-    count = models.Node.query.filter(
-        models.Node.updated_at >= datetime.utcnow() - timedelta(minutes=NODE_AVAILABILITY_TIMEOUT)
-    ).count()
+    count = filter_active_nodes().count()
     return count
 
 
 def get_active_sessions_count(node_key=None):
-    query = models.Session.query.filter(
-        models.Session.client_updated_at >= datetime.utcnow() - timedelta(minutes=NODE_AVAILABILITY_TIMEOUT),
-    )
+    query = filter_active_sessions()
 
     if node_key:
         query = query.filter(models.Session.node_key == node_key)
@@ -45,7 +42,8 @@ def get_average_session_time():
 
     for se in sessions:
         if se.node_updated_at:
-            total_seconds += (se.node_updated_at - se.created_at).total_seconds()
+            delta = se.node_updated_at - se.created_at
+            total_seconds += delta.total_seconds()
             count += 1
 
     average_seconds = total_seconds / count if count != 0 else 0
@@ -77,18 +75,19 @@ def get_nodes(limit=None):
     nodes = nodes.all()
 
     for node in nodes:
-        node.country_string = get_country_string(node.country)
+        node.country_string = get_country_string(
+            node.get_country_from_service_proposal()
+        )
         node.sessions_count = get_sessions_count(node_key=node.node_key)
-        node.last_seen = humanize.naturaltime((datetime.utcnow() - node.updated_at).total_seconds())
+        delta = datetime.utcnow() - node.updated_at
+        node.last_seen = humanize.naturaltime(delta.total_seconds())
         node.status = get_node_status(node)
 
     return nodes
 
 
 def get_available_nodes(limit=None):
-    nodes = models.Node.query.filter(
-        models.Node.updated_at >= datetime.utcnow() - timedelta(minutes=NODE_AVAILABILITY_TIMEOUT)
-    )
+    nodes = filter_active_nodes()
 
     if limit:
         nodes = nodes.limit(limit)
@@ -96,20 +95,22 @@ def get_available_nodes(limit=None):
     nodes = nodes.all()
 
     for node in nodes:
-        node.country_string = get_country_string(node.country)
+        node.country_string = get_country_string(
+            node.get_country_from_service_proposal()
+        )
         node.sessions_count = get_sessions_count(node_key=node.node_key)
         node.uptime = 'N/A'
     return nodes
 
 
 def get_node_status(node):
-    return 'Online' if datetime.utcnow() - node.updated_at <= timedelta(minutes=NODE_AVAILABILITY_TIMEOUT) else 'Offline'
+    return 'Online' if node.is_active() else 'Offline'
 
 
 def get_node_info(node_key):
     def get_node_time_online(day):
         records_count = models.NodeAvailability.query.filter(
-            models.NodeAvailability.node_key==node_key,
+            models.NodeAvailability.node_key == node_key,
             day <= models.NodeAvailability.date,
             models.NodeAvailability.date < day+timedelta(days=1)
         ).count()
@@ -121,8 +122,11 @@ def get_node_info(node_key):
         return round(records_count / 60.0)
 
     node = models.Node.query.get(node_key)
-    node.last_seen = humanize.naturaltime((datetime.utcnow() - node.updated_at).total_seconds())
-    node.country = get_country_string(node.country)
+    delta = datetime.utcnow() - node.updated_at
+    node.last_seen = humanize.naturaltime(delta.total_seconds())
+    node.country_string = get_country_string(
+        node.get_country_from_service_proposal()
+    )
     node.sessions = get_sessions(node_key=node_key)
 
     total_bytes = 0
@@ -137,33 +141,44 @@ def get_node_info(node_key):
 
     # 7 days
     for i in range(6, -1, -1):
-        day = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=i)
-        availability.append( {'day': day.strftime('%Y-%m-%d'), 'time_online': get_node_time_online(day)} )
+        now = datetime.utcnow()
+        today = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        day = today - timedelta(days=i)
+        availability.append({
+            'day': day.strftime('%Y-%m-%d'),
+            'time_online': get_node_time_online(day)
+        })
 
     node.availability = availability
 
-    node.uptime = '{}h / 24h'.format(int(get_node_time_online(datetime.utcnow() - timedelta(days=1))))
+    day_before = datetime.utcnow() - timedelta(days=1)
+    node.uptime = '{}h / 24h'.format(int(get_node_time_online(day_before)))
     node.status = get_node_status(node)
 
     return node
 
 
 def enrich_session_info(se):
-    duration_seconds = ((se.node_updated_at or se.client_updated_at) - se.created_at).total_seconds()
+    duration = (se.node_updated_at or se.client_updated_at) - se.created_at
+    duration_seconds = duration.total_seconds()
     m, s = divmod(duration_seconds, 60)
     h, m = divmod(m, 60)
     se.duration = "%d:%02d:%02d" % (h, m, s)
-    se.client_bytes_sent = se.client_bytes_sent / 1024
-    se.client_bytes_received = se.client_bytes_received / 1024
-    se.data_transferred = se.client_bytes_sent + se.client_bytes_received
-    se.started = humanize.naturaltime((datetime.utcnow() - se.created_at).total_seconds())
-    se.status = 'Ongoing' if ((se.node_updated_at or se.client_updated_at) >= datetime.utcnow() - timedelta(minutes=NODE_AVAILABILITY_TIMEOUT)) else 'Completed'
-    se.client_country = se.client_country if se.client_country else 'N/A'
+    se.data_sent = helpers.get_natural_size(se.client_bytes_sent)
+    se.data_received = helpers.get_natural_size(se.client_bytes_received)
+    se.data_transferred = helpers.get_natural_size(
+        se.client_bytes_sent + se.client_bytes_received
+    )
+    session_time = datetime.utcnow() - se.created_at
+    se.started = humanize.naturaltime(session_time.total_seconds())
+    se.status = 'Ongoing' if se.is_active() else 'Completed'
+    se.shortened_node_key = helpers.shorten_node_key(se.node_key)
+
 
 def get_sessions(node_key=None, limit=None):
     if node_key:
         sessions = models.Session.query.filter(
-            models.Session.node_key==node_key
+            models.Session.node_key == node_key
         )
     else:
         sessions = models.Session.query

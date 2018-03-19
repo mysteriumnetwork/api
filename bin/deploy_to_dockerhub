@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -e
+
+tag=$1
+username=$2
+password=$3
+
+docker login -u "$username" -p "$password"
+bin/api_package_docker "$tag"
+bin/dashboard_package_docker "$tag"
