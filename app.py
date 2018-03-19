@@ -188,10 +188,11 @@ def session_stats_create(session_key, caller_identity):
 
     session = Session.query.get(session_key)
     if session is None:
+        consumer_country = payload.get('consumer_country', '')
         session = Session(session_key)
         ip = request.remote_addr
         session.client_ip = mask_ip_partially(ip)
-        session.client_country = detect_country(ip) or ''
+        session.client_country = consumer_country
         session.consumer_id = caller_identity
         session.node_key = provider_id
 
