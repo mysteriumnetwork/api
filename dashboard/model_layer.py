@@ -173,6 +173,7 @@ def enrich_session_info(se):
     se.started = humanize.naturaltime(session_time.total_seconds())
     se.status = 'Ongoing' if se.is_active() else 'Completed'
     se.shortened_node_key = helpers.shorten_node_key(se.node_key)
+    se.client_country_string = se.client_country if se.client_country else 'N/A'
 
 
 def get_sessions(node_key=None, limit=None):
