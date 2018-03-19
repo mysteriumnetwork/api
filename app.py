@@ -4,7 +4,7 @@ from flask_migrate import Migrate
 from werkzeug.debug import get_current_traceback
 from functools import wraps
 
-from ip import detect_country, mask_ip_partially
+from ip import mask_ip_partially
 from models import db, Node, Session, NodeAvailability, Identity
 from datetime import datetime
 import json
