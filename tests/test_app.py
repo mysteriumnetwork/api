@@ -171,7 +171,7 @@ class TestApi(TestCase):
         self.assertEqual('country', session.client_country)
         self.assertEqual('0x1', session.node_key)
 
-    def test_session_stats_without_consumer_country(self):
+    def test_session_stats_without_session_record_and_consumer_country(self):
         payload = {
             'bytes_sent': 20,
             'bytes_received': 40,
