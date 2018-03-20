@@ -150,6 +150,7 @@ class TestApi(TestCase):
             'bytes_sent': 20,
             'bytes_received': 40,
             'provider_id': '0x1',
+            'consumer_country': 'country'
         }
         auth = generate_test_authorization(json.dumps(payload))
         re = self._post(
@@ -167,8 +168,26 @@ class TestApi(TestCase):
         self.assertIsNotNone(session.client_updated_at)
         self.assertEqual(auth['public_address'], session.consumer_id)
         self.assertEqual('8.8.8.X', session.client_ip)
-        self.assertEqual('US', session.client_country)
+        self.assertEqual('country', session.client_country)
         self.assertEqual('0x1', session.node_key)
+
+    def test_session_stats_without_session_record_and_consumer_country(self):
+        payload = {
+            'bytes_sent': 20,
+            'bytes_received': 40,
+            'provider_id': '0x1',
+        }
+        auth = generate_test_authorization(json.dumps(payload))
+        re = self._post(
+            '/v1/sessions/123/stats',
+            payload,
+            headers=auth['headers'],
+        )
+
+        self.assertEqual(200, re.status_code)
+        self.assertEqual({}, re.json)
+        session = Session.query.get('123')
+        self.assertEqual('', session.client_country)
 
     def test_session_stats_create_without_session_record_with_unknown_ip(self):
         payload = {
