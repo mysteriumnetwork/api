@@ -150,7 +150,7 @@ class TestApi(TestCase):
             'bytes_sent': 20,
             'bytes_received': 40,
             'provider_id': '0x1',
-            "consumer_country": "country"
+            'consumer_country': 'country'
         }
         auth = generate_test_authorization(json.dumps(payload))
         re = self._post(
