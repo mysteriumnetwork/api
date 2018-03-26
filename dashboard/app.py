@@ -1,7 +1,8 @@
 import sys
 from os import path
-sys.path.append(path.dirname(path.abspath(__file__)))  # noqa
-sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))  # noqa
+dashboard_path = path.dirname(path.dirname(path.abspath(__file__)))  # noqa
+sys.path.append(path.dirname(dashboard_path))  # noqa
+sys.path.append(dashboard_path)  # noqa
 from flask import Flask, render_template
 from dashboard import model_layer
 from werkzeug.contrib.cache import SimpleCache
