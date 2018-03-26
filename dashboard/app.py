@@ -1,10 +1,14 @@
+import sys
+from os import path
+sys.path.append(path.dirname(path.abspath(__file__)))  # noqa
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))  # noqa
 from flask import Flask, render_template
 from dashboard import model_layer
 from werkzeug.contrib.cache import SimpleCache
 import settings
 
 app = Flask(__name__)
-model_layer.db.init_app(app)
+model_layer.get_db().init_app(app)
 
 cache = SimpleCache()
 

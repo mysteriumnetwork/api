@@ -1,6 +1,8 @@
 from flask_testing import TestCase
 from dashboard.app import app
-from dashboard.model_layer import db
+from dashboard import model_layer
+
+db = model_layer.get_db()
 
 
 class TestCase(TestCase):
