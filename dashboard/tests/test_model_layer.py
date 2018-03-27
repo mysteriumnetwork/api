@@ -22,6 +22,7 @@ class TestModelLayer(TestCase):
         db.session.add(s2)
 
         results = model_layer.get_sessions_country_stats()
+        self.assertEqual(2, len(results))
         self.assertEqual(2, results[0].count)
         self.assertEqual('country', results[0].client_country)
         self.assertEqual(1, results[1].count)
