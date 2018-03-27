@@ -10,16 +10,9 @@ class TestModelLayer(TestCase):
         self.assertEqual(models.db, db)
 
     def test_get_sessions_country_stats(self):
-        db = model_layer.get_db()
-        s1 = models.Session('1')
-        s1.client_country = 'country'
-        db.session.add(s1)
-        s2 = models.Session('2')
-        s2.client_country = 'country'
-        db.session.add(s2)
-        s2 = models.Session('3')
-        s2.client_country = None
-        db.session.add(s2)
+        self._create_session(1, 'country')
+        self._create_session(2, 'country')
+        self._create_session(3, None)
 
         results = model_layer.get_sessions_country_stats()
         self.assertEqual(2, len(results))
@@ -27,3 +20,9 @@ class TestModelLayer(TestCase):
         self.assertEqual('country', results[0].client_country)
         self.assertEqual(1, results[1].count)
         self.assertEqual(None, results[1].client_country)
+
+    @staticmethod
+    def _create_session(session_key, country):
+        session = models.Session(session_key)
+        session.client_country = country
+        model_layer.get_db().session.add(session)
