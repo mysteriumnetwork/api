@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+    <div class="clearfix"></div>
+
+    <div class="row">
+      <div class="col-md-6 col-sm-6 col-xs-12">
+        <div class="x_panel">
+          <div class="x_title">
+            <h2>Sessions per Country</h2>
+            <ul class="nav navbar-right panel_toolbox">
+              <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+              </li>
+              <li><a class="close-link"><i class="fa fa-close"></i></a>
+              </li>
+            </ul>
+            <div class="clearfix"></div>
+          </div>
+          <div class="x_content">
+
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Country</th>
+                  <th>Sessions</th>
+                </tr>
+              </thead>
+              <tbody>
+
+              {% for st in stats %}
+              <tr>
+                <td>{{st.client_country}}</td>
+                <td>{{st.count}}</td>
+              </tr>
+              {% endfor %}
+
+              </tbody>
+            </table>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+{% endblock %}

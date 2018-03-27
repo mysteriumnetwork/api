@@ -90,5 +90,15 @@ def sessions():
     )
 
 
+@app.route('/sessions-country')
+def sessions_country():
+    results = model_layer.get_sessions_country_stats()
+
+    return render_template(
+        'sessions-country.html',
+        stats=results
+    )
+
+
 if __name__ == '__main__':
     app.run(debug=True)

@@ -3,6 +3,7 @@ from queries import filter_active_sessions, filter_active_nodes
 from datetime import datetime, timedelta
 import humanize
 import dashboard.helpers as helpers
+from sqlalchemy import func, desc
 
 
 def get_db():
@@ -201,3 +202,12 @@ def get_session_info(session_key):
     se = models.Session.query.get(session_key)
     enrich_session_info(se)
     return se
+
+
+def get_sessions_country_stats():
+    results = db.session.query(
+        models.Session.client_country,
+        func.count(models.Session.session_key).label('count')
+    ).group_by(models.Session.client_country).order_by(desc('count')).all()
+
+    return results
