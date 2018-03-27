@@ -205,7 +205,7 @@ def get_session_info(session_key):
 
 
 def get_sessions_country_stats():
-    results = db.session.query(
+    results = get_db().session.query(
         models.Session.client_country,
         func.count(models.Session.session_key).label('count')
     ).group_by(models.Session.client_country).order_by(desc('count')).all()
