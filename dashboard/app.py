@@ -4,7 +4,7 @@ from werkzeug.contrib.cache import SimpleCache
 import settings
 
 app = Flask(__name__)
-model_layer.db.init_app(app)
+model_layer.get_db().init_app(app)
 
 cache = SimpleCache()
 
