@@ -1,6 +1,7 @@
 import sys
 from os import path
-sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))  # noqa
+api_path = path.dirname(path.dirname(path.abspath(__file__)))  # noqa
+sys.path.append(api_path)  # noqa
 
 from tornado.wsgi import WSGIContainer
 from tornado.httpserver import HTTPServer
