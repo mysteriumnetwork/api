@@ -135,7 +135,7 @@ def get_node_info(node_key):
         total_bytes += se.client_bytes_sent
         total_bytes += se.client_bytes_received
 
-    node.data_transferred = '{0:.1f}'.format(total_bytes)
+    node.data_transferred = helpers.get_natural_size(total_bytes)
     node.sessions_count = get_sessions_count(node_key)
 
     availability = []
