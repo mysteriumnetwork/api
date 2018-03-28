@@ -68,7 +68,7 @@ def get_country_string(country):
 
 
 def get_nodes(limit=None):
-    nodes = models.Node.query
+    nodes = models.Node.query.order_by(models.Node.updated_at.desc())
 
     if limit:
         nodes = nodes.limit(limit)
