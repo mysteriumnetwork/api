@@ -42,14 +42,14 @@ def get_average_session_time():
     total_seconds = 0
 
     for se in sessions:
-        if se.node_updated_at:
-            delta = se.node_updated_at - se.created_at
+        updated_at = se.node_updated_at or se.client_updated_at
+        if updated_at:
+            delta = updated_at - se.created_at
             total_seconds += delta.total_seconds()
             count += 1
 
     average_seconds = total_seconds / count if count != 0 else 0
-
-    minutes = (average_seconds % 3600) // 60
+    minutes = average_seconds / 60
     return '{0:.0f}'.format(minutes)
 
 
