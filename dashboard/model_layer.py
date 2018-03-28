@@ -42,14 +42,14 @@ def get_average_session_time():
     total_seconds = 0
 
     for se in sessions:
-        if se.node_updated_at:
-            delta = se.node_updated_at - se.created_at
+        updated_at = se.node_updated_at or se.client_updated_at
+        if updated_at:
+            delta = updated_at - se.created_at
             total_seconds += delta.total_seconds()
             count += 1
 
     average_seconds = total_seconds / count if count != 0 else 0
-
-    minutes = (average_seconds % 3600) // 60
+    minutes = average_seconds / 60
     return '{0:.0f}'.format(minutes)
 
 
@@ -60,7 +60,7 @@ def get_total_data_transferred():
     for se in sessions:
         total_bytes += se.client_bytes_sent
         total_bytes += se.client_bytes_received
-    return '{0:.1f}'.format(total_bytes / 1024.0 / 1024.0)
+    return helpers.get_natural_size(total_bytes)
 
 
 def get_country_string(country):
@@ -128,14 +128,14 @@ def get_node_info(node_key):
     node.country_string = get_country_string(
         node.get_country_from_service_proposal()
     )
-    node.sessions = get_sessions(node_key=node_key)
+    node.sessions = get_sessions(node_key=node_key, limit=10)
 
     total_bytes = 0
     for se in node.sessions:
         total_bytes += se.client_bytes_sent
         total_bytes += se.client_bytes_received
 
-    node.data_transferred = '{0:.1f}'.format(total_bytes)
+    node.data_transferred = helpers.get_natural_size(total_bytes)
     node.sessions_count = get_sessions_count(node_key)
 
     availability = []
