@@ -128,7 +128,7 @@ def get_node_info(node_key):
     node.country_string = get_country_string(
         node.get_country_from_service_proposal()
     )
-    node.sessions = get_sessions(node_key=node_key)
+    node.sessions = get_sessions(node_key=node_key, limit=10)
 
     total_bytes = 0
     for se in node.sessions:
