@@ -23,7 +23,6 @@ def main():
             sessions_count=model_layer.get_sessions_count(),
             average_session_time=model_layer.get_average_session_time(),
             total_data_transferred=model_layer.get_total_data_transferred(),
-            nodes=model_layer.get_nodes(limit=10),
             available_nodes=model_layer.get_available_nodes(limit=10),
             sessions=model_layer.get_sessions(limit=10),
         )
