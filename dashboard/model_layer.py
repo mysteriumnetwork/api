@@ -60,7 +60,7 @@ def get_total_data_transferred():
     for se in sessions:
         total_bytes += se.client_bytes_sent
         total_bytes += se.client_bytes_received
-    return '{0:.1f}'.format(total_bytes / 1024.0 / 1024.0)
+    return helpers.get_natural_size(total_bytes)
 
 
 def get_country_string(country):
