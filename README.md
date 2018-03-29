@@ -1,7 +1,7 @@
 # Mysterium Network API
 
 [![Build Status](https://travis-ci.org/MysteriumNetwork/api.svg?branch=master)](https://travis-ci.org/MysteriumNetwork/api)
-[![pyVersion27](https://img.shields.io/badge/python-2.7-blue.svg)](https://www.python.org/download/releases/2.7/)
+[![pyVersion36](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/)
 
 API for Node & Client
 
@@ -16,7 +16,7 @@ docker-compose up -d
 
 - Run database migrations:
 ```bash
-docker-compose exec api bin/db-migrate
+docker-compose exec api bin/db-upgrade
 ```
 
 - Service should be running on http://127.0.0.1:8001/
