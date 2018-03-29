@@ -99,6 +99,42 @@ class TestApi(TestCase):
         self.assertEqual(400, re.status_code)
         self.assertEqual({"error": 'payload must be a valid json'}, re.json)
 
+    def test_unregister_proposal_successful(self):
+        public_address = generate_static_public_address()
+        payload = {
+            "service_proposal": {
+                "id": 1,
+                "format": "service-proposal/v1",
+                "provider_id": public_address,
+            }
+        }
+
+        auth = generate_test_authorization(json.dumps(payload))
+        re = self._post(
+            '/v1/register_proposal',
+            payload,
+            headers=auth['headers'])
+        self.assertEqual(200, re.status_code)
+        self.assertIsNotNone(re.json)
+
+        node = Node.query.get(public_address)
+        self.assertEqual(self.REMOTE_ADDR, node.ip)
+
+        # unregister
+        payload = {
+            "provider_id": public_address
+        }
+        auth = generate_test_authorization(json.dumps(payload))
+        e = self._post(
+            '/v1/unregister_proposal',
+            payload,
+            headers=auth['headers'])
+        self.assertEqual(200, re.status_code)
+        self.assertIsNotNone(re.json)
+
+        node = Node.query.get(public_address)
+        self.assertIsNone(node)
+
     def test_proposals(self):
         node1 = self._create_node("node1")
         node1.mark_activity()

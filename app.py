@@ -148,6 +148,31 @@ def register_proposal(caller_identity):
     return jsonify({})
 
 
+@app.route('/v1/unregister_proposal', methods=['POST'])
+@restrict_by_ip
+@validate_json
+@recover_identity
+def unregister_proposal(caller_identity):
+    payload = request.get_json(force=True)
+
+    node_key = payload.get('provider_id', None)
+    if node_key is None:
+        return jsonify(error='missing provider_id'), 400
+
+    if node_key.lower() != caller_identity:
+        message = 'provider_id does not match current identity'
+        return jsonify(error=message), 403
+
+    node = Node.query.get(node_key)
+    if not node:
+        return jsonify({})
+
+    db.session.delete(node)
+    db.session.commit()
+
+    return jsonify({})
+
+
 @app.route('/v1/proposals', methods=['GET'])
 def proposals():
     nodes = filter_active_nodes()
