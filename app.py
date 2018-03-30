@@ -165,7 +165,7 @@ def unregister_proposal(caller_identity):
 
     node = Node.query.get(node_key)
     if not node:
-        return jsonify({})
+        return jsonify({}), 404
 
     node.mark_inactive()
     db.session.commit()
