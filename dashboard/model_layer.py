@@ -68,7 +68,7 @@ def get_country_string(country):
 
 
 def get_nodes(limit=None):
-    nodes = models.Node.query
+    nodes = models.Node.query.order_by(models.Node.updated_at.desc())
 
     if limit:
         nodes = nodes.limit(limit)
@@ -100,7 +100,8 @@ def get_available_nodes(limit=None):
             node.get_country_from_service_proposal()
         )
         node.sessions_count = get_sessions_count(node_key=node.node_key)
-        node.uptime = 'N/A'
+        delta = datetime.utcnow() - node.updated_at
+        node.last_seen = humanize.naturaltime(delta.total_seconds())
     return nodes
 
 
