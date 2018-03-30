@@ -30,6 +30,9 @@ class Node(db.Model):
     def mark_activity(self):
         self.updated_at = datetime.utcnow()
 
+    def mark_inactive(self):
+        self.updated_at = None
+
     def get_service_proposals(self):
         try:
             proposal = json.loads(self.proposal)
