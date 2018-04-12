@@ -16,7 +16,7 @@ docker-compose up -d
 
 - Run database migrations:
 ```bash
-docker-compose exec api bin/db-migrate
+docker-compose exec api bin/db-upgrade
 ```
 
 - Service should be running on http://127.0.0.1:8001/
