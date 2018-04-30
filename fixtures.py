@@ -15,7 +15,10 @@ def create_fixtures():
 
 
 def _create_node():
-    return Node("test node")
+    node = Node("test node")
+    node.updated_at = datetime.utcnow()
+    node.proposal = '{}'
+    return node
 
 
 def _create_session(node):
