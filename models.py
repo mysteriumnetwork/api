@@ -31,7 +31,7 @@ class Node(db.Model):
         self.updated_at = datetime.utcnow()
 
     def mark_inactive(self):
-        #TODO this is bad, need a good way to save unregistered node state
+        # TODO this is bad, need a good way to save unregistered node state
         self.updated_at = datetime.utcnow() - AVAILABILITY_TIMEOUT
 
     def get_service_proposals(self):
