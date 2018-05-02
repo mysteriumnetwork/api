@@ -30,6 +30,10 @@ class Node(db.Model):
     def mark_activity(self):
         self.updated_at = datetime.utcnow()
 
+    def mark_inactive(self):
+        # TODO this is bad, need a good way to save unregistered node state
+        self.updated_at = datetime.utcnow() - AVAILABILITY_TIMEOUT
+
     def get_service_proposals(self):
         try:
             proposal = json.loads(self.proposal)

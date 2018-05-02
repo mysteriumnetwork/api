@@ -99,6 +99,56 @@ class TestApi(TestCase):
         self.assertEqual(400, re.status_code)
         self.assertEqual({"error": 'payload must be a valid json'}, re.json)
 
+    def test_unregister_proposal_successful(self):
+        public_address = generate_static_public_address()
+        node = self._create_node(public_address)
+        node.mark_activity()
+        self.assertTrue(node.is_active())
+
+        # unregister
+        payload = {
+            "provider_id": public_address
+        }
+        auth = generate_test_authorization(json.dumps(payload))
+        re = self._post(
+            '/v1/unregister_proposal',
+            payload,
+            headers=auth['headers'])
+        self.assertEqual(200, re.status_code)
+        self.assertIsNotNone(re.json)
+
+        self.assertFalse(node.is_active())
+
+    def test_unregister_proposal_missing_provider(self):
+        # unregister
+        payload = {
+
+        }
+        auth = generate_test_authorization(json.dumps(payload))
+        re = self._post(
+            '/v1/unregister_proposal',
+            payload,
+            headers=auth['headers'])
+        self.assertEqual(400, re.status_code)
+        self.assertEqual({"error": 'missing provider_id'}, re.json)
+
+    def test_unregister_proposal_unauthorized(self):
+        payload = {
+            "provider_id": "incorrect"
+        }
+
+        auth = generate_test_authorization(json.dumps(payload))
+        re = self._post(
+            '/v1/unregister_proposal',
+            payload,
+            headers=auth['headers'])
+        self.assertEqual(403, re.status_code)
+        self.assertIsNotNone(re.json)
+        self.assertEqual(
+            {'error': 'provider_id does not match current identity'},
+            re.json
+        )
+
     def test_proposals(self):
         node1 = self._create_node("node1")
         node1.mark_activity()
