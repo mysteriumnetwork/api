@@ -17,21 +17,29 @@ if [ -z "$VERSION" ]; then
 fi
 
 DOCKER_IMAGE="mysteriumnetwork/mysterium-dashboard"
-DOCKER_TAG=$2
-if [ -z "$DOCKER_TAG" ]; then
-    DOCKER_TAG=$VERSION
-fi
 
-printf "Building Docker image '$DOCKER_IMAGE:$DOCKER_TAG' ..\n" \
+printf "Building Docker image '$DOCKER_IMAGE:$VERSION' ..\n" \
     && docker build \
-        --file Dockerfile.dashboard \
-        --tag $DOCKER_IMAGE:$DOCKER_TAG \
+        --file Dockerfile \
+        --tag $DOCKER_IMAGE:$VERSION \
         . \
-    && docker push $DOCKER_IMAGE:$DOCKER_TAG
+    && docker push $DOCKER_IMAGE:$VERSION
+
 if [ $? -ne 0 ] ; then
     printf "\e[0;31m%s\e[0m\n" "Failed to build Docker image!"
     exit 1
 fi
+
+printf "\e[0;32m%s\e[0m\n" "Docker image building process complete!"
+
+shift
+while test $# -gt 0; do
+    DOCKER_TAG=$1
+    printf "Publishing version '$DOCKER_TAG' image..\n" \
+        && docker tag $DOCKER_IMAGE:$VERSION $DOCKER_IMAGE:$DOCKER_TAG \
+        && docker push $DOCKER_IMAGE:$DOCKER_TAG
+    shift
+done
 
 printf "\e[0;32m%s\e[0m\n" "Docker image building process complete!"
 exit 0
