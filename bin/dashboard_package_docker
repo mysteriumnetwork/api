@@ -20,7 +20,7 @@ DOCKER_IMAGE="mysteriumnetwork/mysterium-dashboard"
 
 printf "Building Docker image '$DOCKER_IMAGE:$VERSION' ..\n" \
     && docker build \
-        --file Dockerfile \
+        --file Dockerfile.dashboard \
         --tag $DOCKER_IMAGE:$VERSION \
         . \
     && docker push $DOCKER_IMAGE:$VERSION
