@@ -19,6 +19,8 @@ from signature import (
 import base64
 import settings
 
+from identity_contract import IdentityContract
+
 
 helpers.setup_logger()
 app = Flask(__name__)
@@ -26,6 +28,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://{}:{}@{}/{}'.format(
     settings.USER, settings.PASSWD, settings.DB_HOST, settings.DB_NAME)
 
 migrate = Migrate(app, db)
+
+identity_contract = IdentityContract(settings.ETHER_PROVIDER_ENDPOINT_URI, settings.IDENTITY_CONTRACT)
 
 
 def is_json_dict(data):
@@ -121,6 +125,9 @@ def home():
 @validate_json
 @recover_identity
 def register_proposal(caller_identity):
+    if not identity_contract.is_registered(caller_identity):
+        return jsonify(error='identity is not registered'), 401
+
     payload = request.get_json(force=True)
 
     proposal = payload.get('service_proposal', None)
