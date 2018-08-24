@@ -115,7 +115,7 @@ class TestApi(TestCase):
             '/v1/register_proposal',
             payload,
             headers=auth['headers'])
-        self.assertEqual(401, re.status_code)
+        self.assertEqual(403, re.status_code)
         self.assertEqual(
             {'error': 'identity is not registered'},
             re.json

@@ -129,7 +129,7 @@ def home():
 @recover_identity
 def register_proposal(caller_identity):
     if not identity_contract.is_registered(caller_identity):
-        return jsonify(error='identity is not registered'), 401
+        return jsonify(error='identity is not registered'), 403
 
     payload = request.get_json(force=True)
 
