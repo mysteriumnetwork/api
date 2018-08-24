@@ -27,4 +27,3 @@ class IdentityContractFake:
 
     def is_registered(self, identity):
         return self.registered
-

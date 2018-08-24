@@ -19,5 +19,8 @@ ALLOWED_IP_ADDRESSES = (
     os.environ.get('ALLOWED_IP_ADDRESSES') or ''
 ).split(',')
 
-ETHER_PROVIDER_ENDPOINT_URI = os.environ.get('ETHER_PROVIDER_ENDPOINT_URI') or 'https://ropsten.infura.io/'
-IDENTITY_CONTRACT = os.environ.get('IDENTITY_CONTRACT') or '0xbe5F9CCea12Df756bF4a5Baf4c29A10c3ee7C83B'
+ETHER_PROVIDER_ENDPOINT_URI = os.environ.get('ETHER_PROVIDER_ENDPOINT_URI') \
+                              or 'https://ropsten.infura.io/'
+
+IDENTITY_CONTRACT = os.environ.get('IDENTITY_CONTRACT') \
+                    or '0xbe5F9CCea12Df756bF4a5Baf4c29A10c3ee7C83B'

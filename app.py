@@ -29,7 +29,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://{}:{}@{}/{}'.format(
 
 migrate = Migrate(app, db)
 
-identity_contract = IdentityContract(settings.ETHER_PROVIDER_ENDPOINT_URI, settings.IDENTITY_CONTRACT)
+identity_contract = IdentityContract(
+    settings.ETHER_PROVIDER_ENDPOINT_URI,
+    settings.IDENTITY_CONTRACT
+)
 
 
 def is_json_dict(data):

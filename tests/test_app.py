@@ -12,6 +12,7 @@ from tests.utils import (
 )
 from identity_contract import IdentityContractFake
 
+
 class TestApi(TestCase):
     REMOTE_ADDR = '8.8.8.8'
 
