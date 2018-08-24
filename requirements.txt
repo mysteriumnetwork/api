@@ -4,7 +4,6 @@ Flask-Testing==0.7.1
 PyMySQL
 Flask-Migrate
 pycodestyle==2.3.1
-humanize==0.5.1
 eth-keys==0.2.0b3
 eth-hash[pycryptodome]==0.1.0
 eth-utils==1.2.0
