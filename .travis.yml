@@ -14,7 +14,12 @@ script:
 
 deploy:
   - provider: script
-    script: bash bin/deploy_to_dockerhub "$TRAVIS_TAG" "$DOCKER_USERNAME" "$DOCKER_PASSWORD"
+    script: bash bin/deploy_to_dockerhub dev
+    on:
+      tags: false
+      branch: master
+  - provider: script
+    script: bash bin/deploy_to_dockerhub "$TRAVIS_TAG" latest
     on:
       tags: true
       branch: master
