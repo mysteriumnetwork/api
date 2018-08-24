@@ -63,8 +63,7 @@ class TestAuthorizationHeader(TestCase):
         with self.assertRaises(ValueError) as err:
             decode_authorization_header(headers)
         self.assertEqual(
-            'signature must be base64 encoded: Invalid base64-encoded string:'
-            ' length cannot be 1 more than a multiple of 4',
+            'signature must be base64 encoded: Incorrect padding',
             str(err.exception)
         )
 
