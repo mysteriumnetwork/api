@@ -4,12 +4,13 @@ import json
 from datetime import datetime, timedelta
 
 from models import Session, Node, AVAILABILITY_TIMEOUT
-from tests.test_case import TestCase, db
+from tests.test_case import TestCase, main
 from tests.utils import (
     generate_test_authorization,
     generate_static_public_address,
     setting
 )
+from identity_contract import IdentityContractFake
 
 
 class TestApi(TestCase):
@@ -24,8 +25,8 @@ class TestApi(TestCase):
                 "provider_id": public_address,
             }
         }
-
         auth = generate_test_authorization(json.dumps(payload))
+        main.identity_contract = IdentityContractFake(True)
         re = self._post(
             '/v1/register_proposal',
             payload,
@@ -99,6 +100,27 @@ class TestApi(TestCase):
         self.assertEqual(400, re.status_code)
         self.assertEqual({"error": 'payload must be a valid json'}, re.json)
 
+    def test_register_proposal_with_unregistered_identity(self):
+        public_address = generate_static_public_address()
+        payload = {
+            "service_proposal": {
+                "id": 1,
+                "format": "service-proposal/v1",
+                "provider_id": public_address,
+            }
+        }
+        auth = generate_test_authorization(json.dumps(payload))
+        main.identity_contract = IdentityContractFake(False)
+        re = self._post(
+            '/v1/register_proposal',
+            payload,
+            headers=auth['headers'])
+        self.assertEqual(403, re.status_code)
+        self.assertEqual(
+            {'error': 'identity is not registered'},
+            re.json
+        )
+
     def test_unregister_proposal_successful(self):
         public_address = generate_static_public_address()
         node = self._create_node(public_address)
@@ -161,7 +183,7 @@ class TestApi(TestCase):
         timeout_delta = AVAILABILITY_TIMEOUT + timedelta(minutes=1)
         node3.updated_at = datetime.utcnow() - timeout_delta
 
-        db.session.commit()
+        main.db.session.commit()
 
         re = self._get('/v1/proposals')
         self.assertEqual(200, re.status_code)
@@ -173,7 +195,7 @@ class TestApi(TestCase):
     def test_proposals_filtering(self):
         node = self._create_sample_node()
         node.mark_activity()
-        db.session.commit()
+        main.db.session.commit()
 
         re = self._get('/v1/proposals', {'node_key': 'node1'})
 
@@ -275,8 +297,8 @@ class TestApi(TestCase):
 
         session = Session('123')
         session.consumer_id = auth['public_address']
-        db.session.add(session)
-        db.session.commit()
+        main.db.session.add(session)
+        main.db.session.commit()
 
         re = self._post(
             '/v1/sessions/123/stats',
@@ -295,8 +317,8 @@ class TestApi(TestCase):
     def test_session_stats_create_with_different_consumer_id(self):
         session = Session('123')
         session.consumer_id = 'different'
-        db.session.add(session)
-        db.session.commit()
+        main.db.session.add(session)
+        main.db.session.commit()
 
         payload = {
             'bytes_sent': 20,
@@ -510,7 +532,7 @@ class TestApi(TestCase):
             "format": "service-proposal/v1",
             "provider_id": node_key,
         })
-        db.session.add(node)
+        main.db.session.add(node)
         return node
 
 

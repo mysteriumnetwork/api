@@ -7,3 +7,5 @@ Flask-Migrate
 eth-keys==0.2.0b3
 eth-hash[pycryptodome]==0.1.0
 pycodestyle==2.4.0
+eth-utils==1.2.0
+web3==4.5.0

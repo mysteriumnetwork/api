@@ -1,5 +1,5 @@
 import unittest
-from tests.test_case import TestCase, db
+from tests.test_case import TestCase, main
 from tests.utils import generate_test_authorization
 from models import Identity
 
@@ -21,7 +21,7 @@ class TestSaveIdentity(TestCase):
         auth = generate_test_authorization()
 
         identity_record = Identity(auth['public_address'])
-        db.session.add(identity_record)
+        main.db.session.add(identity_record)
 
         re = self.client.post(
             '/v1/identities',
