@@ -19,8 +19,12 @@ ALLOWED_IP_ADDRESSES = (
     os.environ.get('ALLOWED_IP_ADDRESSES') or ''
 ).split(',')
 
-ETHER_PROVIDER_ENDPOINT_URI = os.environ.get('ETHER_PROVIDER_ENDPOINT_URI') \
+ETHER_RPC_URL = os.environ.get('ETHER_RPC_URL') \
                               or 'https://ropsten.infura.io/'
+
+ETHER_MINING_MODE = os.environ.get('ETHER_MINING_MODE') or 'pow'
+if ETHER_MINING_MODE not in ['pow', 'poa']:
+    raise Exception('Not supported ether mining mode')
 
 IDENTITY_CONTRACT = os.environ.get('IDENTITY_CONTRACT') \
                     or '0xbe5F9CCea12Df756bF4a5Baf4c29A10c3ee7C83B'
