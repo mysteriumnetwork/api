@@ -7,7 +7,9 @@ class IdentityContract:
     web3 = None
     contract = None
 
-    def __init__(self, provider_endpoint_uri, contract_address, mining_mode='pow'):
+    def __init__(self, provider_endpoint_uri, contract_address,
+                 mining_mode='pow'):
+
         self.web3 = Web3(HTTPProvider(provider_endpoint_uri))
 
         if mining_mode == 'poa':
