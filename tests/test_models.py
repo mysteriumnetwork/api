@@ -42,3 +42,19 @@ class TestNode(TestCase):
             "service_definition": {}
         })
         self.assertIsNone(node.get_country_from_service_proposal())
+
+    def test_get_service_proposals_by_type(self):
+        node = Node("key")
+        node.proposal = json.dumps({
+            "id": 1, "format": "service-proposal/v1", "provider_id": "node1"
+        })
+        node.service_type = "openvpn"
+        res = node.get_service_proposals_by_type("openvpn")
+        self.assertEqual(len(res), 1)
+
+        node2 = Node("key")
+        node2.proposal = json.dumps({
+            "id": 1, "format": "service-proposal/v1", "provider_id": "node1"
+        })
+        res = node2.get_service_proposals_by_type("openvpn")
+        self.assertEqual(len(res), 0)

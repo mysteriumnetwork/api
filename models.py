@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 import json
+import enum
 
 
 db = SQLAlchemy()
@@ -19,6 +20,7 @@ class Node(db.Model):
     proposal = db.Column(db.Text)
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
+    service_type = db.Column(db.Text)
 
     def __init__(self, node_key):
         self.node_key = node_key
@@ -40,6 +42,12 @@ class Node(db.Model):
         except ValueError:
             return []
         return [proposal]
+
+    def get_service_proposals_by_type(self, filterType):
+        if self.service_type == filterType:
+            return self.get_service_proposals()
+        else:
+            return []
 
     def get_country_from_service_proposal(self):
         proposals = self.get_service_proposals()
