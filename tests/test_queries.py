@@ -30,23 +30,23 @@ class TestQueries(TestCase):
         self.assertEqual([session1], sessions)
 
     def test_get_active_nodes_by_service_type(self):
-        node1 = Node("node1")
-        node1.mark_activity()
-        node1.service_type = "dummy"
-        db.session.add(node1)
+        dummy_node = Node("node1")
+        dummy_node.mark_activity()
+        dummy_node.service_type = "dummy"
+        db.session.add(dummy_node)
 
-        node2 = Node("node2")
-        db.session.add(node2)
+        no_service_type_node = Node("node2")
+        db.session.add(no_service_type_node)
 
-        node3 = Node("node3")
-        node3.mark_activity()
-        node3.service_type = "openvpn"
-        db.session.add(node3)
+        openvpn_node = Node("node3")
+        openvpn_node.mark_activity()
+        openvpn_node.service_type = "openvpn"
+        db.session.add(openvpn_node)
 
-        nodes = get_active_nodes_by_service_type("dummy").all()
-        self.assertEqual([node1], nodes)
+        dummy_nodes = get_active_nodes_by_service_type("dummy").all()
+        self.assertEqual([dummy_node], dummy_nodes)
 
-        nodes2 = get_active_nodes_by_service_type(
+        openvpn_nodes = get_active_nodes_by_service_type(
             "openvpn"
         ).all()
-        self.assertEqual([node3], nodes2)
+        self.assertEqual([openvpn_node], openvpn_nodes)

@@ -1,5 +1,6 @@
 import unittest
 import json
+import os
 
 from datetime import datetime, timedelta
 
@@ -188,6 +189,39 @@ class TestApi(TestCase):
             {'error': 'identity is not registered'},
             re.json
         )
+
+    def test_register_proposal_with_feature_flag(self):
+        # save the current settings in the env
+        backup = os.getenv('DISCOVERY_VERIFY_IDENTITY', None)
+        os.environ['DISCOVERY_VERIFY_IDENTITY'] = 'false'
+
+        public_address = generate_static_public_address()
+        payload = {
+            "service_proposal": {
+                "id": 1,
+                "format": "service-proposal/v1",
+                "provider_id": public_address,
+                "service_type": "openvpn",
+            }
+        }
+        auth = generate_test_authorization(json.dumps(payload))
+        re = self._post(
+            '/v1/register_proposal',
+            payload,
+            headers=auth['headers'])
+
+        self.assertEqual(200, re.status_code)
+        self.assertIsNotNone(re.json)
+
+        node = Node.query.get(public_address)
+        self.assertEqual(self.REMOTE_ADDR, node.ip)
+
+        # restore the env settings if backup exists
+        # otherwise remove the env variable
+        if backup is not None:
+            os.environ['DISCOVERY_VERIFY_IDENTITY'] = backup
+        else:
+            del os.environ['DISCOVERY_VERIFY_IDENTITY']
 
     def test_unregister_proposal_successful(self):
         public_address = generate_static_public_address()
@@ -616,6 +650,28 @@ class TestApi(TestCase):
 
         self.assertEqual(200, re.status_code)
         self.assertEqual({}, re.json)
+
+    def test_is_identity_verification_enabled(self):
+        # save the current settings in the env
+        backup = os.getenv('DISCOVERY_VERIFY_IDENTITY', None)
+
+        # with an unset var, we should default to true
+        if backup is not None:
+            del os.environ['DISCOVERY_VERIFY_IDENTITY']
+        self.assertEqual(True, main.is_identity_verification_enabled())
+
+        os.environ['DISCOVERY_VERIFY_IDENTITY'] = 'false'
+        self.assertEqual(False, main.is_identity_verification_enabled())
+
+        os.environ['DISCOVERY_VERIFY_IDENTITY'] = 'true'
+        self.assertEqual(True, main.is_identity_verification_enabled())
+
+        # restore the env settings if backup exists
+        # otherwise remove the env variable
+        if backup is not None:
+            os.environ['DISCOVERY_VERIFY_IDENTITY'] = backup
+        else:
+            del os.environ['DISCOVERY_VERIFY_IDENTITY']
 
     def _get(self, url, params={}):
         return self.client.get(
