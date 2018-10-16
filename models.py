@@ -19,6 +19,7 @@ class Node(db.Model):
     proposal = db.Column(db.Text)
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
+    service_type = db.Column(db.Text)
 
     def __init__(self, node_key):
         self.node_key = node_key

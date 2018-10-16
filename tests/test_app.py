@@ -23,6 +23,7 @@ class TestApi(TestCase):
                 "id": 1,
                 "format": "service-proposal/v1",
                 "provider_id": public_address,
+                "service_type": "openvpn",
             }
         }
         auth = generate_test_authorization(json.dumps(payload))
@@ -37,6 +38,29 @@ class TestApi(TestCase):
         node = Node.query.get(public_address)
         self.assertEqual(self.REMOTE_ADDR, node.ip)
 
+    def test_register_proposal_successful_with_dummy_type(self):
+        public_address = generate_static_public_address()
+        payload = {
+            "service_proposal": {
+                "id": 1,
+                "format": "service-proposal/v1",
+                "provider_id": public_address,
+                "service_type": "dummy",
+            }
+        }
+        auth = generate_test_authorization(json.dumps(payload))
+        main.identity_contract = IdentityContractFake(True)
+        re = self._post(
+            '/v1/register_proposal',
+            payload,
+            headers=auth['headers'])
+        self.assertEqual(200, re.status_code)
+        self.assertIsNotNone(re.json)
+
+        node = Node.query.get(public_address)
+        self.assertEqual(self.REMOTE_ADDR, node.ip)
+        self.assertEqual("dummy", node.service_type)
+
     def test_register_proposal_with_unknown_ip(self):
         public_address = generate_static_public_address()
         payload = {
@@ -44,10 +68,12 @@ class TestApi(TestCase):
                 "id": 1,
                 "format": "service-proposal/v1",
                 "provider_id": public_address,
+                "service_type": "openvpn",
             }
         }
 
         auth = generate_test_authorization(json.dumps(payload))
+        main.identity_contract = IdentityContractFake(True)
         re = self._post(
             '/v1/register_proposal',
             payload,
@@ -66,6 +92,7 @@ class TestApi(TestCase):
                 "id": 1,
                 "format": "service-proposal/v1",
                 "provider_id": "incorrect",
+                "service_type": "openvpn",
             }
         }
 
@@ -77,6 +104,48 @@ class TestApi(TestCase):
         self.assertEqual(403, re.status_code)
         self.assertEqual(
             {'error': 'provider_id does not match current identity'},
+            re.json
+        )
+        self.assertIsNotNone(re.json)
+
+    def test_register_proposal_missing_service_type(self):
+        public_address = generate_static_public_address()
+        payload = {
+            "service_proposal": {
+                "id": 1,
+                "format": "service-proposal/v1",
+                "provider_id": public_address,
+            }
+        }
+        auth = generate_test_authorization(json.dumps(payload))
+        re = self._post(
+            '/v1/register_proposal',
+            payload,
+            headers=auth['headers'])
+        self.assertEqual(400, re.status_code)
+        self.assertEqual(
+            {'error': 'missing service_type'},
+            re.json
+        )
+        self.assertIsNotNone(re.json)
+
+    def test_register_proposal_missing_provider_id(self):
+        payload = {
+            "service_proposal": {
+                "id": 1,
+                "format": "service-proposal/v1",
+                "service_type": "openvpn",
+            }
+        }
+        auth = generate_test_authorization(json.dumps(payload))
+        main.identity_contract = IdentityContractFake(True)
+        re = self._post(
+            '/v1/register_proposal',
+            payload,
+            headers=auth['headers'])
+        self.assertEqual(400, re.status_code)
+        self.assertEqual(
+            {'error': 'missing provider_id'},
             re.json
         )
         self.assertIsNotNone(re.json)
@@ -118,6 +187,31 @@ class TestApi(TestCase):
         self.assertEqual(403, re.status_code)
         self.assertEqual(
             {'error': 'identity is not registered'},
+            re.json
+        )
+
+    def test_register_proposal_with_verification_disabled(self):
+        public_address = generate_static_public_address()
+        payload = {
+            "service_proposal": {
+                "id": 1,
+                "format": "service-proposal/v1",
+                "provider_id": public_address,
+                "service_type": "openvpn",
+            }
+        }
+
+        auth = generate_test_authorization(json.dumps(payload))
+        main.identity_contract = IdentityContractFake(False)
+        with setting('DISCOVERY_VERIFY_IDENTITY', False):
+            re = self._post(
+                '/v1/register_proposal',
+                payload,
+                headers=auth['headers'])
+
+        self.assertEqual(200, re.status_code)
+        self.assertEqual(
+            {},
             re.json
         )
 
@@ -207,6 +301,58 @@ class TestApi(TestCase):
         proposal = proposals[0]
         self.assertIsNotNone(proposal['id'])
         self.assertEqual('node1', proposal['provider_id'])
+
+    def test_proposals_filtering_service_type_openvpn(self):
+        node = self._create_sample_node()
+        node.mark_activity()
+        main.db.session.commit()
+
+        re = self._get('/v1/proposals', {'service_type': 'openvpn'})
+
+        self.assertEqual(200, re.status_code)
+
+        data = json.loads(re.data)
+        proposals = data['proposals']
+        self.assertEqual(1, len(proposals))
+        proposal = proposals[0]
+        self.assertIsNotNone(proposal['id'])
+        self.assertEqual('node1', proposal['provider_id'])
+        self.assertEqual(node.service_type, "openvpn")
+
+    def test_proposals_filtering_service_type_string(self):
+        node = self._create_sample_node()
+        node.mark_activity()
+        main.db.session.commit()
+
+        re = self._get(
+            '/v1/proposals',
+            {'service_type': 'something else entirely'}
+        )
+
+        self.assertEqual(200, re.status_code)
+
+        data = json.loads(re.data)
+        proposals = data['proposals']
+        self.assertEqual(0, len(proposals))
+
+    def test_proposals_filtering_no_service_type(self):
+        node = self._create_sample_node()
+        node.mark_activity()
+        main.db.session.commit()
+
+        re = self._get(
+            '/v1/proposals'
+        )
+
+        self.assertEqual(200, re.status_code)
+
+        data = json.loads(re.data)
+        proposals = data['proposals']
+        self.assertEqual(1, len(proposals))
+        proposal = proposals[0]
+        self.assertIsNotNone(proposal['id'])
+        self.assertEqual('node1', proposal['provider_id'])
+        self.assertEqual(node.service_type, "openvpn")
 
     def test_proposals_with_unknown_node_key(self):
         self._create_sample_node()
@@ -532,6 +678,7 @@ class TestApi(TestCase):
             "format": "service-proposal/v1",
             "provider_id": node_key,
         })
+        node.service_type = "openvpn"
         main.db.session.add(node)
         return node
 

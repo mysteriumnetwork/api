@@ -3,6 +3,7 @@ from datetime import datetime
 from tests.test_case import TestCase
 from models import db, Node, Session
 from queries import filter_active_nodes, filter_active_sessions
+from queries import filter_active_nodes_by_service_type
 
 
 class TestQueries(TestCase):
@@ -27,3 +28,25 @@ class TestQueries(TestCase):
 
         sessions = filter_active_sessions().all()
         self.assertEqual([session1], sessions)
+
+    def test_filter_active_nodes_by_service_type(self):
+        dummy_node = Node("node1")
+        dummy_node.mark_activity()
+        dummy_node.service_type = "dummy"
+        db.session.add(dummy_node)
+
+        no_service_type_node = Node("node2")
+        db.session.add(no_service_type_node)
+
+        openvpn_node = Node("node3")
+        openvpn_node.mark_activity()
+        openvpn_node.service_type = "openvpn"
+        db.session.add(openvpn_node)
+
+        dummy_nodes = filter_active_nodes_by_service_type("dummy").all()
+        self.assertEqual([dummy_node], dummy_nodes)
+
+        openvpn_nodes = filter_active_nodes_by_service_type(
+            "openvpn"
+        ).all()
+        self.assertEqual([openvpn_node], openvpn_nodes)

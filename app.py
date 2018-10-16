@@ -10,8 +10,9 @@ from datetime import datetime
 import json
 import helpers
 import logging
+import os
 
-from queries import filter_active_nodes
+from queries import filter_active_nodes, filter_active_nodes_by_service_type
 from signature import (
     recover_public_address,
     ValidationError as SignatureValidationError
@@ -129,7 +130,8 @@ def home():
 @validate_json
 @recover_identity
 def register_proposal(caller_identity):
-    if not identity_contract.is_registered(caller_identity):
+    if settings.DISCOVERY_VERIFY_IDENTITY and \
+            not identity_contract.is_registered(caller_identity):
         return jsonify(error='identity is not registered'), 403
 
     payload = request.get_json(force=True)
@@ -137,6 +139,10 @@ def register_proposal(caller_identity):
     proposal = payload.get('service_proposal', None)
     if proposal is None:
         return jsonify(error='missing service_proposal'), 400
+
+    service_type = proposal.get('service_type', None)
+    if service_type is None:
+        return jsonify(error='missing service_type'), 400
 
     node_key = proposal.get('provider_id', None)
     if node_key is None:
@@ -152,6 +158,8 @@ def register_proposal(caller_identity):
 
     node.ip = request.remote_addr
     node.proposal = json.dumps(proposal)
+    # add the column to make querying easier
+    node.service_type = service_type
     node.mark_activity()
     db.session.add(node)
     db.session.commit()
@@ -186,7 +194,8 @@ def unregister_proposal(caller_identity):
 
 @app.route('/v1/proposals', methods=['GET'])
 def proposals():
-    nodes = filter_active_nodes()
+    service_type = request.args.get('service_type', 'openvpn')
+    nodes = filter_active_nodes_by_service_type(service_type)
 
     node_key = request.args.get('node_key')
     if node_key:

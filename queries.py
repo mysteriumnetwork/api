@@ -15,3 +15,9 @@ def _filter_active_models(model, column):
     return model.query.filter(
         updated_timestamp >= datetime.utcnow() - AVAILABILITY_TIMEOUT
     )
+
+
+def filter_active_nodes_by_service_type(service_type):
+    return Node.query.filter(
+        getattr(Node, 'updated_at') >= datetime.utcnow() - AVAILABILITY_TIMEOUT
+    ).filter(getattr(Node, 'service_type') == service_type)
