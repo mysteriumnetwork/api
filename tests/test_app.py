@@ -1,6 +1,5 @@
 import unittest
 import json
-import os
 
 from datetime import datetime, timedelta
 
@@ -74,6 +73,7 @@ class TestApi(TestCase):
         }
 
         auth = generate_test_authorization(json.dumps(payload))
+        main.identity_contract = IdentityContractFake(True)
         re = self._post(
             '/v1/register_proposal',
             payload,
@@ -190,11 +190,7 @@ class TestApi(TestCase):
             re.json
         )
 
-    def test_register_proposal_with_feature_flag(self):
-        # save the current settings in the env
-        backup = os.getenv('DISCOVERY_VERIFY_IDENTITY', None)
-        os.environ['DISCOVERY_VERIFY_IDENTITY'] = 'false'
-
+    def test_register_proposal_with_verification_disabled(self):
         public_address = generate_static_public_address()
         payload = {
             "service_proposal": {
@@ -204,24 +200,20 @@ class TestApi(TestCase):
                 "service_type": "openvpn",
             }
         }
+
         auth = generate_test_authorization(json.dumps(payload))
-        re = self._post(
-            '/v1/register_proposal',
-            payload,
-            headers=auth['headers'])
+        main.identity_contract = IdentityContractFake(False)
+        with setting('DISCOVERY_VERIFY_IDENTITY', False):
+            re = self._post(
+                '/v1/register_proposal',
+                payload,
+                headers=auth['headers'])
 
         self.assertEqual(200, re.status_code)
-        self.assertIsNotNone(re.json)
-
-        node = Node.query.get(public_address)
-        self.assertEqual(self.REMOTE_ADDR, node.ip)
-
-        # restore the env settings if backup exists
-        # otherwise remove the env variable
-        if backup is not None:
-            os.environ['DISCOVERY_VERIFY_IDENTITY'] = backup
-        else:
-            del os.environ['DISCOVERY_VERIFY_IDENTITY']
+        self.assertEqual(
+            {},
+            re.json
+        )
 
     def test_unregister_proposal_successful(self):
         public_address = generate_static_public_address()
@@ -310,7 +302,7 @@ class TestApi(TestCase):
         self.assertIsNotNone(proposal['id'])
         self.assertEqual('node1', proposal['provider_id'])
 
-    def test_proposals_filtering_service_type(self):
+    def test_proposals_filtering_service_type_openvpn(self):
         node = self._create_sample_node()
         node.mark_activity()
         main.db.session.commit()
@@ -327,6 +319,11 @@ class TestApi(TestCase):
         self.assertEqual('node1', proposal['provider_id'])
         self.assertEqual(node.service_type, "openvpn")
 
+    def test_proposals_filtering_service_type_string(self):
+        node = self._create_sample_node()
+        node.mark_activity()
+        main.db.session.commit()
+
         re = self._get(
             '/v1/proposals',
             {'service_type': 'something else entirely'}
@@ -337,6 +334,11 @@ class TestApi(TestCase):
         data = json.loads(re.data)
         proposals = data['proposals']
         self.assertEqual(0, len(proposals))
+
+    def test_proposals_filtering_no_service_type(self):
+        node = self._create_sample_node()
+        node.mark_activity()
+        main.db.session.commit()
 
         re = self._get(
             '/v1/proposals'
@@ -650,28 +652,6 @@ class TestApi(TestCase):
 
         self.assertEqual(200, re.status_code)
         self.assertEqual({}, re.json)
-
-    def test_is_identity_verification_enabled(self):
-        # save the current settings in the env
-        backup = os.getenv('DISCOVERY_VERIFY_IDENTITY', None)
-
-        # with an unset var, we should default to true
-        if backup is not None:
-            del os.environ['DISCOVERY_VERIFY_IDENTITY']
-        self.assertEqual(True, main.is_identity_verification_enabled())
-
-        os.environ['DISCOVERY_VERIFY_IDENTITY'] = 'false'
-        self.assertEqual(False, main.is_identity_verification_enabled())
-
-        os.environ['DISCOVERY_VERIFY_IDENTITY'] = 'true'
-        self.assertEqual(True, main.is_identity_verification_enabled())
-
-        # restore the env settings if backup exists
-        # otherwise remove the env variable
-        if backup is not None:
-            os.environ['DISCOVERY_VERIFY_IDENTITY'] = backup
-        else:
-            del os.environ['DISCOVERY_VERIFY_IDENTITY']
 
     def _get(self, url, params={}):
         return self.client.get(

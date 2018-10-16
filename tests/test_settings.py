@@ -46,6 +46,23 @@ class TestSettings(unittest.TestCase):
             str(err.exception)
         )
 
+    @mock.patch.dict(os.environ, {'DISCOVERY_VERIFY_IDENTITY': 'true'})
+    def test_is_identity_verification_enabled(self):
+        import settings
+        importlib.reload(settings)
+        self.assertEqual(True, settings.DISCOVERY_VERIFY_IDENTITY)
+
+    @mock.patch.dict(os.environ, {'DISCOVERY_VERIFY_IDENTITY': 'false'})
+    def test_is_identity_verification_disabled(self):
+        import settings
+        importlib.reload(settings)
+        self.assertEqual(False, settings.DISCOVERY_VERIFY_IDENTITY)
+
+    def test_is_identity_verification_disabled(self):
+        import settings
+        importlib.reload(settings)
+        self.assertEqual(True, settings.DISCOVERY_VERIFY_IDENTITY)
+
 
 if __name__ == '__main__':
     unittest.main()

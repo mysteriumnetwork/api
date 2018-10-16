@@ -12,7 +12,7 @@ import helpers
 import logging
 import os
 
-from queries import filter_active_nodes, get_active_nodes_by_service_type
+from queries import filter_active_nodes, filter_active_nodes_by_service_type
 from signature import (
     recover_public_address,
     ValidationError as SignatureValidationError
@@ -35,13 +35,6 @@ identity_contract = IdentityContract(
     settings.IDENTITY_CONTRACT,
     settings.ETHER_MINING_MODE
 )
-
-
-def is_identity_verification_enabled():
-    value = os.getenv('DISCOVERY_VERIFY_IDENTITY', None)
-    if value is not None:
-        return value.lower() == 'true'
-    return True
 
 
 def is_json_dict(data):
@@ -137,7 +130,7 @@ def home():
 @validate_json
 @recover_identity
 def register_proposal(caller_identity):
-    if is_identity_verification_enabled() and \
+    if settings.DISCOVERY_VERIFY_IDENTITY and \
             not identity_contract.is_registered(caller_identity):
         return jsonify(error='identity is not registered'), 403
 
@@ -202,7 +195,7 @@ def unregister_proposal(caller_identity):
 @app.route('/v1/proposals', methods=['GET'])
 def proposals():
     service_type = request.args.get('service_type', 'openvpn')
-    nodes = get_active_nodes_by_service_type(service_type)
+    nodes = filter_active_nodes_by_service_type(service_type)
 
     node_key = request.args.get('node_key')
     if node_key:

@@ -28,3 +28,7 @@ if ETHER_MINING_MODE not in ['pow', 'poa']:
 
 IDENTITY_CONTRACT = os.environ.get('IDENTITY_CONTRACT') \
                     or '0xbe5F9CCea12Df756bF4a5Baf4c29A10c3ee7C83B'
+
+DISCOVERY_VERIFY_IDENTITY = os.environ.get(
+    'DISCOVERY_VERIFY_IDENTITY', 'true'
+    ).lower() == 'true'
