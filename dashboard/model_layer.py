@@ -1,5 +1,6 @@
 import models
 from queries import filter_active_sessions, filter_active_nodes
+from queries import count_active_nodes
 from datetime import datetime, timedelta
 import humanize
 import dashboard.helpers as helpers
@@ -11,8 +12,10 @@ def get_db():
 
 
 def get_active_nodes_count():
-    count = filter_active_nodes().count()
-    return count
+    count = count_active_nodes().first()
+    if len(count) == 1:
+        return count[0]
+    return 0
 
 
 def get_active_sessions_count(node_key=None):
@@ -23,6 +26,14 @@ def get_active_sessions_count(node_key=None):
 
     count = query.count()
     return count
+
+
+def get_sessions_count_by_service_type(node_key, service_type):
+    query = models.Session.query.filter(
+        models.Session.node_key == node_key,
+        models.Session.service_type == service_type
+    )
+    return query.count()
 
 
 def get_sessions_count(node_key=None):
@@ -79,7 +90,9 @@ def get_nodes(limit=None):
         node.country_string = get_country_string(
             node.get_country_from_service_proposal()
         )
-        node.sessions_count = get_sessions_count(node_key=node.node_key)
+        node.sessions_count = get_sessions_count_by_service_type(
+            node.node_key, node.service_type
+        )
         delta = datetime.utcnow() - node.updated_at
         node.last_seen = humanize.naturaltime(delta.total_seconds())
         node.status = get_node_status(node)
@@ -99,7 +112,9 @@ def get_available_nodes(limit=None):
         node.country_string = get_country_string(
             node.get_country_from_service_proposal()
         )
-        node.sessions_count = get_sessions_count(node_key=node.node_key)
+        node.sessions_count = get_sessions_count_by_service_type(
+            node.node_key, node.service_type
+        )
         delta = datetime.utcnow() - node.updated_at
         node.last_seen = humanize.naturaltime(delta.total_seconds())
     return nodes
@@ -109,10 +124,11 @@ def get_node_status(node):
     return 'Online' if node.is_active() else 'Offline'
 
 
-def get_node_info(node_key):
+def get_node_info(node_key, service_type):
     def get_node_time_online(day):
         records_count = models.NodeAvailability.query.filter(
             models.NodeAvailability.node_key == node_key,
+            models.NodeAvailability.service_type == service_type,
             day <= models.NodeAvailability.date,
             models.NodeAvailability.date < day+timedelta(days=1)
         ).count()
@@ -123,13 +139,17 @@ def get_node_info(node_key):
 
         return round(records_count / 60.0)
 
-    node = models.Node.query.get(node_key)
+    node = models.Node.query.get([node_key, service_type])
     delta = datetime.utcnow() - node.updated_at
     node.last_seen = humanize.naturaltime(delta.total_seconds())
     node.country_string = get_country_string(
         node.get_country_from_service_proposal()
     )
-    node.sessions = get_sessions(node_key=node_key, limit=10)
+    node.sessions = get_sessions(
+        node_key=node_key,
+        service_type=service_type,
+        limit=10
+    )
 
     total_bytes = 0
     for se in node.sessions:
@@ -137,7 +157,10 @@ def get_node_info(node_key):
         total_bytes += se.client_bytes_received
 
     node.data_transferred = helpers.get_natural_size(total_bytes)
-    node.sessions_count = get_sessions_count(node_key)
+    node.sessions_count = get_sessions_count_by_service_type(
+        node_key,
+        service_type
+    )
 
     availability = []
 
@@ -178,10 +201,11 @@ def enrich_session_info(se):
     se.client_country_string = get_country_string(se.client_country)
 
 
-def get_sessions(node_key=None, limit=None):
-    if node_key:
+def get_sessions(node_key=None, service_type=None, limit=None):
+    if node_key and service_type:
         sessions = models.Session.query.filter(
-            models.Session.node_key == node_key
+            models.Session.node_key == node_key,
+            models.Session.service_type == service_type
         )
     else:
         sessions = models.Session.query

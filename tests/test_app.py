@@ -3,7 +3,7 @@ import json
 
 from datetime import datetime, timedelta
 
-from models import Session, Node, AVAILABILITY_TIMEOUT
+from models import Session, Node, NodeAvailability, AVAILABILITY_TIMEOUT
 from tests.test_case import TestCase, main
 from tests.utils import (
     generate_test_authorization,
@@ -35,8 +35,51 @@ class TestApi(TestCase):
         self.assertEqual(200, re.status_code)
         self.assertIsNotNone(re.json)
 
-        node = Node.query.get(public_address)
+        node = Node.query.get([public_address, "openvpn"])
         self.assertEqual(self.REMOTE_ADDR, node.ip)
+
+    def test_register_multiple_proposals_successful(self):
+        public_address = generate_static_public_address()
+        payload = {
+            "service_proposal": {
+                "id": 1,
+                "format": "service-proposal/v1",
+                "provider_id": public_address,
+                "service_type": "openvpn",
+            }
+        }
+        auth = generate_test_authorization(json.dumps(payload))
+        main.identity_contract = IdentityContractFake(True)
+        re = self._post(
+            '/v1/register_proposal',
+            payload,
+            headers=auth['headers'])
+        self.assertEqual(200, re.status_code)
+        self.assertIsNotNone(re.json)
+
+        payload = {
+            "service_proposal": {
+                "id": 1,
+                "format": "service-proposal/v1",
+                "provider_id": public_address,
+                "service_type": "dummy",
+            }
+        }
+
+        auth = generate_test_authorization(json.dumps(payload))
+        main.identity_contract = IdentityContractFake(True)
+        re = self._post(
+            '/v1/register_proposal',
+            payload,
+            headers=auth['headers'])
+        self.assertEqual(200, re.status_code)
+        self.assertIsNotNone(re.json)
+
+        node_openvpn = Node.query.get([public_address, "openvpn"])
+        self.assertIsNotNone(node_openvpn)
+
+        node_dummy = Node.query.get([public_address, "dummy"])
+        self.assertIsNotNone(node_dummy)
 
     def test_register_proposal_successful_with_dummy_type(self):
         public_address = generate_static_public_address()
@@ -57,7 +100,7 @@ class TestApi(TestCase):
         self.assertEqual(200, re.status_code)
         self.assertIsNotNone(re.json)
 
-        node = Node.query.get(public_address)
+        node = Node.query.get([public_address, "dummy"])
         self.assertEqual(self.REMOTE_ADDR, node.ip)
         self.assertEqual("dummy", node.service_type)
 
@@ -83,7 +126,7 @@ class TestApi(TestCase):
         self.assertEqual(200, re.status_code)
         self.assertIsNotNone(re.json)
 
-        node = Node.query.get(public_address)
+        node = Node.query.get([public_address, "openvpn"])
         self.assertEqual('127.0.0.1', node.ip)
 
     def test_register_proposal_unauthorized(self):
@@ -217,7 +260,7 @@ class TestApi(TestCase):
 
     def test_unregister_proposal_successful(self):
         public_address = generate_static_public_address()
-        node = self._create_node(public_address)
+        node = self._create_node(public_address, "openvpn")
         node.mark_activity()
         self.assertTrue(node.is_active())
 
@@ -234,6 +277,32 @@ class TestApi(TestCase):
         self.assertIsNotNone(re.json)
 
         self.assertFalse(node.is_active())
+
+    def test_unregister_proposal_multiple_types(self):
+        public_address = generate_static_public_address()
+        node_openvpn = self._create_node(public_address, "openvpn")
+        node_openvpn.mark_activity()
+        self.assertTrue(node_openvpn.is_active())
+
+        node_dummy = self._create_node(public_address, "dummy")
+        node_dummy.mark_activity()
+        self.assertTrue(node_dummy.is_active())
+
+        # unregister
+        payload = {
+            "provider_id": public_address,
+            "service_type": "dummy",
+        }
+        auth = generate_test_authorization(json.dumps(payload))
+        re = self._post(
+            '/v1/unregister_proposal',
+            payload,
+            headers=auth['headers'])
+        self.assertEqual(200, re.status_code)
+        self.assertIsNotNone(re.json)
+
+        self.assertTrue(node_openvpn.is_active())
+        self.assertFalse(node_dummy.is_active())
 
     def test_unregister_proposal_missing_provider(self):
         # unregister
@@ -266,14 +335,14 @@ class TestApi(TestCase):
         )
 
     def test_proposals(self):
-        node1 = self._create_node("node1")
+        node1 = self._create_node("node1", "openvpn")
         node1.mark_activity()
 
         # node.updated_at == None
-        self._create_node("node2")
+        self._create_node("node2", "openvpn")
 
         #  node.updated_at timeout passed
-        node3 = self._create_node("node3")
+        node3 = self._create_node("node3", "openvpn")
         timeout_delta = AVAILABILITY_TIMEOUT + timedelta(minutes=1)
         node3.updated_at = datetime.utcnow() - timeout_delta
 
@@ -388,6 +457,35 @@ class TestApi(TestCase):
         self.assertEqual('8.8.8.X', session.client_ip)
         self.assertEqual('country', session.client_country)
         self.assertEqual('0x1', session.node_key)
+        self.assertEqual('openvpn', session.service_type)
+
+    def test_session_stats_create_with_type(self):
+        payload = {
+            'bytes_sent': 20,
+            'bytes_received': 40,
+            'provider_id': '0x1',
+            'consumer_country': 'country',
+            'service_type': 'dummy'
+        }
+        auth = generate_test_authorization(json.dumps(payload))
+        re = self._post(
+            '/v1/sessions/123/stats',
+            payload,
+            headers=auth['headers'],
+        )
+
+        self.assertEqual(200, re.status_code)
+        self.assertEqual({}, re.json)
+
+        session = Session.query.get('123')
+        self.assertEqual(20, session.client_bytes_sent)
+        self.assertEqual(40, session.client_bytes_received)
+        self.assertIsNotNone(session.client_updated_at)
+        self.assertEqual(auth['public_address'], session.consumer_id)
+        self.assertEqual('8.8.8.X', session.client_ip)
+        self.assertEqual('country', session.client_country)
+        self.assertEqual('0x1', session.node_key)
+        self.assertEqual('dummy', session.service_type)
 
     def test_session_stats_without_session_record_and_consumer_country(self):
         payload = {
@@ -588,8 +686,65 @@ class TestApi(TestCase):
         payload = {}
         auth = generate_test_authorization(json.dumps(payload))
 
-        self._create_node(auth['public_address'])
+        self._create_node(auth['public_address'], "openvpn")
 
+        re = self._post(
+            '/v1/ping_proposal',
+            payload,
+            headers=auth['headers']
+        )
+        self.assertEqual(200, re.status_code)
+        self.assertEqual({}, re.json)
+        pings = NodeAvailability.query.all()
+        self.assertEqual(pings[0].service_type, "openvpn")
+
+    def test_ping_proposal_with_service_type(self):
+        payload = {'service_type': 'dummy'}
+        auth = generate_test_authorization(json.dumps(payload))
+
+        self._create_node(auth['public_address'], "dummy")
+
+        re = self._post(
+            '/v1/ping_proposal',
+            payload,
+            headers=auth['headers']
+        )
+        self.assertEqual(200, re.status_code)
+        self.assertEqual({}, re.json)
+
+        pings = NodeAvailability.query.all()
+        self.assertEqual(pings[0].service_type, "dummy")
+
+    def test_ping_proposal_no_node_with_service_type(self):
+        payload = {'service_type': 'dummy'}
+        auth = generate_test_authorization(json.dumps(payload))
+
+        self._create_node(auth['public_address'], "openvpn")
+
+        re = self._post(
+            '/v1/ping_proposal',
+            payload,
+            headers=auth['headers']
+        )
+        self.assertEqual(400, re.status_code)
+        self.assertEqual({'error': 'node key not found'}, re.json)
+
+    def test_ping_proposal_with_type(self):
+        payload = {}
+        auth = generate_test_authorization(json.dumps(payload))
+
+        node = self._create_node(auth['public_address'], "dummy")
+
+        re = self._post(
+            '/v1/ping_proposal',
+            payload,
+            headers=auth['headers']
+        )
+        self.assertEqual(400, re.status_code)
+        self.assertEqual({'error': 'node key not found'}, re.json)
+
+        payload = {'service_type': 'dummy'}
+        auth = generate_test_authorization(json.dumps(payload))
         re = self._post(
             '/v1/ping_proposal',
             payload,
@@ -614,7 +769,7 @@ class TestApi(TestCase):
         payload = {}
         auth = generate_test_authorization(json.dumps(payload))
 
-        self._create_node(auth['public_address'])
+        self._create_node(auth['public_address'], "openvpn")
 
         ips = [
             '1.1.1.1',
@@ -635,7 +790,7 @@ class TestApi(TestCase):
         payload = {}
         auth = generate_test_authorization(json.dumps(payload))
 
-        self._create_node(auth['public_address'])
+        self._create_node(auth['public_address'], "openvpn")
 
         ips = [
             '1.1.1.1',
@@ -669,16 +824,15 @@ class TestApi(TestCase):
         )
 
     def _create_sample_node(self):
-        return self._create_node("node1")
+        return self._create_node("node1", "openvpn")
 
-    def _create_node(self, node_key):
-        node = Node(node_key)
+    def _create_node(self, node_key, service_type):
+        node = Node(node_key, service_type)
         node.proposal = json.dumps({
             "id": 1,
             "format": "service-proposal/v1",
             "provider_id": node_key,
         })
-        node.service_type = "openvpn"
         main.db.session.add(node)
         return node
 

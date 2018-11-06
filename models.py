@@ -19,10 +19,11 @@ class Node(db.Model):
     proposal = db.Column(db.Text)
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
-    service_type = db.Column(db.Text)
+    service_type = db.Column(db.String(255), primary_key=True)
 
-    def __init__(self, node_key):
+    def __init__(self, node_key, service_type):
         self.node_key = node_key
+        self.service_type = service_type
         self.created_at = datetime.utcnow()
 
     def is_active(self):
@@ -68,6 +69,7 @@ class Session(db.Model):
     client_ip = db.Column(db.String(45))
     client_country = db.Column(db.String(255))
     established = db.Column(db.Boolean)
+    service_type = db.Column(db.String(255))
 
     def __init__(self, session_key):
         self.session_key = session_key
@@ -87,6 +89,7 @@ class NodeAvailability(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     node_key = db.Column(db.String(IDENTITY_LENGTH_LIMIT))
     date = db.Column(db.DateTime)
+    service_type = db.Column(db.String(255))
 
     def __init__(self, node_key):
         self.node_key = node_key

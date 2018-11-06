@@ -36,9 +36,9 @@ def main():
     return page_content
 
 
-@app.route('/node/<key>')
-def node(key):
-    node = model_layer.get_node_info(key)
+@app.route('/node/<key>/<service_type>')
+def node(key, service_type):
+    node = model_layer.get_node_info(key, service_type)
     return render_template(
         'node.html',
         node=node,
