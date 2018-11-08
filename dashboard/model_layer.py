@@ -1,6 +1,6 @@
 import models
 from queries import filter_active_sessions, filter_active_nodes
-from queries import count_active_nodes
+from queries import get_active_nodes_count_query
 from datetime import datetime, timedelta
 import humanize
 import dashboard.helpers as helpers
@@ -12,7 +12,7 @@ def get_db():
 
 
 def get_active_nodes_count():
-    count = count_active_nodes().first()
+    count = get_active_nodes_count_query().first()
     if len(count) == 1:
         return count[0]
     return 0

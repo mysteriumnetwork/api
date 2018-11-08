@@ -3,7 +3,7 @@ from models import Node, Session, AVAILABILITY_TIMEOUT
 from sqlalchemy import func, distinct
 
 
-def count_active_nodes():
+def get_active_nodes_count_query():
     updated_timestamp = getattr(Node, 'updated_at')
     return Node.query.with_entities(
         func.count(distinct(Node.node_key))
