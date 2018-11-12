@@ -1,5 +1,15 @@
 from datetime import datetime
 from models import Node, Session, AVAILABILITY_TIMEOUT
+from sqlalchemy import func, distinct
+
+
+def get_active_nodes_count_query():
+    updated_timestamp = getattr(Node, 'updated_at')
+    return Node.query.with_entities(
+        func.count(distinct(Node.node_key))
+    ).filter(
+        updated_timestamp >= datetime.utcnow() - AVAILABILITY_TIMEOUT
+    )
 
 
 def filter_active_nodes():

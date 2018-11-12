@@ -42,11 +42,11 @@
                 </li>
                 <li>
                   <span class="name">Node</span>
-                  <span class="value"><a href="/node/{{ session.node_key }}">{{ session.shortened_node_key }}</a></span>
+                  <span class="value"><a href="/node/{{ session.node_key }}/{{ session.service_type }}">{{ session.shortened_node_key }}</a></span>
                 </li>
                 <li>
                   <span class="name">Protocol</span>
-                  <span class="value">OpenVPN (UDP)</span>
+                  <span class="value">{{ session.service_type }}</span>
                 </li>
               </ul>
             </div>

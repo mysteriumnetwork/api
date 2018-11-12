@@ -31,6 +31,7 @@
                   <th>#</th>
                   <th>Node Key</th>
                   <th>Country</th>
+                  <th>Service Type</th>
                   <th>Seen</th>
                   <th>Sessions Total</th>
                   <th>Status</th>
@@ -38,10 +39,11 @@
               </thead>
               <tbody>
                 {% for node in nodes %}
-                <tr onclick="window.document.location='/node/{{node.node_key}}'">
+                <tr onclick="window.document.location='/node/{{node.node_key}}/{{node.service_type}}'">
                   <th scope="row">{{loop.index}}</th>
                   <td>{{node.node_key}}</td>
                   <td>{{node.country_string}}</td>
+                  <td>{{node.service_type}}</td>
                   <td>{{node.last_seen}}</td>
                   <td>{{node.sessions_count}}</td>
                   <td>{{node.status}}</td>

@@ -20,7 +20,7 @@ class TestSession(TestCase):
 
 class TestNode(TestCase):
     def test_get_country_from_service_proposal(self):
-        node = Node("key")
+        node = Node("key", "dummy")
         node.proposal = json.dumps({
             "service_definition": {
                 "location_originate": {"country": "country code"},
@@ -32,12 +32,12 @@ class TestNode(TestCase):
         )
 
     def test_get_country_from_empty_service_proposal(self):
-        node = Node("key")
+        node = Node("key", "dummy")
         node.proposal = json.dumps({})
         self.assertIsNone(node.get_country_from_service_proposal())
 
     def test_get_country_from_invalid_service_proposal(self):
-        node = Node("key")
+        node = Node("key", "dummy")
         node.proposal = json.dumps({
             "service_definition": {}
         })

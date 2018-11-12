@@ -152,9 +152,9 @@ def register_proposal(caller_identity):
         message = 'provider_id does not match current identity'
         return jsonify(error=message), 403
 
-    node = Node.query.get(node_key)
+    node = Node.query.get([node_key, service_type])
     if not node:
-        node = Node(node_key)
+        node = Node(node_key, service_type)
 
     node.ip = request.remote_addr
     node.proposal = json.dumps(proposal)
@@ -174,6 +174,8 @@ def register_proposal(caller_identity):
 def unregister_proposal(caller_identity):
     payload = request.get_json(force=True)
 
+    service_type = payload.get('service_type', 'openvpn')
+
     node_key = payload.get('provider_id', None)
     if node_key is None:
         return jsonify(error='missing provider_id'), 400
@@ -182,7 +184,7 @@ def unregister_proposal(caller_identity):
         message = 'provider_id does not match current identity'
         return jsonify(error=message), 403
 
-    node = Node.query.get(node_key)
+    node = Node.query.get([node_key, service_type])
     if not node:
         return jsonify({}), 404
 
@@ -215,6 +217,8 @@ def proposals():
 def session_stats_create(session_key, caller_identity):
     payload = request.get_json(force=True)
 
+    service_type = payload.get('service_type', 'openvpn')
+
     bytes_sent = payload.get('bytes_sent')
     if not isinstance(bytes_sent, int) or bytes_sent < 0:
         return jsonify(
@@ -244,9 +248,11 @@ def session_stats_create(session_key, caller_identity):
     if session.consumer_id != caller_identity:
         message = 'session identity does not match current one'
         return jsonify(error=message), 403
+
     session.client_bytes_sent = bytes_sent
     session.client_bytes_received = bytes_received
     session.client_updated_at = datetime.utcnow()
+    session.service_type = service_type
 
     db.session.add(session)
     db.session.commit()
@@ -262,7 +268,10 @@ def session_stats_create(session_key, caller_identity):
 @validate_json
 @recover_identity
 def ping_proposal(caller_identity):
-    node = Node.query.get(caller_identity)
+    payload = request.get_json(force=True)
+    service_type = payload.get('service_type', 'openvpn')
+
+    node = Node.query.get([caller_identity, service_type])
     if not node:
         return jsonify(error='node key not found'), 400
 
@@ -270,6 +279,8 @@ def ping_proposal(caller_identity):
 
     # add record to NodeAvailability
     na = NodeAvailability(caller_identity)
+    na.service_type = service_type
+
     db.session.add(na)
     db.session.commit()
 

@@ -8,11 +8,11 @@ from queries import filter_active_nodes_by_service_type
 
 class TestQueries(TestCase):
     def test_filter_active_nodes(self):
-        node1 = Node("node1")
+        node1 = Node("node1", "dummy")
         node1.mark_activity()
         db.session.add(node1)
 
-        node2 = Node("node2")
+        node2 = Node("node2", "dummy")
         db.session.add(node2)
 
         nodes = filter_active_nodes().all()
@@ -30,17 +30,12 @@ class TestQueries(TestCase):
         self.assertEqual([session1], sessions)
 
     def test_filter_active_nodes_by_service_type(self):
-        dummy_node = Node("node1")
+        dummy_node = Node("node1", "dummy")
         dummy_node.mark_activity()
-        dummy_node.service_type = "dummy"
         db.session.add(dummy_node)
 
-        no_service_type_node = Node("node2")
-        db.session.add(no_service_type_node)
-
-        openvpn_node = Node("node3")
+        openvpn_node = Node("node3", "openvpn")
         openvpn_node.mark_activity()
-        openvpn_node.service_type = "openvpn"
         db.session.add(openvpn_node)
 
         dummy_nodes = filter_active_nodes_by_service_type("dummy").all()
