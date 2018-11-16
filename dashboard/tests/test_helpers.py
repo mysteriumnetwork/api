@@ -1,5 +1,7 @@
 import unittest
-from dashboard.helpers import shorten_node_key, get_natural_size, format_duration
+from dashboard.helpers import (
+    shorten_node_key, get_natural_size, format_duration
+)
 from datetime import timedelta
 
 
