@@ -17,14 +17,13 @@ def get_natural_size(value):
 
 
 def format_duration(duration: timedelta) -> str:
-    result = ''
     total_seconds = duration.total_seconds()
     if total_seconds < 60:
-        result = '< 1 minute'
-    else:
-        total_minutes, _ = divmod(total_seconds, 60)
-        hours, minutes = divmod(total_minutes, 60)
-        if hours > 0:
-            result += '%dhr ' % hours
-        result += '%dmin' % minutes
+        return '< 1 minute'
+    total_minutes, _ = divmod(total_seconds, 60)
+    hours, minutes = divmod(total_minutes, 60)
+    result = ''
+    if hours > 0:
+        result += '%dhr ' % hours
+    result += '%dmin' % minutes
     return result
