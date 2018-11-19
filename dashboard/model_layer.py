@@ -185,10 +185,7 @@ def get_node_info(node_key, service_type):
 
 def enrich_session_info(se):
     duration = (se.node_updated_at or se.client_updated_at) - se.created_at
-    duration_seconds = duration.total_seconds()
-    m, s = divmod(duration_seconds, 60)
-    h, m = divmod(m, 60)
-    se.duration = "%d:%02d:%02d" % (h, m, s)
+    se.duration = helpers.format_duration(duration)
     se.data_sent = helpers.get_natural_size(se.client_bytes_sent)
     se.data_received = helpers.get_natural_size(se.client_bytes_received)
     se.data_transferred = helpers.get_natural_size(
