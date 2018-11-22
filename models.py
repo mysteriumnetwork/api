@@ -9,6 +9,7 @@ db = SQLAlchemy()
 IDENTITY_LENGTH_LIMIT = 42
 SESSION_KEY_LIMIT = 36
 AVAILABILITY_TIMEOUT = timedelta(minutes=2)
+SESSION_EXPIRATION = timedelta(minutes=10)
 
 
 class Node(db.Model):
@@ -82,6 +83,10 @@ class Session(db.Model):
 
     def is_active(self):
         return _is_active(self.client_updated_at)
+
+    def has_expired(self):
+        last_session_activity = self.client_updated_at or self.created_at
+        return datetime.utcnow() - last_session_activity > SESSION_EXPIRATION
 
 
 class NodeAvailability(db.Model):

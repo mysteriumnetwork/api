@@ -682,6 +682,56 @@ class TestApi(TestCase):
         sessions = Session.query.all()
         self.assertEqual(0, len(sessions))
 
+    def test_session_stats_when_session_has_expired(self):
+        payload = {
+            'bytes_sent': 20,
+            'bytes_received': 40,
+            'provider_id': '0x1',
+        }
+        auth = generate_test_authorization(json.dumps(payload))
+        session = Session('123')
+        session.consumer_id = auth['public_address']
+        session.created_at = datetime.utcnow() - timedelta(minutes=11)
+        session.client_updated_at = None
+        main.db.session.add(session)
+        main.db.session.commit()
+        re = self._post(
+            '/v1/sessions/123/stats',
+            payload,
+            headers=auth['headers'],
+        )
+        self.assertEqual(400, re.status_code)
+        self.assertEqual(
+            {'error': 'session has expired'},
+            re.json
+        )
+
+        # update client_updated_at in that way session should not expire
+        session.client_updated_at = datetime.utcnow() - timedelta(minutes=9)
+        main.db.session.add(session)
+        main.db.session.commit()
+        re = self._post(
+            '/v1/sessions/123/stats',
+            payload,
+            headers=auth['headers'],
+        )
+        self.assertEqual(200, re.status_code)
+
+        # update client_updated_at in that way session should expire
+        session.client_updated_at = datetime.utcnow() - timedelta(minutes=11)
+        main.db.session.add(session)
+        main.db.session.commit()
+        re = self._post(
+            '/v1/sessions/123/stats',
+            payload,
+            headers=auth['headers'],
+        )
+        self.assertEqual(400, re.status_code)
+        self.assertEqual(
+            {'error': 'session has expired'},
+            re.json
+        )
+
     def test_ping_proposal(self):
         payload = {}
         auth = generate_test_authorization(json.dumps(payload))
