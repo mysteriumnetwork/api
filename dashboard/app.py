@@ -21,6 +21,9 @@ def main():
             'dashboard.html',
             active_nodes_count=model_layer.get_active_nodes_count(),
             sessions_count=model_layer.get_sessions_count(),
+            active_sessions_count=model_layer.get_sessions_count(
+                only_active_sessions=True
+            ),
             average_session_time=model_layer.get_average_session_time(),
             total_data_transferred=model_layer.get_total_data_transferred(),
             available_nodes=model_layer.get_available_nodes(limit=10),

@@ -18,14 +18,16 @@ def get_active_nodes_count():
     return 0
 
 
-def get_active_sessions_count(node_key=None):
-    query = filter_active_sessions()
+def get_sessions_count(node_key=None, only_active_sessions=False):
+    if only_active_sessions:
+        query = filter_active_sessions()
+    else:
+        query = models.Session.query
 
     if node_key:
         query = query.filter(models.Session.node_key == node_key)
 
-    count = query.count()
-    return count
+    return query.count()
 
 
 def get_sessions_count_by_service_type(node_key, service_type):
@@ -33,16 +35,6 @@ def get_sessions_count_by_service_type(node_key, service_type):
         models.Session.node_key == node_key,
         models.Session.service_type == service_type
     )
-    return query.count()
-
-
-def get_sessions_count(node_key=None):
-    if node_key:
-        query = models.Session.query.filter(
-            models.Session.node_key == node_key
-        )
-    else:
-        query = models.Session.query
     return query.count()
 
 
@@ -59,9 +51,8 @@ def get_average_session_time():
             total_seconds += delta.total_seconds()
             count += 1
 
-    average_seconds = total_seconds / count if count != 0 else 0
-    minutes = average_seconds / 60
-    return '{0:.0f}'.format(minutes)
+    average_in_seconds = total_seconds / count if count != 0 else 0
+    return helpers.format_duration(timedelta(seconds=average_in_seconds))
 
 
 def get_total_data_transferred():
