@@ -249,6 +249,11 @@ def session_stats_create(session_key, caller_identity):
         message = 'session identity does not match current one'
         return jsonify(error=message), 403
 
+    if session.has_expired():
+        return jsonify(
+            error='session has expired'
+        ), 400
+
     session.client_bytes_sent = bytes_sent
     session.client_bytes_received = bytes_received
     session.client_updated_at = datetime.utcnow()
