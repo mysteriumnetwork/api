@@ -9,7 +9,7 @@ API for Node & Client
 
 - Start docker containers in background:
 ```bash
-docker-compose up -d
+docker-compose up -d --build
 ```
 
 - Wait ~10s for database to setup.
