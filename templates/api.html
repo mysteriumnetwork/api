@@ -1,43 +1,167 @@
-Mysterium.Network API<br/>
-Version: 1.0<br/>
-URL Base: https://mvp.mysterium.network:5000<br/>
-Params should be encoded in JSON and passed as HTTP body data.<br/>
-Returned values are encoded in JSON.
-API reqest returns status code. For example status code 200 means success.<br/>
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="utf-8">
+    <title>Endpoints</title>
+    <style>
+        .endpoint {
+            background-color: #e8e8e8;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        .endpoint .title {
+            font-weight: bold;
+        }
+    </style>
+</head>
 
-<p>
-    POST /v1/node_register<br/>
-    Params: Proposal<br/>
-    Proposal Example:
-    "service_proposal": {
-            "id": 1,
-            "format": "service-proposal/v1",
-            "provider_id": "node1"
+<body>
+
+<div>Most parameters should be encoded in JSON and passed as HTTP body data.</div>
+<div>Returned values are encoded in JSON.</div>
+<div>Each endpoint returns status code. For example status code 200 means success.</div>
+<div>For POST methods Authorization header with signature is required.</div>
+
+<div class="endpoint">
+    <div class="title">POST /v1/register_proposal</div>
+    <div>Registers proposal to discovery service.</div>
+    <div>Example JSON Parameters:</div>
+    <pre>
+    {
+        "service_proposal": {
+                "format": "service-proposal/v1",
+                "service_type": "openvpn",
+                "provider_id": "0x0000000000000000000000000000000000000001"
+        }
     }
-    <br/>
-    Returns:
-</p>
+    </pre>
+    <div>Returns:</div>
+    <pre>
+    {}
+    </pre>
+</div>
 
-<p>
-    GET /v1/proposals<br/>
-    Params: node_key (optional)<br/>
-    Returns: proposals
-</p>
+<div class="endpoint">
+    <div class="title">POST /v1/unregister_proposal</div>
+    <div>Unregisters proposal from discovery service.</div>
+    <div>Example JSON Parameters:</div>
+    <pre>
+    {
+        "service_type": "openvpn",
+        "provider_id": "0x0000000000000000000000000000000000000001"
+    }
+    </pre>
+    <div>Returns:</div>
+    <pre>
+    {}
+    </pre>
+</div>
 
-<p>
-    POST /v1/client_create_session<br/>
-    Params: node_key, session_key (optional)<br/>
-    Returns: session_key, connection_config
-</p>
+<div class="endpoint">
+    <div class="title">GET /v1/proposals[?node_key=...&service_type=...]</div>
+    <div>Returns list of proposals.</div>
+    <div>URL parameters:</div>
+    <div>node_key (optional), example: "0x0000000000000000000000000000000000000001"</div>
+    <div>service_type (optional), example: "openvpn"</div>
+    <div>Return example:</div>
+    <pre>
+    {
+      "proposals": [
+        {
+          "format": "service-proposal/v1",
+          "id": 1,
+          "payment_method": {
+            "duration": 3600,
+            "price": {
+              "amount": 12,
+              "currency": "MYST"
+            }
+          },
+          "payment_method_type": "PER_TIME",
+          "provider_contacts": [
+            {
+              "definition": {
+                "broker_addresses": [
+                  "nats://127.0.0.1:4222"
+                ],
+                "topic": "0xc14a7bc8fb0fac76114df546f541145dad541b57"
+              },
+              "type": "nats/v1"
+            }
+          ],
+          "provider_id": "0x0000000000000000000000000000000000000001",
+          "service_definition": {
+            "location": {
+              "country": "country code"
+            },
+            "location_originate": {
+              "country": "country code"
+            },
+            "protocol": "udp",
+            "session_bandwidth": 83886080
+          },
+          "service_type": "openvpn"
+        }
+      ]
+    }
+    </pre>
+</div>
 
-<p>
-    POST /v1/node_send_stats<br/>
-    Params: node_key, sessions: [session_key, bytes_sent, bytes_received]<br/>
-    Returns: sessions: [session_key, is_session_valid]
-</p>
+<div class="endpoint">
+    <div class="title">POST /v1/sessions/{session_key}/stats</div>
+    <div>Creates or updates session statistics.</div>
+    <div>URL parameters:</div>
+    <div>session_key, example: "4cfb0324-daf6-4ad8-448b-e61fe0a1f918"</div>
+    <div>Example JSON parameters:</div>
+    <pre>
+    {
+        "service_type": "openvpn"
+        "bytes_sent": 1024,
+        "bytes_received": 1024,
+        "provider_id": "0x0000000000000000000000000000000000000001",
+        "consumer_country": "Country Code"
+    }
+    </pre>
+    <div>Returns:</div>
+    <pre>
+    {}
+    </pre>
+</div>
 
-<p>
-    POST /v1/client_send_stats<br/>
-    Params: session_key, bytes_sent, bytes_received<br/>
-    Returns: session_key, is_session_valid
-</p>
+<div class="endpoint">
+    <div class="title">POST /v1/ping_proposal</div>
+    <div>Indicates that proposal is active.</div>
+    <div>Example JSON parameters:</div>
+    <pre>
+    {
+        "service_type": "openvpn"
+    }
+    </pre>
+    <div>Returns:</div>
+    <pre>
+    {}
+    </pre>
+</div>
+
+<div class="endpoint">
+    <div class="title">POST /v1/identities</div>
+    <div>Saves new identity.</div>
+    <div>Returns:</div>
+    <pre>
+    {}
+    </pre>
+</div>
+
+<div class="endpoint">
+    <div class="title">GET /v1/me</div>
+    <div>Returns recovered public address from signed payload.</div>
+    <div>Return example:</div>
+    <pre>
+    {
+        "identity": "0x0000000000000000000000000000000000000001"
+    }
+    </pre>
+</div>
+
+</body>
+</html>
