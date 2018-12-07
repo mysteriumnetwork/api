@@ -371,6 +371,21 @@ class TestApi(TestCase):
         self.assertIsNotNone(proposal['id'])
         self.assertEqual('node1', proposal['provider_id'])
 
+    def test_proposals_all(self):
+        node = self._create_sample_node()
+        node.mark_activity()
+        node_noop = self._create_node("node2", "noop")
+        node_noop.mark_activity()
+        main.db.session.commit()
+
+        re = self._get('/v1/proposals', {'service_type': 'all'})
+
+        self.assertEqual(200, re.status_code)
+
+        data = json.loads(re.data)
+        proposals = data['proposals']
+        self.assertEqual(2, len(proposals))
+
     def test_proposals_filtering_service_type_openvpn(self):
         node = self._create_sample_node()
         node.mark_activity()
