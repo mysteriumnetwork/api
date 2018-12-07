@@ -197,7 +197,10 @@ def unregister_proposal(caller_identity):
 @app.route('/v1/proposals', methods=['GET'])
 def proposals():
     service_type = request.args.get('service_type', 'openvpn')
-    nodes = filter_active_nodes_by_service_type(service_type)
+    if service_type == "all":
+        nodes = filter_active_nodes()
+    else:
+        nodes = filter_active_nodes_by_service_type(service_type)
 
     node_key = request.args.get('node_key')
     if node_key:
