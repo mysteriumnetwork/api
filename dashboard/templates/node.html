@@ -2,20 +2,20 @@
 
 {% block body %}
 
-
     <div class="page-title">
       <div class="title_left">
-        <h3>Node Details <small> {{ node.node_key }}</small></h3>
+        <h3>Node </h3>
+          <div class="key">{{ node.node_key }}</div>
       </div>
     </div>
 
     <div class="clearfix"></div>
 
     <div class="row">
-      <div class="col-md-12">
-        <div class="x_panel">
+      <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel no-bottom">
           <div class="x_title">
-            <h2>Stats</h2>
+            <h2>Details</h2>
             <ul class="nav navbar-right panel_toolbox">
               <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
               </li>
@@ -26,47 +26,39 @@
           </div>
 
           <div class="x_content">
-            <div class="col-md-12 col-sm-6 col-xs-12">
+            <div class="row">
               <ul class="stats-overview">
-                <li>
+                <li class="col-md-2 col-sm-4 col-xs-6">
                   <span class="name">Status</span>
                   <span class="value">{{ node.status }}</span>
                 </li>
-                <li>
-                  <span class="name">Sessions Total</span>
+                <li class="col-md-2 col-sm-4 col-xs-6">
+                  <span class="name">Sessions</span>
                   <span class="value">{{ node.sessions_count }}</span>
                 </li>
-                <li>
+                <li class="col-md-2 col-sm-4 col-xs-6">
                   <span class="name">Country</span>
                   <span class="value">{{ node.country_string }}</span>
                 </li>
-                <li>
+                <li class="col-md-2 col-sm-4 col-xs-6 ">
                   <span class="name">Seen</span>
                   <span class="value">{{ node.last_seen }}</span>
                 </li>
-                <li>
-                  <span class="name">Data Transferred Total</span>
+                <li class="col-md-2 col-sm-4 col-xs-6">
+                  <span class="name">Data Transferred</span>
                   <span class="value">{{ node.data_transferred }}</span>
                 </li>
-                <li>
+                <li class="col-md-2 col-sm-4 col-xs-6">
                   <span class="name">Transport Protocols</span>
                   <span class="value">{{ node.service_type }}</span>
                 </li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="x_content">
-            <div class="col-md-12 col-sm-6 col-xs-12">
-              <ul class="stats-overview">
-                <li>
+                <li class="col-md-2 col-sm-4 col-xs-6">
                   <span class="name">Uptime</span>
                   <span class="value">{{ node.uptime }}</span>
                 </li>
               </ul>
             </div>
           </div>
-
         </div>
       </div>
     </div>
@@ -74,10 +66,10 @@
     <div class="clearfix"></div>
 
     <div class="row">
-      <div class="col-md-12">
+      <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
           <div class="x_title">
-            <h2>Past Week Availability</h2>
+            <h2>Week Availability</h2>
             <ul class="nav navbar-right panel_toolbox">
               <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
               </li>
@@ -102,7 +94,7 @@
       <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
           <div class="x_title">
-            <h2>Last Sessions</h2>
+            <h2>Latest Sessions</h2>
             <ul class="nav navbar-right panel_toolbox">
               <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
               </li>
@@ -116,8 +108,8 @@
             <table class="table table-hover clickable">
               <thead>
                 <tr>
-                  <th>#</th>
-                  <th>Session Key</th>
+                  <th class="enumerator">#</th>
+                  <th>Session</th>
                   <th>Status</th>
                   <th>Started</th>
                   <th>Duration</th>
@@ -128,8 +120,8 @@
 
               {% for se in node.sessions %}
               <tr onclick="window.document.location='/session/{{se.session_key}}'">
-                <th scope="row">{{loop.index}}</th>
-                <td>{{se.session_key}}</td>
+                <td scope="row" class="enumerator">{{loop.index}}</td>
+                <td class="td-session-key">{{se.session_key}}</td>
                 <td>{{se.status}}</td>
                 <td>{{se.started}}</td>
                 <td>{{se.duration}}</td>

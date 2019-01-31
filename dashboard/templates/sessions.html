@@ -2,19 +2,11 @@
 
 {% block body %}
 
-    <div class="page-title">
-      <div class="title_left">
-        <h3>Sessions</h3>
-      </div>
-    </div>
-
-    <div class="clearfix"></div>
-
     <div class="row">
       <div class="col-md-12 col-sm-6 col-xs-12">
         <div class="x_panel">
           <div class="x_title">
-            <h2>All Sessions</h2>
+            <h2>Sessions List</h2>
             <ul class="nav navbar-right panel_toolbox">
               <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
               </li>
@@ -28,19 +20,19 @@
             <table class="table table-hover clickable">
               <thead>
                 <tr>
-                  <th>#</th>
-                  <th>Session Key</th>
+                  <th class="enumerator">#</th>
+                  <th>Session</th>
                   <th>Status</th>
                   <th>Started</th>
                   <th>Duration</th>
-                  <th>Data Transferred (KB)</th>
+                  <th>Data Transferred</th>
                 </tr>
               </thead>
               <tbody>
 
               {% for se in sessions %}
               <tr onclick="window.document.location='/session/{{se.session_key}}'">
-                <th scope="row">{{loop.index}}</th>
+                <td scope="row" class="enumerator">{{loop.index}}</td>
                 <td>{{se.session_key}}</td>
                 <td>{{se.status}}</td>
                 <td>{{se.started}}</td>

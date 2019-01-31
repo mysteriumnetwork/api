@@ -395,11 +395,6 @@ body .container.body .right_col {
         height: inherit
     }
 }
-@media (max-width: 1270px) and (min-width: 192px) {
-    .x_title h2 small {
-        display: none
-    }
-}
 .left_col .mCSB_scrollTools {
     width: 6px
 }
@@ -514,12 +509,17 @@ body {
     padding: 10px 0
 }
 .page-title .title_left {
-    width: 45%;
+    /*width: 45%;*/
     float: left;
     display: block
 }
 .page-title .title_left h3 {
-    margin: 9px 0
+    margin: 9px 0;
+    display: inline;
+}
+.page-title .title_left .key {
+    white-space: nowrap;
+    display: inline;
 }
 .page-title .title_right {
     width: 55%;
@@ -1689,27 +1689,32 @@ span.right {
     background: #425567
 }
 .tile_count {
+    margin-top: 20px;
     margin-bottom: 20px;
-    margin-top: 20px
+}
+@media screen and (max-width: 992px) {
+    .tile_count {
+        margin-bottom: 0px;
+    }
 }
 .tile_count .tile_stats_count {
-    border-bottom: 1px solid #D9DEE4;
     padding: 0 10px 0 20px;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
-    position: relative
+    position: relative;
+    margin-bottom: 10px;
+    padding-bottom: 10px
 }
 @media (min-width: 992px) {
     footer {
         margin-left: 230px
     }
 }
-@media (min-width: 992px) {
+@media screen and (max-width: 992px) {
     .tile_count .tile_stats_count {
-        margin-bottom: 10px;
-        border-bottom: 0;
-        padding-bottom: 10px
+        margin-top: 5px;
+        margin-bottom: 5px;
     }
 }
 .tile_count .tile_stats_count:before {
@@ -1726,18 +1731,29 @@ span.right {
     }
 }
 .tile_count .tile_stats_count .count {
-    font-size: 30px;
+    font-size: 38px;
     line-height: 47px;
-    font-weight: 600
+    font-weight: 600;
 }
-@media (min-width: 768px) {
+@media screen and (max-width: 1360px) {
+    .tile_count .tile_stats_count:before {
+        border-left: 0;
+    }
     .tile_count .tile_stats_count .count {
-        font-size: 40px
+        font-size: 30px;
+        line-height: 38px;
     }
 }
-@media (min-width: 992px) and (max-width: 1100px) {
+@media screen and (max-width: 992px) {
     .tile_count .tile_stats_count .count {
-        font-size: 30px
+        font-size: 25px;
+        line-height: 36px;
+    }
+}
+@media screen and (max-width: 768px) {
+    .tile_count .tile_stats_count .count {
+        font-size: 16px;
+        line-height: 24px;
     }
 }
 .tile_count .tile_stats_count span {
@@ -2973,7 +2989,6 @@ ul.user_data li .progress {
     display: flex
 }
 ul.stats-overview {
-    /*border-bottom: 1px solid #e8e8e8;*/
     padding-bottom: 10px;
     margin-bottom: 10px;
     padding: 0;
@@ -2982,17 +2997,14 @@ ul.stats-overview li {
     display: inline-block;
     text-align: center;
     padding: 0 15px;
-    width: 16%;
     font-size: 14px;
-    border-right: 1px solid #e8e8e8
+    border-right: 1px solid #e8e8e8;
+    margin-bottom: 30px;
 }
-ul.stats-overview.session li {
-    display: inline-block;
-    text-align: center;
-    padding: 0 15px;
-    width: 17%;
-    font-size: 14px;
-    border-right: 1px solid #e8e8e8
+@media (max-width: 992px) {
+    ul.stats-overview li {
+        border-right: 0px;
+    }
 }
 ul.stats-overview li:last-child {
     border-right: 0
@@ -3004,9 +3016,6 @@ ul.stats-overview li .value {
     font-size: 14px;
     font-weight: bold;
     display: block
-}
-ul.stats-overview li:first-child {
-    padding-left: 0
 }
 ul.project_files li {
     margin-bottom: 5px
@@ -4271,4 +4280,35 @@ table.clickable tr {
 
 table.clickable thead tr {
     cursor: auto;
+}
+
+.no-bottom {
+    padding-bottom: 0px;
+}
+
+@media screen and (max-width: 1500px) {
+    .td-node-key, .td-session-key {
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+@media screen and (max-width: 530px) {
+    body {
+        font-size: 12px;
+    }
+
+    .td-node-key, .td-session-key {
+        max-width: 58px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    table .enumerator {
+        display: none;
+
+    }
 }

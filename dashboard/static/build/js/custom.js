@@ -2596,19 +2596,9 @@ if (typeof NProgress != 'undefined') {
 			console.log('init_morris_charts');
 
 			if ($('#graph_bar').length){ 
-			
+
 				Morris.Bar({
 				  element: 'graph_bar',
-				  /*data: [
-					{day: '2017-10-01', time_online: 24},
-					{day: '2017-10-02', time_online: 15},
-					{day: '2017-10-03', time_online: 1},
-					{day: '2017-10-04', time_online: 20},
-					{day: '2017-10-05', time_online: 5},
-					{day: '2017-10-06', time_online: 2},
-					{day: '2017-10-07', time_online: 4},
-
-				  ],*/
 				  data: availability_chart_data,
 				  xkey: 'day',
 				  ykeys: ['time_online'],
@@ -5026,41 +5016,9 @@ if (typeof NProgress != 'undefined') {
 	   
 	   
 	$(document).ready(function() {
-				
-		init_sparklines();
-		init_flot_chart();
+
 		init_sidebar();
-		init_wysiwyg();
-		init_InputMask();
-		init_JQVmap();
-		init_cropper();
-		init_knob();
-		init_IonRangeSlider();
-		init_ColorPicker();
-		init_TagsInput();
-		init_parsley();
-		init_daterangepicker();
-		init_daterangepicker_right();
-		init_daterangepicker_single_call();
-		init_daterangepicker_reservation();
-		init_SmartWizard();
-		init_EasyPieChart();
-		init_charts();
-		init_echarts();
 		init_morris_charts();
-		init_skycons();
-		init_select2();
-		init_validator();
-		init_DataTables();
-		init_chart_doughnut();
-		init_gauge();
-		init_PNotify();
-		init_starrr();
-		init_calendar();
-		init_compose();
-		init_CustomNotification();
-		init_autosize();
-		init_autocomplete();
 				
 	});	
 	

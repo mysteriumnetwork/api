@@ -2,19 +2,11 @@
 
 {% block body %}
 
-    <div class="page-title">
-      <div class="title_left">
-        <h3>Nodes</h3>
-      </div>
-    </div>
-
-    <div class="clearfix"></div>
-
     <div class="row">
       <div class="col-md-12 col-sm-6 col-xs-12">
         <div class="x_panel">
           <div class="x_title">
-            <h2>All Nodes</h2>
+            <h2>Nodes List</h2>
             <ul class="nav navbar-right panel_toolbox">
               <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
               </li>
@@ -28,25 +20,25 @@
             <table class="table table-hover clickable">
               <thead>
                 <tr>
-                  <th>#</th>
-                  <th>Node Key</th>
-                  <th>Country</th>
-                  <th>Service Type</th>
-                  <th>Seen</th>
-                  <th>Sessions Total</th>
+                  <th class="enumerator">#</th>
+                  <th>Node</th>
                   <th>Status</th>
+                  <th>Seen</th>
+                  <th>Sessions</th>
+                  <th>Country</th>
+                  <th>Type</th>
                 </tr>
               </thead>
               <tbody>
                 {% for node in nodes %}
                 <tr onclick="window.document.location='/node/{{node.node_key}}/{{node.service_type}}'">
-                  <th scope="row">{{loop.index}}</th>
-                  <td>{{node.node_key}}</td>
-                  <td>{{node.country_string}}</td>
-                  <td>{{node.service_type}}</td>
+                  <td scope="row" class="enumerator">{{loop.index}}</td>
+                  <td class="td-node-key">{{node.node_key}}</td>
+                  <td>{{node.status}}</td>
                   <td>{{node.last_seen}}</td>
                   <td>{{node.sessions_count}}</td>
-                  <td>{{node.status}}</td>
+                  <td>{{node.country_string}}</td>
+                  <td>{{node.service_type}}</td>
                 </tr>
                 {% endfor %}
               </tbody>

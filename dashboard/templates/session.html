@@ -5,17 +5,18 @@
 
     <div class="page-title">
       <div class="title_left">
-        <h3>Session Details <small> {{ session.session_key }}</small></h3>
+        <h3>Session </h3>
+        <div class="key">{{ session.session_key }}</div>
       </div>
     </div>
 
     <div class="clearfix"></div>
 
     <div class="row">
-      <div class="col-md-12">
-        <div class="x_panel">
+      <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel no-bottom">
           <div class="x_title">
-            <h2>Stats</h2>
+            <h2>Details</h2>
             <ul class="nav navbar-right panel_toolbox">
               <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
               </li>
@@ -26,56 +27,45 @@
           </div>
 
           <div class="x_content">
-            <div class="col-md-12 col-sm-6 col-xs-12">
-              <ul class="stats-overview session">
-                <li>
+            <div class="row">
+              <ul class="stats-overview">
+                <li class="col-md-2 col-sm-4 col-xs-6">
                   <span class="name">Status</span>
                   <span class="value">{{ session.status }}</span>
                 </li>
-                <li>
+                <li class="col-md-2 col-sm-4 col-xs-6">
                   <span class="name">Duration</span>
                   <span class="value">{{ session.duration }}</span>
                 </li>
-                <li>
+                <li class="col-md-2 col-sm-4 col-xs-6">
                   <span class="name">Started</span>
                   <span class="value">{{ session.started }}</span>
                 </li>
-                <li>
+                <li class="col-md-2 col-sm-4 col-xs-6">
                   <span class="name">Node</span>
                   <span class="value"><a href="/node/{{ session.node_key }}/{{ session.service_type }}">{{ session.shortened_node_key }}</a></span>
                 </li>
-                <li>
+                <li class="col-md-2 col-sm-4 col-xs-6">
                   <span class="name">Protocol</span>
                   <span class="value">{{ session.service_type }}</span>
                 </li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="x_content">
-            <div class="col-md-12 col-sm-6 col-xs-12">
-              <ul class="stats-overview session">
-                <li>
+                <li class="col-md-2 col-sm-4 col-xs-6">
                   <span class="name">Data Transferred Total</span>
                   <span class="value">{{ session.data_transferred }}</span>
                 </li>
-                <li>
+                <li class="col-md-2 col-sm-4 col-xs-6">
                   <span class="name">Data Sent / Received</span>
                   <span class="value">{{ session.data_sent }} / {{ session.data_received }}</span>
                 </li>
-                <li>
+                <li class="col-md-2 col-sm-4 col-xs-6">
                   <span class="name">Consumer Country</span>
                   <span class="value">{{ session.client_country_string }}</span>
                 </li>
               </ul>
             </div>
           </div>
-
         </div>
       </div>
     </div>
-
-
-
 
 {% endblock %}
