@@ -1,27 +1,25 @@
 import binascii
+import json
+import helpers
+import logging
+import base64
+import settings
+from datetime import datetime
 from flask import Flask, request, render_template, jsonify
 from flask_migrate import Migrate
 from werkzeug.debug import get_current_traceback
 from functools import wraps
-
 from ip import mask_ip_partially
-from models import db, Node, Session, NodeAvailability, Identity
-from datetime import datetime
-import json
-import helpers
-import logging
-import os
-
 from queries import filter_active_nodes, filter_active_nodes_by_service_type
+from identity_contract import IdentityContract
+from eth_utils.address import is_hex_address as is_valid_eth_address
 from signature import (
     recover_public_address,
     ValidationError as SignatureValidationError
 )
-import base64
-import settings
-
-from identity_contract import IdentityContract
-
+from models import (
+    db, Node, Session, NodeAvailability, Identity, IdentityRegistration
+)
 
 helpers.setup_logger()
 app = Flask(__name__)
@@ -56,6 +54,7 @@ def validate_json(f):
     return wrapper
 
 
+# TODO: move to authorization.py
 def decode_authorization_header(headers):
     # Authorization request header format:
     # Authorization: Signature <signature_base64_encoded>
@@ -88,6 +87,13 @@ def decode_authorization_header(headers):
         ).lower()
     except SignatureValidationError as err:
         raise ValueError('invalid signature format: {0}'.format(err))
+
+
+# TODO: move to authorization.py
+def get_authorization_signature(headers):
+    authorization = headers.get('Authorization')
+    _, signature_base64_encoded = authorization.split(' ')
+    return signature_base64_encoded
 
 
 def recover_identity(f):
@@ -305,6 +311,51 @@ def save_identity(caller_identity):
 
     identity = Identity(caller_identity)
     db.session.add(identity)
+    db.session.commit()
+
+    return jsonify({})
+
+
+# End Point which creates payout info next to identity
+@app.route('/v1/identities/<identity_url_param>/payout', methods=['POST'])
+@validate_json
+@recover_identity
+def create_payout_info(identity_url_param, caller_identity):
+    payload = request.get_json(force=True)
+
+    identity_payload = payload.get('identity', None)
+    if identity_payload is None:
+        msg = 'missing identity parameter in body'
+        return jsonify(error=msg), 400
+
+    payout_eth_address = payload.get('payout_eth_address', None)
+    if payout_eth_address is None:
+        msg = 'missing payout_eth_address parameter in body'
+        return jsonify(error=msg), 400
+
+    if identity_payload.lower() != identity_url_param.lower():
+        msg = 'identity parameter in url does not match with provider_id'
+        return jsonify(error=msg), 400
+
+    if identity_payload.lower() != caller_identity:
+        msg = 'identity parameter in body does not match with signer identity'
+        return jsonify(error=msg), 400
+
+    if not is_valid_eth_address(payout_eth_address):
+        msg = 'payout_eth_address is not in Ethereum address format'
+        return jsonify(error=msg), 400
+
+    if IdentityRegistration.query.get(caller_identity):
+        msg = 'identity payout address already registered'
+        return jsonify(error=msg), 403
+
+    new_model = IdentityRegistration(
+        caller_identity,
+        payout_eth_address,
+        base64.b64encode(request.data),
+        get_authorization_signature(request.headers)
+    )
+    db.session.add(new_model)
     db.session.commit()
 
     return jsonify({})

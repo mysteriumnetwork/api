@@ -1,8 +1,6 @@
 import unittest
 import json
-
 from datetime import datetime, timedelta
-
 from models import Session, Node, NodeAvailability, AVAILABILITY_TIMEOUT
 from tests.test_case import TestCase, main
 from tests.utils import (
@@ -14,8 +12,6 @@ from identity_contract import IdentityContractFake
 
 
 class TestApi(TestCase):
-    REMOTE_ADDR = '8.8.8.8'
-
     def test_register_proposal_successful(self):
         public_address = generate_static_public_address()
         payload = {
@@ -872,21 +868,6 @@ class TestApi(TestCase):
 
         self.assertEqual(200, re.status_code)
         self.assertEqual({}, re.json)
-
-    def _get(self, url, params={}):
-        return self.client.get(
-            url,
-            query_string=params,
-            environ_base={'REMOTE_ADDR': self.REMOTE_ADDR}
-        )
-
-    def _post(self, url, payload, headers=None, remote_addr=None):
-        return self.client.post(
-            url,
-            data=json.dumps(payload),
-            headers=headers,
-            environ_base={'REMOTE_ADDR': remote_addr or self.REMOTE_ADDR}
-        )
 
     def _create_sample_node(self):
         return self._create_node("node1", "openvpn")
