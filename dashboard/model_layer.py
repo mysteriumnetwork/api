@@ -4,7 +4,7 @@ from queries import get_active_nodes_count_query
 from datetime import datetime, timedelta
 import humanize
 import dashboard.helpers as helpers
-from sqlalchemy import func, desc
+from sqlalchemy import func, desc, text
 
 
 def get_db():
@@ -39,29 +39,21 @@ def get_sessions_count_by_service_type(node_key, service_type):
 
 
 def get_average_session_time():
-    sessions = models.Session.query.all()
-
-    count = 0
-    total_seconds = 0
-
-    for se in sessions:
-        updated_at = se.node_updated_at or se.client_updated_at
-        if updated_at:
-            delta = updated_at - se.created_at
-            total_seconds += delta.total_seconds()
-            count += 1
-
-    average_in_seconds = total_seconds / count if count != 0 else 0
-    return helpers.format_duration(timedelta(seconds=average_in_seconds))
+    sql = text("""select
+    AVG(TIME_TO_SEC(TIMEDIFF(client_updated_at, created_at)))
+    as averageDuration FROM session;""")
+    result = models.db.engine.execute(sql)
+    myrow = result.fetchone()
+    seconds = int(myrow[0])
+    return helpers.format_duration(timedelta(seconds=seconds))
 
 
 def get_total_data_transferred():
-    sessions = models.Session.query.all()
-
-    total_bytes = 0
-    for se in sessions:
-        total_bytes += se.client_bytes_sent
-        total_bytes += se.client_bytes_received
+    sql = text("""select SUM(client_bytes_sent) as clientBytesSent,
+    SUM(client_bytes_received) as clientBytesReceived FROM session;""")
+    result = models.db.engine.execute(sql)
+    myrow = result.fetchone()
+    total_bytes = myrow[0] + myrow[1]
     return helpers.get_natural_size(total_bytes)
 
 
@@ -213,7 +205,8 @@ def get_sessions(node_key=None, service_type=None, limit=None):
 
 def get_session_info(session_key):
     se = models.Session.query.get(session_key)
-    enrich_session_info(se)
+    if se is not None:
+        enrich_session_info(se)
     return se
 
 
