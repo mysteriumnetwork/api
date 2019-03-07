@@ -89,13 +89,6 @@ def decode_authorization_header(headers):
         raise ValueError('invalid signature format: {0}'.format(err))
 
 
-# TODO: move to authorization.py
-def get_authorization_signature(headers):
-    authorization = headers.get('Authorization')
-    _, signature_base64_encoded = authorization.split(' ')
-    return signature_base64_encoded
-
-
 def recover_identity(f):
     @wraps(f)
     def wrapper(*args, **kw):
@@ -316,47 +309,35 @@ def save_identity(caller_identity):
     return jsonify({})
 
 
-# End Point which creates payout info next to identity
+# End Point which creates or updates payout info next to identity
 @app.route('/v1/identities/<identity_url_param>/payout', methods=['POST'])
 @validate_json
 @recover_identity
-def create_payout_info(identity_url_param, caller_identity):
+def update_payout_info(identity_url_param, caller_identity):
     payload = request.get_json(force=True)
-
-    identity_payload = payload.get('identity', None)
-    if identity_payload is None:
-        msg = 'missing identity parameter in body'
-        return jsonify(error=msg), 400
 
     payout_eth_address = payload.get('payout_eth_address', None)
     if payout_eth_address is None:
         msg = 'missing payout_eth_address parameter in body'
         return jsonify(error=msg), 400
 
-    if identity_payload.lower() != identity_url_param.lower():
-        msg = 'identity parameter in url does not match with provider_id'
-        return jsonify(error=msg), 400
-
-    if identity_payload.lower() != caller_identity:
-        msg = 'identity parameter in body does not match with signer identity'
-        return jsonify(error=msg), 400
+    if identity_url_param.lower() != caller_identity:
+        msg = 'identity parameter in url does not match with signer identity'
+        return jsonify(error=msg), 403
 
     if not is_valid_eth_address(payout_eth_address):
         msg = 'payout_eth_address is not in Ethereum address format'
         return jsonify(error=msg), 400
 
-    if IdentityRegistration.query.get(caller_identity):
-        msg = 'identity payout address already registered'
-        return jsonify(error=msg), 403
-
-    new_model = IdentityRegistration(
-        caller_identity,
-        payout_eth_address,
-        base64.b64encode(request.data),
-        get_authorization_signature(request.headers)
-    )
-    db.session.add(new_model)
-    db.session.commit()
+    record = IdentityRegistration.query.get(caller_identity)
+    if record:
+        record.update(payout_eth_address)
+        db.session.add(record)
+        db.session.commit()
+    else:
+        new_record = IdentityRegistration(caller_identity, payout_eth_address)
+        db.session.add(new_record)
+        db.session.commit()
 
     return jsonify({})
 

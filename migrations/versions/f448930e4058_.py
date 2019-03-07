@@ -23,8 +23,6 @@ def upgrade():
         sa.Column('created_at', sa.DateTime(), nullable=True),
         sa.Column('updated_at', sa.DateTime(), nullable=True),
         sa.Column('payout_eth_address', sa.String(length=42), nullable=True),
-        sa.Column('signed_body', sa.String(length=1023), nullable=True),
-        sa.Column('signature', sa.String(length=255), nullable=True),
         sa.PrimaryKeyConstraint('identity')
     )
 
