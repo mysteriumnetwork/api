@@ -322,7 +322,7 @@ def update_payout_info(identity_url_param, caller_identity):
         return jsonify(error=msg), 400
 
     if identity_url_param.lower() != caller_identity:
-        msg = 'identity parameter in url does not match with signer identity'
+        msg = 'no permission to modify this identity'
         return jsonify(error=msg), 403
 
     if not is_valid_eth_address(payout_eth_address):
@@ -333,12 +333,11 @@ def update_payout_info(identity_url_param, caller_identity):
     if record:
         record.update(payout_eth_address)
         db.session.add(record)
-        db.session.commit()
     else:
         new_record = IdentityRegistration(caller_identity, payout_eth_address)
         db.session.add(new_record)
-        db.session.commit()
 
+    db.session.commit()
     return jsonify({})
 
 

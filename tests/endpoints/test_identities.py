@@ -31,7 +31,7 @@ class TestPost(TestCase):
             payload,
             headers=auth['headers']
         )
-        msg = 'identity parameter in url does not match with signer identity'
+        msg = 'no permission to modify this identity'
         self.assertEqual({'error': msg}, re.json)
         self.assertEqual(403, re.status_code)
 
