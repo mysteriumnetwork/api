@@ -33,3 +33,11 @@ class TestCase(TestCase):
             headers=headers,
             environ_base={'REMOTE_ADDR': remote_addr or self.REMOTE_ADDR}
         )
+
+    def _put(self, url, payload, headers=None):
+        return self.client.put(
+            url,
+            data=json.dumps(payload),
+            headers=headers,
+            environ_base={'REMOTE_ADDR': self.REMOTE_ADDR}
+        )

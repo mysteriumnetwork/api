@@ -20,7 +20,7 @@
 <div>Most parameters should be encoded in JSON and passed as HTTP body data.</div>
 <div>Returned values are encoded in JSON.</div>
 <div>Each endpoint returns status code. For example status code 200 means success.</div>
-<div>For POST methods Authorization header with signature is required.</div>
+<div>For POST and PUT methods Authorization header with signature is required.</div>
 
 <div class="endpoint">
     <div class="title">POST /v1/register_proposal</div>
@@ -153,8 +153,8 @@
 </div>
 
 <div class="endpoint">
-    <div class="title">POST /v1/identities/{identity}/payout</div>
-    <div>Creates or updates payout info for identity.</div>
+    <div class="title">PUT /v1/identities/{identity}/payout</div>
+    <div>Sets payout info for identity.</div>
     <div>Example JSON parameters:</div>
     <pre>
     {

@@ -12,7 +12,7 @@ class TestPost(TestCase):
         identity = generate_static_public_address().upper()
         payload = {}
         auth = generate_test_authorization(json.dumps(payload))
-        re = self._post(
+        re = self._put(
             '/v1/identities/{}/payout'.format(identity),
             payload,
             headers=auth['headers']
@@ -26,7 +26,7 @@ class TestPost(TestCase):
             'payout_eth_address': '0x'
         }
         auth = generate_test_authorization(json.dumps(payload))
-        re = self._post(
+        re = self._put(
             '/v1/identities/mismatch/payout',
             payload,
             headers=auth['headers']
@@ -41,7 +41,7 @@ class TestPost(TestCase):
             'payout_eth_address': 'any'
         }
         auth = generate_test_authorization(json.dumps(payload))
-        re = self._post(
+        re = self._put(
             '/v1/identities/{}/payout'.format(identity),
             payload,
             headers=auth['headers']
@@ -56,7 +56,7 @@ class TestPost(TestCase):
             'payout_eth_address': '0x000000000000000000000000000000000000000a'
         }
         auth = generate_test_authorization(json.dumps(payload))
-        re = self._post(
+        re = self._put(
             '/v1/identities/{}/payout'.format(identity),
             payload,
             headers=auth['headers']
@@ -83,7 +83,7 @@ class TestPost(TestCase):
             'payout_eth_address': '0x000000000000000000000000000000000000000a'
         }
         auth = generate_test_authorization(json.dumps(payload))
-        re = self._post(
+        re = self._put(
             '/v1/identities/{}/payout'.format(identity),
             payload,
             headers=auth['headers']

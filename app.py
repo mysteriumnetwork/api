@@ -310,10 +310,10 @@ def save_identity(caller_identity):
 
 
 # End Point which creates or updates payout info next to identity
-@app.route('/v1/identities/<identity_url_param>/payout', methods=['POST'])
+@app.route('/v1/identities/<identity_url_param>/payout', methods=['PUT'])
 @validate_json
 @recover_identity
-def update_payout_info(identity_url_param, caller_identity):
+def set_payout_info(identity_url_param, caller_identity):
     payload = request.get_json(force=True)
 
     payout_eth_address = payload.get('payout_eth_address', None)
