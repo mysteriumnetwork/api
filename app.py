@@ -1,27 +1,25 @@
 import binascii
+import json
+import helpers
+import logging
+import base64
+import settings
+from datetime import datetime
 from flask import Flask, request, render_template, jsonify
 from flask_migrate import Migrate
 from werkzeug.debug import get_current_traceback
 from functools import wraps
-
 from ip import mask_ip_partially
-from models import db, Node, Session, NodeAvailability, Identity
-from datetime import datetime
-import json
-import helpers
-import logging
-import os
-
 from queries import filter_active_nodes, filter_active_nodes_by_service_type
+from identity_contract import IdentityContract
+from eth_utils.address import is_hex_address as is_valid_eth_address
 from signature import (
     recover_public_address,
     ValidationError as SignatureValidationError
 )
-import base64
-import settings
-
-from identity_contract import IdentityContract
-
+from models import (
+    db, Node, Session, NodeAvailability, Identity, IdentityRegistration
+)
 
 helpers.setup_logger()
 app = Flask(__name__)
@@ -56,6 +54,7 @@ def validate_json(f):
     return wrapper
 
 
+# TODO: move to authorization.py
 def decode_authorization_header(headers):
     # Authorization request header format:
     # Authorization: Signature <signature_base64_encoded>
@@ -307,6 +306,38 @@ def save_identity(caller_identity):
     db.session.add(identity)
     db.session.commit()
 
+    return jsonify({})
+
+
+# End Point which creates or updates payout info next to identity
+@app.route('/v1/identities/<identity_url_param>/payout', methods=['PUT'])
+@validate_json
+@recover_identity
+def set_payout_info(identity_url_param, caller_identity):
+    payload = request.get_json(force=True)
+
+    payout_eth_address = payload.get('payout_eth_address', None)
+    if payout_eth_address is None:
+        msg = 'missing payout_eth_address parameter in body'
+        return jsonify(error=msg), 400
+
+    if identity_url_param.lower() != caller_identity:
+        msg = 'no permission to modify this identity'
+        return jsonify(error=msg), 403
+
+    if not is_valid_eth_address(payout_eth_address):
+        msg = 'payout_eth_address is not in Ethereum address format'
+        return jsonify(error=msg), 400
+
+    record = IdentityRegistration.query.get(caller_identity)
+    if record:
+        record.update(payout_eth_address)
+        db.session.add(record)
+    else:
+        new_record = IdentityRegistration(caller_identity, payout_eth_address)
+        db.session.add(new_record)
+
+    db.session.commit()
     return jsonify({})
 
 

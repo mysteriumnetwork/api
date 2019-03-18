@@ -14,6 +14,8 @@ def sign_message_with_static_key(message):
 
 def generate_static_public_address():
     pk = _generate_static_private_key()
+
+    # TODO: remove .lower()
     public_address = pk.public_key.to_checksum_address().lower()
     return public_address
 

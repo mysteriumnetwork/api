@@ -20,7 +20,7 @@
 <div>Most parameters should be encoded in JSON and passed as HTTP body data.</div>
 <div>Returned values are encoded in JSON.</div>
 <div>Each endpoint returns status code. For example status code 200 means success.</div>
-<div>For POST methods Authorization header with signature is required.</div>
+<div>For POST and PUT methods Authorization header with signature is required.</div>
 
 <div class="endpoint">
     <div class="title">POST /v1/register_proposal</div>
@@ -115,7 +115,7 @@
     <div>Example JSON parameters:</div>
     <pre>
     {
-        "service_type": "openvpn"
+        "service_type": "openvpn",
         "bytes_sent": 1024,
         "bytes_received": 1024,
         "provider_id": "0x0000000000000000000000000000000000000001",
@@ -146,6 +146,21 @@
 <div class="endpoint">
     <div class="title">POST /v1/identities</div>
     <div>Saves new identity.</div>
+    <div>Returns:</div>
+    <pre>
+    {}
+    </pre>
+</div>
+
+<div class="endpoint">
+    <div class="title">PUT /v1/identities/{identity}/payout</div>
+    <div>Sets payout info for identity.</div>
+    <div>Example JSON parameters:</div>
+    <pre>
+    {
+        "payout_eth_address": "0x000000000000000000000000000000000000000A"
+    }
+    </pre>
     <div>Returns:</div>
     <pre>
     {}

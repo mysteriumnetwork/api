@@ -115,3 +115,20 @@ def _is_active(last_update_time):
     if last_update_time is None:
         return False
     return last_update_time > datetime.utcnow() - AVAILABILITY_TIMEOUT
+
+
+class IdentityRegistration(db.Model):
+    __tablename__ = 'identity_registration'
+    identity = db.Column(db.String(IDENTITY_LENGTH_LIMIT), primary_key=True)
+    created_at = db.Column(db.DateTime)
+    updated_at = db.Column(db.DateTime)
+    payout_eth_address = db.Column(db.String(IDENTITY_LENGTH_LIMIT))
+
+    def __init__(self, identity, payout_eth_address):
+        self.identity = identity
+        self.created_at = datetime.utcnow()
+        self.payout_eth_address = payout_eth_address
+
+    def update(self, payout_eth_address):
+        self.updated_at = datetime.utcnow()
+        self.payout_eth_address = payout_eth_address
