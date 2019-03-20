@@ -1,6 +1,8 @@
 from flask import Flask, render_template
 from dashboard import model_layer
 from werkzeug.contrib.cache import SimpleCache
+from dashboard.helpers import get_week_range
+from datetime import datetime
 import settings
 
 app = Flask(__name__)
@@ -32,6 +34,28 @@ def main():
 
         cache.set(
             'dashboard-page',
+            page_content,
+            timeout=1 * 60
+        )
+
+    return page_content
+
+
+@app.route('/leaderboard')
+def leaderboard():
+    page_content = cache.get('leaderboard')
+    if page_content is None:
+        date_from, date_to = get_week_range(datetime.utcnow().date())
+        nodes = model_layer.get_registered_nodes(date_from, date_to)
+        model_layer.enrich_registered_nodes_info(nodes, date_from, date_to)
+        page_content = render_template(
+            'leaderboard.html',
+            date_from=date_from.strftime("%Y-%m-%d"),
+            date_to=date_to.strftime("%Y-%m-%d"),
+            leaderboard_nodes=nodes,
+        )
+        cache.set(
+            'leaderboard',
             page_content,
             timeout=1 * 60
         )

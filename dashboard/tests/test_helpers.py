@@ -1,8 +1,11 @@
 import unittest
+from datetime import timedelta, datetime, date
 from dashboard.helpers import (
-    shorten_node_key, get_natural_size, format_duration
+    shorten_node_key,
+    get_natural_size,
+    format_duration,
+    get_week_range
 )
-from datetime import timedelta
 
 
 class TestHelpers(unittest.TestCase):
@@ -70,3 +73,9 @@ class TestHelpers(unittest.TestCase):
             '100hr 1min',
             format_duration(timedelta(hours=100, minutes=1))
         )
+
+    def test_get_week_range(self):
+        fixed_date = date(2019, 3, 20)
+        date_from, date_to = get_week_range(fixed_date)
+        self.assertEqual(datetime(2019, 3, 18, 0, 0, 0), date_from)
+        self.assertEqual(datetime(2019, 3, 25, 0, 0, 0), date_to)

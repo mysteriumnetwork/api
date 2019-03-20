@@ -38,6 +38,16 @@ def get_sessions_count_by_service_type(node_key, service_type):
     return query.count()
 
 
+def get_sessions_count_by_date(node_key, service_type, date_from, date_to):
+    query = models.Session.query.filter(
+        models.Session.node_key == node_key,
+        models.Session.service_type == service_type,
+        date_from <= models.Session.client_updated_at,
+        models.Session.client_updated_at < date_to
+    )
+    return query.count()
+
+
 def get_average_session_time():
     sql = text("""select
     AVG(TIME_TO_SEC(TIMEDIFF(client_updated_at, created_at)))
@@ -55,6 +65,23 @@ def get_total_data_transferred():
     myrow = result.fetchone()
     total_bytes = myrow[0] + myrow[1]
     return helpers.get_natural_size(total_bytes)
+
+
+def get_node_data_transferred(node_key, service_type, date_from, date_to):
+    row = models.Session.query.with_entities(
+        func.sum(models.Session.client_bytes_sent)
+            .label('total_bytes_sent'),
+        func.sum(models.Session.client_bytes_received)
+            .label('total_bytes_received'),
+     ).filter(
+        models.Session.node_key == node_key,
+        models.Session.service_type == service_type,
+        date_from <= models.Session.client_updated_at,
+        models.Session.client_updated_at < date_to,
+    ).one()
+    bytes_sent = row[0] or 0
+    bytes_received = row[1] or 0
+    return bytes_sent + bytes_received
 
 
 def get_country_string(country):
@@ -103,25 +130,58 @@ def get_available_nodes(limit=None):
     return nodes
 
 
+def get_node_hours_online(node_key, service_type, date_from, date_to) -> int:
+    records_count = models.NodeAvailability.query.filter(
+        models.NodeAvailability.node_key == node_key,
+        models.NodeAvailability.service_type == service_type,
+        date_from <= models.NodeAvailability.date,
+        models.NodeAvailability.date < date_to
+    ).count()
+    return int(round(records_count / 60.0))
+
+
+def get_registered_nodes(date_from, date_to):
+    selected_nodes = []
+    registered_ids = models.IdentityRegistration.query.all()
+    for id in registered_ids:
+        nodes = models.Node.query.filter(
+            models.Node.node_key == id.identity,
+            date_from <= models.Node.updated_at,
+            models.Node.updated_at < date_to
+        ).all()
+        selected_nodes += nodes
+
+    return selected_nodes
+
+
+def enrich_registered_nodes_info(nodes, date_from, date_to):
+    for node in nodes:
+        node.country_string = get_country_string(
+            node.get_country_from_service_proposal()
+        )
+        node.sessions_count = get_sessions_count_by_date(
+            node.node_key, node.service_type, date_from, date_to
+        )
+        total_bytes = get_node_data_transferred(
+            node.node_key,
+            node.service_type,
+            date_from,
+            date_to
+        )
+        node.data_transferred = helpers.get_natural_size(total_bytes)
+        hours_online = get_node_hours_online(
+            node.node_key,
+            node.service_type,
+            date_from, date_to
+        )
+        node.availability = '{} / 168 h'.format(hours_online)
+
+
 def get_node_status(node):
     return 'Online' if node.is_active() else 'Offline'
 
 
 def get_node_info(node_key, service_type):
-    def get_node_time_online(day):
-        records_count = models.NodeAvailability.query.filter(
-            models.NodeAvailability.node_key == node_key,
-            models.NodeAvailability.service_type == service_type,
-            day <= models.NodeAvailability.date,
-            models.NodeAvailability.date < day+timedelta(days=1)
-        ).count()
-
-        if records_count > 24*60:
-            # something broken
-            pass
-
-        return round(records_count / 60.0)
-
     node = models.Node.query.get([node_key, service_type])
     delta = datetime.utcnow() - node.updated_at
     node.last_seen = humanize.naturaltime(delta.total_seconds())
@@ -154,15 +214,22 @@ def get_node_info(node_key, service_type):
         day = today - timedelta(days=i)
         availability.append({
             'day': day.strftime('%Y-%m-%d'),
-            'time_online': get_node_time_online(day)
+            'time_online': get_node_hours_online(
+                node_key,
+                service_type,
+                day,
+                day + timedelta(days=1)
+            )
         })
 
     node.availability = availability
-
-    day_before = datetime.utcnow() - timedelta(days=1)
-    node.uptime = '{}h / 24h'.format(int(get_node_time_online(day_before)))
+    node.uptime = '{} / 24 h'.format(get_node_hours_online(
+        node_key,
+        service_type,
+        datetime.utcnow() - timedelta(days=1),
+        datetime.utcnow()
+    ))
     node.status = get_node_status(node)
-
     return node
 
 

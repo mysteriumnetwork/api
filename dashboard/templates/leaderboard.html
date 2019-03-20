@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+          <div class="row">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+              <div class="x_panel">
+                <div class="x_title">
+                  <h2>Weekly Leaderboard ({{date_from}} - {{date_to}})</h2>
+                  <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                    </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a>
+                    </li>
+                  </ul>
+                  <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+
+                  <table class="table table-hover clickable">
+                    <thead>
+                      <tr>
+                        <th class="enumerator">#</th>
+                        <th>Node</th>
+                        <th>Type</th>
+                        <th>Country</th>
+                        <th>Sessions</th>
+                        <th>Data Transferred</th>
+                        <th>Weekly Availability</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for node in leaderboard_nodes %}
+                      <tr onclick="window.document.location='/node/{{node.node_key}}/{{node.service_type}}'">
+                        <td scope="row" class="enumerator">{{loop.index}}</td>
+                        <td class="td-node-key">{{node.node_key}}</td>
+                        <td>{{node.service_type}}</td>
+                        <td>{{node.country_string}}</td>
+                        <td>{{node.sessions_count}}</td>
+                        <td>{{node.data_transferred}}</td>
+                        <td>{{node.availability}}</td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+{% endblock %}
