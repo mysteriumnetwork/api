@@ -44,7 +44,7 @@ def get_average_session_time():
     as averageDuration FROM session;""")
     result = models.db.engine.execute(sql)
     myrow = result.fetchone()
-    seconds = int(myrow[0])
+    seconds = int(myrow[0]) if myrow[0] is not None else 0
     return helpers.format_duration(timedelta(seconds=seconds))
 
 
@@ -53,7 +53,7 @@ def get_total_data_transferred():
     SUM(client_bytes_received) as clientBytesReceived FROM session;""")
     result = models.db.engine.execute(sql)
     myrow = result.fetchone()
-    total_bytes = myrow[0] + myrow[1]
+    total_bytes = (myrow[0] or 0) + (myrow[1] or 0)
     return helpers.get_natural_size(total_bytes)
 
 
