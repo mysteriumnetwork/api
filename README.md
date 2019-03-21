@@ -19,7 +19,8 @@ docker-compose up -d --build
 docker-compose exec api bin/db-upgrade
 ```
 
-- Service should be running on http://127.0.0.1:8001/
+- API service should be running on http://127.0.0.1:8001
+- Dashboard on http://127.0.0.1:8002
 
 ## Development
 
