@@ -57,7 +57,8 @@ def get_total_data_transferred():
     return helpers.get_natural_size(total_bytes)
 
 
-def aggregate_node_data_from_sessions(node_key, service_type, date_from, date_to):
+def aggregate_node_data_from_sessions(node_key, service_type,
+                                      date_from, date_to):
     query = models.Session.query.with_entities(
         func.sum(models.Session.client_bytes_sent)
             .label('total_bytes_sent'),
