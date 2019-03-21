@@ -2,8 +2,7 @@ from dashboard.tests.test_case import TestCase
 from dashboard.model_layer import (
     get_db,
     get_sessions_country_stats,
-    get_node_data_transferred,
-    get_sessions_count_by_date,
+    aggregate_node_data_from_sessions,
     get_node_hours_online,
     get_registered_nodes,
 )
@@ -39,7 +38,7 @@ class TestModelLayer(TestCase):
         get_db().session.add(session)
 
 
-class TestGetNodeDataTransferred(TestCase):
+class TestAggregateSessionsDataTransferred(TestCase):
     def test_match_node_key_and_service_type(self):
         self._create_session(
             'session key 1', 'node key', 'service type', now,  1, 2
@@ -53,7 +52,7 @@ class TestGetNodeDataTransferred(TestCase):
         self._create_session(
             'session key 4', 'other node key', 'service type', now, -100, -100
         )
-        total_bytes = get_node_data_transferred(
+        _, total_bytes = aggregate_node_data_from_sessions(
             'node key',
             'service type',
             now,
@@ -68,7 +67,7 @@ class TestGetNodeDataTransferred(TestCase):
         self._create_session(
             'session key 2', 'node key', 'service type', now + second, 1, 2
         )
-        total_bytes = get_node_data_transferred(
+        _, total_bytes = aggregate_node_data_from_sessions(
             'node key',
             'service type',
             now,
@@ -88,7 +87,7 @@ class TestGetNodeDataTransferred(TestCase):
         get_db().session.add(session)
 
 
-class TestGetSessionsCountByDate(TestCase):
+class TestAggregateSessionsCount(TestCase):
     def test_match_query_params(self):
         self._create_session(
             'session key 1', 'node key', 'service type', now
@@ -105,13 +104,16 @@ class TestGetSessionsCountByDate(TestCase):
         self._create_session(
             'session key 5', 'node key', 'service type', now + second
         )
-        sessions_count = get_sessions_count_by_date(
+        self._create_session(
+            'session key 6', 'node key', 'service type', now
+        )
+        sessions_count, _ = aggregate_node_data_from_sessions(
             'node key',
             'service type',
             now,
             now + second
         )
-        self.assertEqual(1, sessions_count)
+        self.assertEqual(2, sessions_count)
 
     @staticmethod
     def _create_session(session_key, node_key, service_type, updated_at):

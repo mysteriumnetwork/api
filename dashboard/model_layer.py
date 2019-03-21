@@ -31,21 +31,11 @@ def get_sessions_count(node_key=None, only_active_sessions=False):
 
 
 def get_sessions_count_by_service_type(node_key, service_type):
-    query = models.Session.query.filter(
+    query = models.Session.query.with_entities(func.count()).filter(
         models.Session.node_key == node_key,
         models.Session.service_type == service_type
     )
-    return query.count()
-
-
-def get_sessions_count_by_date(node_key, service_type, date_from, date_to):
-    query = models.Session.query.filter(
-        models.Session.node_key == node_key,
-        models.Session.service_type == service_type,
-        date_from <= models.Session.client_updated_at,
-        models.Session.client_updated_at < date_to
-    )
-    return query.count()
+    return query.scalar()
 
 
 def get_average_session_time():
@@ -67,21 +57,26 @@ def get_total_data_transferred():
     return helpers.get_natural_size(total_bytes)
 
 
-def get_node_data_transferred(node_key, service_type, date_from, date_to):
-    row = models.Session.query.with_entities(
+def aggregate_node_data_from_sessions(node_key, service_type, date_from, date_to):
+    query = models.Session.query.with_entities(
         func.sum(models.Session.client_bytes_sent)
             .label('total_bytes_sent'),
         func.sum(models.Session.client_bytes_received)
             .label('total_bytes_received'),
+        func.count()
+            .label('total_sessions'),
      ).filter(
         models.Session.node_key == node_key,
         models.Session.service_type == service_type,
         date_from <= models.Session.client_updated_at,
         models.Session.client_updated_at < date_to,
-    ).one()
-    bytes_sent = row[0] or 0
-    bytes_received = row[1] or 0
-    return bytes_sent + bytes_received
+    )
+    row = query.one()
+    bytes_sent = int(row[0] or 0)
+    bytes_received = int(row[1] or 0)
+    sessions_count = int(row[2] or 0)
+    bytes_total = bytes_sent + bytes_received
+    return sessions_count, bytes_total
 
 
 def get_country_string(country):
@@ -131,27 +126,25 @@ def get_available_nodes(limit=None):
 
 
 def get_node_hours_online(node_key, service_type, date_from, date_to) -> int:
-    records_count = models.NodeAvailability.query.filter(
+    query = models.NodeAvailability.query.with_entities(func.count()).filter(
         models.NodeAvailability.node_key == node_key,
         models.NodeAvailability.service_type == service_type,
         date_from <= models.NodeAvailability.date,
         models.NodeAvailability.date < date_to
-    ).count()
+    )
+    records_count = query.scalar()
     return int(round(records_count / 60.0))
 
 
 def get_registered_nodes(date_from, date_to):
-    selected_nodes = []
-    registered_ids = models.IdentityRegistration.query.all()
-    for id in registered_ids:
-        nodes = models.Node.query.filter(
-            models.Node.node_key == id.identity,
-            date_from <= models.Node.updated_at,
-            models.Node.updated_at < date_to
-        ).all()
-        selected_nodes += nodes
-
-    return selected_nodes
+    query = models.Node.query.join(
+        models.IdentityRegistration,
+        models.IdentityRegistration.identity == models.Node.node_key,
+    ).filter(
+        date_from <= models.Node.updated_at,
+        models.Node.updated_at < date_to
+    )
+    return query.all()
 
 
 def enrich_registered_nodes_info(nodes, date_from, date_to):
@@ -159,15 +152,10 @@ def enrich_registered_nodes_info(nodes, date_from, date_to):
         node.country_string = get_country_string(
             node.get_country_from_service_proposal()
         )
-        node.sessions_count = get_sessions_count_by_date(
+        sessions_count, total_bytes = aggregate_node_data_from_sessions(
             node.node_key, node.service_type, date_from, date_to
         )
-        total_bytes = get_node_data_transferred(
-            node.node_key,
-            node.service_type,
-            date_from,
-            date_to
-        )
+        node.sessions_count = sessions_count
         node.data_transferred = helpers.get_natural_size(total_bytes)
         hours_online = get_node_hours_online(
             node.node_key,
