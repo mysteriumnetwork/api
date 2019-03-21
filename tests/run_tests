@@ -1,0 +1,8 @@
+#!/bin/sh
+
+(cd tests; docker-compose up --build -d)
+echo "Sleeping for 10s until everything initializes"
+sleep 10
+(cd tests; docker-compose exec api bin/db-upgrade)
+
+bin/test

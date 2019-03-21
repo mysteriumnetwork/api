@@ -23,8 +23,17 @@ from models import (
 
 helpers.setup_logger()
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://{}:{}@{}/{}'.format(
-    settings.USER, settings.PASSWD, settings.DB_HOST, settings.DB_NAME)
+
+
+def _generate_database_uri(db_config):
+    return 'mysql+pymysql://{}:{}@{}/{}'.format(
+        db_config['user'], db_config['passwd'], db_config['host'],
+        db_config['name'])
+
+
+app.config['SQLALCHEMY_DATABASE_URI'] =\
+    _generate_database_uri(settings.DB_CONFIG)
+
 
 migrate = Migrate(app, db)
 
@@ -390,7 +399,10 @@ def start_debug_app():
     app.run(debug=True)
 
 
-def init_db():
+def init_db(custom_config=None):
+    if custom_config is not None:
+        app.config['SQLALCHEMY_DATABASE_URI'] =\
+            _generate_database_uri(custom_config)
     db.init_app(app)
 
 

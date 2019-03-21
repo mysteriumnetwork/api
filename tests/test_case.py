@@ -1,20 +1,27 @@
 from flask_testing import TestCase
-import app as main
+from app import app, init_db
 import json
+from models import db
 
 
 class TestCase(TestCase):
     def create_app(self):
-        main.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
-        main.db.init_app(main.app)
-        return main.app
+        db_config = {
+            'host': 'localhost:33062',
+            'name': 'myst_api',
+            'user': 'myst_api',
+            'passwd': 'myst_api'
+        }
+
+        init_db(db_config)
+        return app
 
     def setUp(self):
-        main.db.create_all()
+        db.create_all()
 
     def tearDown(self):
-        main.db.session.remove()
-        main.db.drop_all()
+        db.session.remove()
+        db.drop_all()
 
     # TODO: find better place to move constant
     REMOTE_ADDR = '8.8.8.8'

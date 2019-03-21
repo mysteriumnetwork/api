@@ -1,10 +1,11 @@
-from tests.test_case import TestCase, main
+from tests.test_case import TestCase
 from tests.utils import (
     build_test_authorization,
     build_static_public_address
 )
 from models import IdentityRegistration
 import json
+from models import db
 
 
 class TestIdentities(TestCase):
@@ -76,8 +77,8 @@ class TestIdentities(TestCase):
     def test_payout_update(self):
         identity = build_static_public_address().upper()
         pre_record = IdentityRegistration(identity.lower(), '')
-        main.db.session.add(pre_record)
-        main.db.session.commit()
+        db.session.add(pre_record)
+        db.session.commit()
 
         payload = {
             'payout_eth_address': '0x000000000000000000000000000000000000000a'
@@ -103,8 +104,8 @@ class TestIdentities(TestCase):
         identity = build_static_public_address().upper()
         eth_address = build_static_public_address().upper()
         pre_record = IdentityRegistration(identity.lower(), eth_address)
-        main.db.session.add(pre_record)
-        main.db.session.commit()
+        db.session.add(pre_record)
+        db.session.commit()
 
         auth = build_test_authorization()
         re = self._get(
@@ -131,8 +132,8 @@ class TestIdentities(TestCase):
         other_identity = '0X000000000000000000000000000000000000000A'
         eth_address = build_static_public_address().upper()
         pre_record = IdentityRegistration(other_identity.lower(), eth_address)
-        main.db.session.add(pre_record)
-        main.db.session.commit()
+        db.session.add(pre_record)
+        db.session.commit()
 
         auth = build_test_authorization()
         re = self._get(

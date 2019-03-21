@@ -35,7 +35,10 @@ class Node(db.Model):
 
     def mark_inactive(self):
         # TODO this is bad, need a good way to save unregistered node state
-        self.updated_at = datetime.utcnow() - AVAILABILITY_TIMEOUT
+        # time in percona is rounded to seconds,
+        # so need additional 1 second to ensure node becomes inactive instantly
+        value = datetime.utcnow() - AVAILABILITY_TIMEOUT - timedelta(seconds=1)
+        self.updated_at = value
 
     def get_service_proposals(self):
         try:
@@ -115,7 +118,8 @@ class Identity(db.Model):
 def _is_active(last_update_time):
     if last_update_time is None:
         return False
-    return last_update_time > datetime.utcnow() - AVAILABILITY_TIMEOUT
+    passed = datetime.utcnow() - last_update_time
+    return passed < AVAILABILITY_TIMEOUT
 
 
 class IdentityRegistration(db.Model):

@@ -28,7 +28,7 @@ class TestGetLeaderBoardRows(TestCase):
             'session 4', 'consumer id 3',
             'provider id', 'service y', now, 3, 4
         )
-        rows = get_leaderboard_rows(now, now)
+        rows = get_leaderboard_rows(now - second, now + second)
         self.assertEqual(1, len(rows))
         self.assertEqual('provider id', rows[0].provider_id)
         self.assertEqual(4, rows[0].sessions_count)

@@ -8,6 +8,13 @@ DB_NAME = os.environ.get('DB_NAME') or ''
 USER = os.environ.get('DB_USER') or ''
 PASSWD = os.environ.get('DB_PASSWORD') or ''
 
+DB_CONFIG = {
+    'host': DB_HOST,
+    'name': DB_NAME,
+    'user': USER,
+    'passwd': PASSWD
+}
+
 # util.strtobool
 # True values are y, yes, t, true, on and 1;
 # False values are n, no, f, false, off and 0.
