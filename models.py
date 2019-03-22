@@ -58,6 +58,7 @@ class Session(db.Model):
     __tablename__ = 'session'
 
     session_key = db.Column(db.String(SESSION_KEY_LIMIT), primary_key=True)
+    # TODO: rename to provider_id
     node_key = db.Column(db.String(IDENTITY_LENGTH_LIMIT))
     created_at = db.Column(db.DateTime)
     node_updated_at = db.Column(db.DateTime)

@@ -1,12 +1,29 @@
-from flask import Flask, render_template
-from dashboard import model_layer
+from dashboard.db_queries.leaderboard import (
+    get_leaderboard_rows,
+    enrich_leaderboard_rows
+)
+from dashboard.model_layer import (
+    get_active_nodes_count,
+    get_sessions_count,
+    get_average_session_time,
+    get_total_data_transferred,
+    get_available_nodes,
+    get_sessions,
+    get_node_info,
+    get_sessions_country_stats,
+    get_nodes,
+    get_session_info
+)
 from werkzeug.contrib.cache import SimpleCache
 from dashboard.helpers import get_week_range
+from flask import Flask, render_template
 from datetime import datetime
+from models import db
 import settings
 
+
 app = Flask(__name__)
-model_layer.get_db().init_app(app)
+db.init_app(app)
 
 cache = SimpleCache()
 
@@ -21,15 +38,15 @@ def main():
 
         page_content = render_template(
             'dashboard.html',
-            active_nodes_count=model_layer.get_active_nodes_count(),
-            sessions_count=model_layer.get_sessions_count(),
-            active_sessions_count=model_layer.get_sessions_count(
+            active_nodes_count=get_active_nodes_count(),
+            sessions_count=get_sessions_count(),
+            active_sessions_count=get_sessions_count(
                 only_active_sessions=True
             ),
-            average_session_time=model_layer.get_average_session_time(),
-            total_data_transferred=model_layer.get_total_data_transferred(),
-            available_nodes=model_layer.get_available_nodes(limit=10),
-            sessions=model_layer.get_sessions(limit=10),
+            average_session_time=get_average_session_time(),
+            total_data_transferred=get_total_data_transferred(),
+            available_nodes=get_available_nodes(limit=10),
+            sessions=get_sessions(limit=10),
         )
 
         cache.set(
@@ -46,13 +63,13 @@ def leaderboard():
     page_content = cache.get('leaderboard')
     if page_content is None:
         date_from, date_to = get_week_range(datetime.utcnow().date())
-        nodes = model_layer.get_registered_nodes(date_from, date_to)
-        model_layer.enrich_registered_nodes_info(nodes, date_from, date_to)
+        leader_board_rows = get_leaderboard_rows(date_from, date_to, 10)
+        enrich_leaderboard_rows(leader_board_rows, date_from, date_to)
         page_content = render_template(
             'leaderboard.html',
             date_from=date_from.strftime("%Y-%m-%d"),
             date_to=date_to.strftime("%Y-%m-%d"),
-            leaderboard_nodes=nodes,
+            leaderboard_rows=leader_board_rows,
         )
         cache.set(
             'leaderboard',
@@ -65,7 +82,7 @@ def leaderboard():
 
 @app.route('/node/<key>/<service_type>')
 def node(key, service_type):
-    node = model_layer.get_node_info(key, service_type)
+    node = get_node_info(key, service_type)
     return render_template(
         'node.html',
         node=node,
@@ -77,7 +94,7 @@ def nodes():
 
     nodes = cache.get('all-nodes')
     if nodes is None:
-        nodes = model_layer.get_nodes(limit=500)
+        nodes = get_nodes(limit=500)
         cache.set(
             'all-nodes',
             nodes,
@@ -92,7 +109,7 @@ def nodes():
 
 @app.route('/session/<key>')
 def session(key):
-    session = model_layer.get_session_info(key)
+    session = get_session_info(key)
     return render_template(
         'session.html',
         session=session,
@@ -103,7 +120,7 @@ def session(key):
 def sessions():
     sessions = cache.get('all-sessions')
     if sessions is None:
-        sessions = model_layer.get_sessions(limit=500)
+        sessions = get_sessions(limit=500)
         cache.set(
             'all-sessions',
             sessions,
@@ -118,7 +135,7 @@ def sessions():
 
 @app.route('/sessions-country')
 def sessions_country():
-    results = model_layer.get_sessions_country_stats()
+    results = get_sessions_country_stats()
 
     return render_template(
         'sessions-country.html',
