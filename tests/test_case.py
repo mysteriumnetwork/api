@@ -19,10 +19,11 @@ class TestCase(TestCase):
     # TODO: find better place to move constant
     REMOTE_ADDR = '8.8.8.8'
 
-    def _get(self, url, params={}):
+    def _get(self, url, params={}, headers=None):
         return self.client.get(
             url,
             query_string=params,
+            headers=headers,
             environ_base={'REMOTE_ADDR': self.REMOTE_ADDR}
         )
 

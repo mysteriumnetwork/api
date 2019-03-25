@@ -7,7 +7,7 @@ from models import IdentityRegistration
 import json
 
 
-class TestPost(TestCase):
+class TestIdentities(TestCase):
     def test_payout_no_payout_address(self):
         identity = generate_static_public_address().upper()
         payload = {}
@@ -98,3 +98,48 @@ class TestPost(TestCase):
             record.payout_eth_address
         )
         self.assertIsNotNone(record.updated_at)
+
+    def test_get_payout_returns_eth_address(self):
+        identity = generate_static_public_address().upper()
+        eth_address = generate_static_public_address().upper()
+        pre_record = IdentityRegistration(identity.lower(), eth_address)
+        main.db.session.add(pre_record)
+        main.db.session.commit()
+
+        auth = generate_test_authorization()
+        re = self._get(
+            '/v1/identities/{}/payout'.format(identity),
+            headers=auth['headers']
+        )
+        self.assertEqual(200, re.status_code)
+        self.assertEqual({'eth_address': eth_address}, re.json)
+
+    def test_get_payout_returns_404_with_no_payout_info(self):
+        identity = generate_static_public_address().upper()
+
+        auth = generate_test_authorization()
+        re = self._get(
+            '/v1/identities/{}/payout'.format(identity),
+            headers=auth['headers']
+        )
+        self.assertEqual(404, re.status_code)
+        self.assertEqual(
+            {'error': 'payout info for this identity not found'},
+            re.json)
+
+    def test_get_payout_returns_403_when_requesting_other_identity(self):
+        other_identity = '0X000000000000000000000000000000000000000A'
+        eth_address = generate_static_public_address().upper()
+        pre_record = IdentityRegistration(other_identity.lower(), eth_address)
+        main.db.session.add(pre_record)
+        main.db.session.commit()
+
+        auth = generate_test_authorization(json.dumps({}))
+        re = self._get(
+            '/v1/identities/{}/payout'.format(other_identity),
+            headers=auth['headers']
+        )
+        self.assertEqual(403, re.status_code)
+        self.assertEqual(
+            {'error': 'no permission to access this identity'},
+            re.json)
