@@ -4,7 +4,7 @@ from app import decode_authorization_header
 import base64
 from tests.utils import (
     sign_message_with_static_key,
-    generate_static_public_address,
+    build_static_public_address,
 )
 
 
@@ -85,7 +85,7 @@ class TestAuthorizationHeader(TestCase):
 
     def test_successful(self):
         signature = sign_message_with_static_key('')
-        public_address = generate_static_public_address()
+        public_address = build_static_public_address()
 
         signature_value = base64.b64encode(signature).decode("utf-8")
         headers = {

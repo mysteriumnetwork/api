@@ -4,8 +4,8 @@ from datetime import datetime, timedelta
 from models import Session, Node, NodeAvailability, AVAILABILITY_TIMEOUT
 from tests.test_case import TestCase, main
 from tests.utils import (
-    generate_test_authorization,
-    generate_static_public_address,
+    build_test_authorization,
+    build_static_public_address,
     setting
 )
 from identity_contract import IdentityContractFake
@@ -13,7 +13,7 @@ from identity_contract import IdentityContractFake
 
 class TestApi(TestCase):
     def test_register_proposal_successful(self):
-        public_address = generate_static_public_address()
+        public_address = build_static_public_address()
         payload = {
             "service_proposal": {
                 "id": 1,
@@ -22,7 +22,7 @@ class TestApi(TestCase):
                 "service_type": "openvpn",
             }
         }
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         main.identity_contract = IdentityContractFake(True)
         re = self._post(
             '/v1/register_proposal',
@@ -35,7 +35,7 @@ class TestApi(TestCase):
         self.assertEqual(self.REMOTE_ADDR, node.ip)
 
     def test_register_multiple_proposals_successful(self):
-        public_address = generate_static_public_address()
+        public_address = build_static_public_address()
         payload = {
             "service_proposal": {
                 "id": 1,
@@ -44,7 +44,7 @@ class TestApi(TestCase):
                 "service_type": "openvpn",
             }
         }
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         main.identity_contract = IdentityContractFake(True)
         re = self._post(
             '/v1/register_proposal',
@@ -62,7 +62,7 @@ class TestApi(TestCase):
             }
         }
 
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         main.identity_contract = IdentityContractFake(True)
         re = self._post(
             '/v1/register_proposal',
@@ -78,7 +78,7 @@ class TestApi(TestCase):
         self.assertIsNotNone(node_dummy)
 
     def test_register_proposal_successful_with_dummy_type(self):
-        public_address = generate_static_public_address()
+        public_address = build_static_public_address()
         payload = {
             "service_proposal": {
                 "id": 1,
@@ -87,7 +87,7 @@ class TestApi(TestCase):
                 "service_type": "dummy",
             }
         }
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         main.identity_contract = IdentityContractFake(True)
         re = self._post(
             '/v1/register_proposal',
@@ -101,7 +101,7 @@ class TestApi(TestCase):
         self.assertEqual("dummy", node.service_type)
 
     def test_register_proposal_with_unknown_ip(self):
-        public_address = generate_static_public_address()
+        public_address = build_static_public_address()
         payload = {
             "service_proposal": {
                 "id": 1,
@@ -111,7 +111,7 @@ class TestApi(TestCase):
             }
         }
 
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         main.identity_contract = IdentityContractFake(True)
         re = self._post(
             '/v1/register_proposal',
@@ -135,7 +135,7 @@ class TestApi(TestCase):
             }
         }
 
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         re = self._post(
             '/v1/register_proposal',
             payload,
@@ -148,7 +148,7 @@ class TestApi(TestCase):
         self.assertIsNotNone(re.json)
 
     def test_register_proposal_missing_service_type(self):
-        public_address = generate_static_public_address()
+        public_address = build_static_public_address()
         payload = {
             "service_proposal": {
                 "id": 1,
@@ -156,7 +156,7 @@ class TestApi(TestCase):
                 "provider_id": public_address,
             }
         }
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         re = self._post(
             '/v1/register_proposal',
             payload,
@@ -176,7 +176,7 @@ class TestApi(TestCase):
                 "service_type": "openvpn",
             }
         }
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         main.identity_contract = IdentityContractFake(True)
         re = self._post(
             '/v1/register_proposal',
@@ -209,7 +209,7 @@ class TestApi(TestCase):
         self.assertEqual({"error": 'payload must be a valid json'}, re.json)
 
     def test_register_proposal_with_unregistered_identity(self):
-        public_address = generate_static_public_address()
+        public_address = build_static_public_address()
         payload = {
             "service_proposal": {
                 "id": 1,
@@ -217,7 +217,7 @@ class TestApi(TestCase):
                 "provider_id": public_address,
             }
         }
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         main.identity_contract = IdentityContractFake(False)
         re = self._post(
             '/v1/register_proposal',
@@ -230,7 +230,7 @@ class TestApi(TestCase):
         )
 
     def test_register_proposal_with_verification_disabled(self):
-        public_address = generate_static_public_address()
+        public_address = build_static_public_address()
         payload = {
             "service_proposal": {
                 "id": 1,
@@ -240,7 +240,7 @@ class TestApi(TestCase):
             }
         }
 
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         main.identity_contract = IdentityContractFake(False)
         with setting('DISCOVERY_VERIFY_IDENTITY', False):
             re = self._post(
@@ -255,7 +255,7 @@ class TestApi(TestCase):
         )
 
     def test_unregister_proposal_successful(self):
-        public_address = generate_static_public_address()
+        public_address = build_static_public_address()
         node = self._create_node(public_address, "openvpn")
         node.mark_activity()
         self.assertTrue(node.is_active())
@@ -264,7 +264,7 @@ class TestApi(TestCase):
         payload = {
             "provider_id": public_address
         }
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         re = self._post(
             '/v1/unregister_proposal',
             payload,
@@ -275,7 +275,7 @@ class TestApi(TestCase):
         self.assertFalse(node.is_active())
 
     def test_unregister_proposal_multiple_types(self):
-        public_address = generate_static_public_address()
+        public_address = build_static_public_address()
         node_openvpn = self._create_node(public_address, "openvpn")
         node_openvpn.mark_activity()
         self.assertTrue(node_openvpn.is_active())
@@ -289,7 +289,7 @@ class TestApi(TestCase):
             "provider_id": public_address,
             "service_type": "dummy",
         }
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         re = self._post(
             '/v1/unregister_proposal',
             payload,
@@ -305,7 +305,7 @@ class TestApi(TestCase):
         payload = {
 
         }
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         re = self._post(
             '/v1/unregister_proposal',
             payload,
@@ -318,7 +318,7 @@ class TestApi(TestCase):
             "provider_id": "incorrect"
         }
 
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         re = self._post(
             '/v1/unregister_proposal',
             payload,
@@ -450,7 +450,7 @@ class TestApi(TestCase):
             'provider_id': '0x1',
             'consumer_country': 'country'
         }
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         re = self._post(
             '/v1/sessions/123/stats',
             payload,
@@ -478,7 +478,7 @@ class TestApi(TestCase):
             'consumer_country': 'country',
             'service_type': 'dummy'
         }
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         re = self._post(
             '/v1/sessions/123/stats',
             payload,
@@ -504,7 +504,7 @@ class TestApi(TestCase):
             'bytes_received': 40,
             'provider_id': '0x1',
         }
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         re = self._post(
             '/v1/sessions/123/stats',
             payload,
@@ -522,7 +522,7 @@ class TestApi(TestCase):
             'bytes_received': 40,
             'provider_id': '0x1',
         }
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         re = self._post(
             '/v1/sessions/123/stats',
             payload,
@@ -548,7 +548,7 @@ class TestApi(TestCase):
             'bytes_received': 40,
             'provider_id': '0x1',
         }
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
 
         session = Session('123')
         session.consumer_id = auth['public_address']
@@ -580,7 +580,7 @@ class TestApi(TestCase):
             'bytes_received': 40,
             'provider_id': '0x1',
         }
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         re = self._post(
             '/v1/sessions/123/stats',
             payload,
@@ -596,7 +596,7 @@ class TestApi(TestCase):
         self.assertEqual(0, session.client_bytes_sent)
 
     def test_session_stats_create_with_negative_values(self):
-        auth = generate_test_authorization()
+        auth = build_test_authorization()
         re = self._post(
             '/v1/sessions/123/stats',
             {
@@ -635,7 +635,7 @@ class TestApi(TestCase):
             'bytes_sent': 20,
             'bytes_received': 40,
         }
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         re = self._post(
             '/v1/sessions/123/stats',
             payload,
@@ -656,7 +656,7 @@ class TestApi(TestCase):
             'bytes_received': 40,
             'provider_id': '0x1',
         }
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         re = self._post(
             '/v1/sessions/123/stats',
             payload,
@@ -677,7 +677,7 @@ class TestApi(TestCase):
             'bytes_sent': 20,
             'provider_id': '0x1',
         }
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         re = self._post(
             '/v1/sessions/123/stats',
             payload,
@@ -699,7 +699,7 @@ class TestApi(TestCase):
             'bytes_received': 40,
             'provider_id': '0x1',
         }
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         session = Session('123')
         session.consumer_id = auth['public_address']
         session.created_at = datetime.utcnow() - timedelta(minutes=11)
@@ -745,7 +745,7 @@ class TestApi(TestCase):
 
     def test_ping_proposal(self):
         payload = {}
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
 
         self._create_node(auth['public_address'], "openvpn")
 
@@ -761,7 +761,7 @@ class TestApi(TestCase):
 
     def test_ping_proposal_with_service_type(self):
         payload = {'service_type': 'dummy'}
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
 
         self._create_node(auth['public_address'], "dummy")
 
@@ -778,7 +778,7 @@ class TestApi(TestCase):
 
     def test_ping_proposal_no_node_with_service_type(self):
         payload = {'service_type': 'dummy'}
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
 
         self._create_node(auth['public_address'], "openvpn")
 
@@ -792,7 +792,7 @@ class TestApi(TestCase):
 
     def test_ping_proposal_with_type(self):
         payload = {}
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
 
         node = self._create_node(auth['public_address'], "dummy")
 
@@ -805,7 +805,7 @@ class TestApi(TestCase):
         self.assertEqual({'error': 'node key not found'}, re.json)
 
         payload = {'service_type': 'dummy'}
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         re = self._post(
             '/v1/ping_proposal',
             payload,
@@ -816,7 +816,7 @@ class TestApi(TestCase):
 
     def test_node_send_stats_with_unknown_node(self):
         payload = {}
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
 
         re = self._post(
             '/v1/node_send_stats',
@@ -828,7 +828,7 @@ class TestApi(TestCase):
 
     def test_restrict_by_ip_fail(self):
         payload = {}
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
 
         self._create_node(auth['public_address'], "openvpn")
 
@@ -849,7 +849,7 @@ class TestApi(TestCase):
 
     def test_restrict_by_ip_success(self):
         payload = {}
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
 
         self._create_node(auth['public_address'], "openvpn")
 

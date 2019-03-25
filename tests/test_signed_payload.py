@@ -1,10 +1,10 @@
 from tests.test_case import TestCase
-from tests.utils import generate_test_authorization
+from tests.utils import build_test_authorization
 
 
 class TestApi(TestCase):
     def test_successful_request(self):
-        auth = generate_test_authorization()
+        auth = build_test_authorization()
         re = self.client.get('/v1/me', headers=auth['headers'])
 
         self.assertEqual(200, re.status_code)
