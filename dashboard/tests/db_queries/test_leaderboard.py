@@ -28,7 +28,7 @@ class TestGetLeaderBoardRows(TestCase):
             'session 4', 'consumer id 3',
             'provider id', 'service y', now, 3, 4
         )
-        rows = get_leaderboard_rows(now, now + second)
+        rows = get_leaderboard_rows(now, now)
         self.assertEqual(1, len(rows))
         self.assertEqual('provider id', rows[0].provider_id)
         self.assertEqual(4, rows[0].sessions_count)
@@ -47,7 +47,7 @@ class TestGetLeaderBoardRows(TestCase):
             'session 2', None,
             'provider id', 'service 2', now, 0, 0
         )
-        rows = get_leaderboard_rows(now, now + second)
+        rows = get_leaderboard_rows(now, now)
         self.assertEqual(0, len(rows))
 
     def test_session_updated_at_mismatch(self):
@@ -61,13 +61,13 @@ class TestGetLeaderBoardRows(TestCase):
             'session 2', None, 'provider id',
             'service', now + second, 0, 0
         )
-        rows = get_leaderboard_rows(now, now + second)
+        rows = get_leaderboard_rows(now, now)
         self.assertEqual(0, len(rows))
 
     def test_node_has_no_sessions(self):
         self._create_identity_registration('provider id')
         self._create_node('provider id', 'service', now)
-        rows = get_leaderboard_rows(now, now + second)
+        rows = get_leaderboard_rows(now, now)
         self.assertEqual(0, len(rows))
 
     def test_node_was_not_registered(self):
@@ -76,7 +76,7 @@ class TestGetLeaderBoardRows(TestCase):
             'session', None, 'provider id',
             'service', now, 0, 0
         )
-        rows = get_leaderboard_rows(now, now + second)
+        rows = get_leaderboard_rows(now, now)
         self.assertEqual(0, len(rows))
 
     def test_registered_without_node(self):
@@ -85,7 +85,7 @@ class TestGetLeaderBoardRows(TestCase):
             'session', None, 'provider id',
             'service', now, 0, 0
         )
-        rows = get_leaderboard_rows(now, now + second)
+        rows = get_leaderboard_rows(now, now)
         self.assertEqual(0, len(rows))
 
     @staticmethod

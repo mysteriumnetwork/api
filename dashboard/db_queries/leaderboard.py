@@ -46,15 +46,15 @@ def get_leaderboard_rows(date_from, date_to, limit=10):
         INNER JOIN session s ON s.node_key = ir.identity
             AND s.service_type = n.service_type
         WHERE s.client_updated_at >= '{date_from}'
-            AND s.client_updated_at < '{date_to}'
+            AND s.client_updated_at <= '{date_to}'
             AND n.updated_at >= '{date_from}'
-            AND n.updated_at < '{date_to}'
+            AND n.updated_at <= '{date_to}'
         GROUP BY ir.identity, n.node_key
         ORDER BY total_bytes DESC
         LIMIT {limit}
         """.format(
-            date_from=date_from.strftime("%Y-%m-%d %H:%M:%S"),
-            date_to=date_to.strftime("%Y-%m-%d %H:%M:%S"),
+            date_from=date_from,
+            date_to=date_to,
             limit=limit
         )
     )

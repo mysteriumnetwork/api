@@ -8,7 +8,7 @@ second = timedelta(seconds=1)
 
 
 class TestNodeAvailability(TestCase):
-    def test_returns_one_hour(self):
+    def test_result_is_rounded_to_hour(self):
         for x in range(31):
             self._create_node_availability('node key', 'service type', now)
 
@@ -16,7 +16,7 @@ class TestNodeAvailability(TestCase):
             'node key',
             'service type',
             now,
-            now + second
+            now
         )
         self.assertEqual(1, hours)
 
@@ -40,7 +40,7 @@ class TestNodeAvailability(TestCase):
             'node key',
             'service type',
             now,
-            now + second
+            now
         )
         self.assertEqual(0, hours)
 
