@@ -1,20 +1,19 @@
 from dashboard.tests.test_case import TestCase
-from dashboard import model_layer
-import models
+from dashboard.model_layer import get_sessions_country_stats
+from datetime import datetime, timedelta
+from models import db, Session
+
+now = datetime.utcnow()
+second = timedelta(seconds=1)
 
 
 class TestModelLayer(TestCase):
-    def test_get_db(self):
-        db = model_layer.get_db()
-        self.assertIsNotNone(db)
-        self.assertEqual(models.db, db)
-
     def test_get_sessions_country_stats(self):
         self._create_session(1, 'country')
         self._create_session(2, 'country')
         self._create_session(3, None)
 
-        results = model_layer.get_sessions_country_stats()
+        results = get_sessions_country_stats()
         self.assertEqual(2, len(results))
         self.assertEqual(2, results[0].count)
         self.assertEqual('country', results[0].client_country)
@@ -23,6 +22,6 @@ class TestModelLayer(TestCase):
 
     @staticmethod
     def _create_session(session_key, country):
-        session = models.Session(session_key)
+        session = Session(session_key)
         session.client_country = country
-        model_layer.get_db().session.add(session)
+        db.session.add(session)

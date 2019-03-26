@@ -1,6 +1,7 @@
 import models
 import humanize
-from datetime import timedelta
+from datetime import timedelta, datetime
+import calendar
 
 
 def shorten_node_key(node_key):
@@ -27,3 +28,12 @@ def format_duration(duration: timedelta) -> str:
         result += '%dhr ' % hours
     result += '%dmin' % minutes
     return result
+
+
+# calculates week range starting from Monday to Monday from provided date
+def get_week_range(date):
+    monday = date + timedelta(days=-date.weekday(), weeks=0)
+    monday_timestamp = calendar.timegm(monday.timetuple())
+    date_from = datetime.utcfromtimestamp(monday_timestamp)
+    date_to = date_from + timedelta(days=7)
+    return date_from, date_to
