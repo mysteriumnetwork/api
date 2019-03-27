@@ -134,7 +134,7 @@ class TestIdentities(TestCase):
         main.db.session.add(pre_record)
         main.db.session.commit()
 
-        auth = build_test_authorization(json.dumps({}))
+        auth = build_test_authorization()
         re = self._get(
             '/v1/identities/{}/payout'.format(other_identity),
             headers=auth['headers']
