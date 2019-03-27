@@ -1,17 +1,17 @@
 from tests.test_case import TestCase, main
 from tests.utils import (
-    generate_test_authorization,
-    generate_static_public_address
+    build_test_authorization,
+    build_static_public_address
 )
 from models import IdentityRegistration
 import json
 
 
-class TestPost(TestCase):
+class TestIdentities(TestCase):
     def test_payout_no_payout_address(self):
-        identity = generate_static_public_address().upper()
+        identity = build_static_public_address().upper()
         payload = {}
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         re = self._put(
             '/v1/identities/{}/payout'.format(identity),
             payload,
@@ -25,7 +25,7 @@ class TestPost(TestCase):
         payload = {
             'payout_eth_address': '0x'
         }
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         re = self._put(
             '/v1/identities/mismatch/payout',
             payload,
@@ -36,11 +36,11 @@ class TestPost(TestCase):
         self.assertEqual(403, re.status_code)
 
     def test_payout_incorrect_eth_address(self):
-        identity = generate_static_public_address().upper()
+        identity = build_static_public_address().upper()
         payload = {
             'payout_eth_address': 'any'
         }
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         re = self._put(
             '/v1/identities/{}/payout'.format(identity),
             payload,
@@ -51,11 +51,11 @@ class TestPost(TestCase):
         self.assertEqual(400, re.status_code)
 
     def test_payout_create(self):
-        identity = generate_static_public_address().upper()
+        identity = build_static_public_address().upper()
         payload = {
             'payout_eth_address': '0x000000000000000000000000000000000000000a'
         }
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         re = self._put(
             '/v1/identities/{}/payout'.format(identity),
             payload,
@@ -74,7 +74,7 @@ class TestPost(TestCase):
         self.assertIsNone(record.updated_at)
 
     def test_payout_update(self):
-        identity = generate_static_public_address().upper()
+        identity = build_static_public_address().upper()
         pre_record = IdentityRegistration(identity.lower(), '')
         main.db.session.add(pre_record)
         main.db.session.commit()
@@ -82,7 +82,7 @@ class TestPost(TestCase):
         payload = {
             'payout_eth_address': '0x000000000000000000000000000000000000000a'
         }
-        auth = generate_test_authorization(json.dumps(payload))
+        auth = build_test_authorization(json.dumps(payload))
         re = self._put(
             '/v1/identities/{}/payout'.format(identity),
             payload,
@@ -98,3 +98,48 @@ class TestPost(TestCase):
             record.payout_eth_address
         )
         self.assertIsNotNone(record.updated_at)
+
+    def test_get_payout_returns_eth_address(self):
+        identity = build_static_public_address().upper()
+        eth_address = build_static_public_address().upper()
+        pre_record = IdentityRegistration(identity.lower(), eth_address)
+        main.db.session.add(pre_record)
+        main.db.session.commit()
+
+        auth = build_test_authorization()
+        re = self._get(
+            '/v1/identities/{}/payout'.format(identity),
+            headers=auth['headers']
+        )
+        self.assertEqual(200, re.status_code)
+        self.assertEqual({'eth_address': eth_address}, re.json)
+
+    def test_get_payout_returns_404_with_no_payout_info(self):
+        identity = build_static_public_address().upper()
+
+        auth = build_test_authorization()
+        re = self._get(
+            '/v1/identities/{}/payout'.format(identity),
+            headers=auth['headers']
+        )
+        self.assertEqual(404, re.status_code)
+        self.assertEqual(
+            {'error': 'payout info for this identity not found'},
+            re.json)
+
+    def test_get_payout_returns_403_when_requesting_other_identity(self):
+        other_identity = '0X000000000000000000000000000000000000000A'
+        eth_address = build_static_public_address().upper()
+        pre_record = IdentityRegistration(other_identity.lower(), eth_address)
+        main.db.session.add(pre_record)
+        main.db.session.commit()
+
+        auth = build_test_authorization()
+        re = self._get(
+            '/v1/identities/{}/payout'.format(other_identity),
+            headers=auth['headers']
+        )
+        self.assertEqual(403, re.status_code)
+        self.assertEqual(
+            {'error': 'no permission to access this identity'},
+            re.json)

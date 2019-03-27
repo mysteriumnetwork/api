@@ -309,6 +309,20 @@ def save_identity(caller_identity):
     return jsonify({})
 
 
+# End Point which returns payout info next to identity
+@app.route('/v1/identities/<identity_url_param>/payout', methods=['GET'])
+@recover_identity
+def payout_info(identity_url_param, caller_identity):
+    if identity_url_param.lower() != caller_identity:
+        return jsonify(error='no permission to access this identity'), 403
+
+    record = IdentityRegistration.query.get(caller_identity)
+    if not record:
+        return jsonify(error='payout info for this identity not found'), 404
+
+    return jsonify({'eth_address': record.payout_eth_address})
+
+
 # End Point which creates or updates payout info next to identity
 @app.route('/v1/identities/<identity_url_param>/payout', methods=['PUT'])
 @validate_json
