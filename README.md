@@ -29,9 +29,11 @@ Install the requirements using pip
 $ pip install -r requirements.txt
 ```
 
-To execute tests, start api service in background and run:
+To execute tests:
+- Ensure that python 3.6+ is installed globally (`python --version`)
+- Run:
 ```bash
-bin/test
+tests/run_tests
 ```
 
 To run linter:

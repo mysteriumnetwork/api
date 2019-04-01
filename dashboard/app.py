@@ -20,6 +20,7 @@ from flask import Flask, render_template
 from datetime import datetime
 from models import db
 import settings
+from models import db
 
 
 app = Flask(__name__)
@@ -27,8 +28,15 @@ db.init_app(app)
 
 cache = SimpleCache()
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://{}:{}@{}/{}'.format(
-    settings.USER, settings.PASSWD, settings.DB_HOST, settings.DB_NAME)
+
+def _generate_database_uri(db_config):
+    return 'mysql+pymysql://{}:{}@{}/{}'.format(
+        db_config['user'], db_config['passwd'], db_config['host'],
+        db_config['name'])
+
+
+app.config['SQLALCHEMY_DATABASE_URI'] =\
+    _generate_database_uri(settings.DB_CONFIG)
 
 
 @app.route('/')
@@ -141,6 +149,13 @@ def sessions_country():
         'sessions-country.html',
         stats=results
     )
+
+
+def init_db(custom_config=None):
+    if custom_config is not None:
+        app.config['SQLALCHEMY_DATABASE_URI'] =\
+            _generate_database_uri(custom_config)
+    db.init_app(app)
 
 
 if __name__ == '__main__':

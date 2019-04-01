@@ -1,14 +1,15 @@
 import unittest
 import json
 from datetime import datetime, timedelta
-from models import Session, Node, NodeAvailability, AVAILABILITY_TIMEOUT
-from tests.test_case import TestCase, main
+from models import db, Session, Node, NodeAvailability, AVAILABILITY_TIMEOUT
+from tests.test_case import TestCase
 from tests.utils import (
     build_test_authorization,
     build_static_public_address,
     setting
 )
 from identity_contract import IdentityContractFake
+import app as main
 
 
 class TestApi(TestCase):
@@ -342,7 +343,7 @@ class TestApi(TestCase):
         timeout_delta = AVAILABILITY_TIMEOUT + timedelta(minutes=1)
         node3.updated_at = datetime.utcnow() - timeout_delta
 
-        main.db.session.commit()
+        db.session.commit()
 
         re = self._get('/v1/proposals')
         self.assertEqual(200, re.status_code)
@@ -354,7 +355,7 @@ class TestApi(TestCase):
     def test_proposals_filtering(self):
         node = self._create_sample_node()
         node.mark_activity()
-        main.db.session.commit()
+        db.session.commit()
 
         re = self._get('/v1/proposals', {'node_key': 'node1'})
 
@@ -372,7 +373,7 @@ class TestApi(TestCase):
         node.mark_activity()
         node_noop = self._create_node("node2", "noop")
         node_noop.mark_activity()
-        main.db.session.commit()
+        db.session.commit()
 
         re = self._get('/v1/proposals', {'service_type': 'all'})
 
@@ -385,7 +386,7 @@ class TestApi(TestCase):
     def test_proposals_filtering_service_type_openvpn(self):
         node = self._create_sample_node()
         node.mark_activity()
-        main.db.session.commit()
+        db.session.commit()
 
         re = self._get('/v1/proposals', {'service_type': 'openvpn'})
 
@@ -402,7 +403,7 @@ class TestApi(TestCase):
     def test_proposals_filtering_service_type_string(self):
         node = self._create_sample_node()
         node.mark_activity()
-        main.db.session.commit()
+        db.session.commit()
 
         re = self._get(
             '/v1/proposals',
@@ -418,7 +419,7 @@ class TestApi(TestCase):
     def test_proposals_filtering_no_service_type(self):
         node = self._create_sample_node()
         node.mark_activity()
-        main.db.session.commit()
+        db.session.commit()
 
         re = self._get(
             '/v1/proposals'
@@ -552,8 +553,8 @@ class TestApi(TestCase):
 
         session = Session('123')
         session.consumer_id = auth['public_address']
-        main.db.session.add(session)
-        main.db.session.commit()
+        db.session.add(session)
+        db.session.commit()
 
         re = self._post(
             '/v1/sessions/123/stats',
@@ -572,8 +573,8 @@ class TestApi(TestCase):
     def test_session_stats_create_with_different_consumer_id(self):
         session = Session('123')
         session.consumer_id = 'different'
-        main.db.session.add(session)
-        main.db.session.commit()
+        db.session.add(session)
+        db.session.commit()
 
         payload = {
             'bytes_sent': 20,
@@ -704,8 +705,8 @@ class TestApi(TestCase):
         session.consumer_id = auth['public_address']
         session.created_at = datetime.utcnow() - timedelta(minutes=11)
         session.client_updated_at = None
-        main.db.session.add(session)
-        main.db.session.commit()
+        db.session.add(session)
+        db.session.commit()
         re = self._post(
             '/v1/sessions/123/stats',
             payload,
@@ -719,8 +720,8 @@ class TestApi(TestCase):
 
         # update client_updated_at in that way session should not expire
         session.client_updated_at = datetime.utcnow() - timedelta(minutes=9)
-        main.db.session.add(session)
-        main.db.session.commit()
+        db.session.add(session)
+        db.session.commit()
         re = self._post(
             '/v1/sessions/123/stats',
             payload,
@@ -730,8 +731,8 @@ class TestApi(TestCase):
 
         # update client_updated_at in that way session should expire
         session.client_updated_at = datetime.utcnow() - timedelta(minutes=11)
-        main.db.session.add(session)
-        main.db.session.commit()
+        db.session.add(session)
+        db.session.commit()
         re = self._post(
             '/v1/sessions/123/stats',
             payload,
@@ -879,7 +880,7 @@ class TestApi(TestCase):
             "format": "service-proposal/v1",
             "provider_id": node_key,
         })
-        main.db.session.add(node)
+        db.session.add(node)
         return node
 
 

@@ -15,8 +15,8 @@ class TestNodeAvailability(TestCase):
         hours = get_node_hours_online(
             'node key',
             'service type',
-            now,
-            now
+            now - second,
+            now + second
         )
         self.assertEqual(1, hours)
 
