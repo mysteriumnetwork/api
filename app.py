@@ -21,7 +21,9 @@ from models import (
     db, Node, Session, NodeAvailability, Identity, IdentityRegistration
 )
 
-helpers.setup_logger()
+if not settings.DISABLE_LOGS:
+    helpers.setup_logger()
+
 app = Flask(__name__)
 
 

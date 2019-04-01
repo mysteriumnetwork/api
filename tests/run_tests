@@ -1,8 +1,8 @@
 #!/bin/sh
 
 (cd tests; docker-compose up --build -d)
-echo "Sleeping for 10s until everything initializes"
+printf "Sleeping for 10s until everything initializes...\n"
 sleep 10
 (cd tests; docker-compose exec api bin/db-upgrade)
 
-bin/test
+DISABLE_LOGS=1 bin/test

@@ -15,6 +15,8 @@ DB_CONFIG = {
     'passwd': PASSWD
 }
 
+DISABLE_LOGS = os.environ.get('DISABLE_LOGS') or False
+
 # util.strtobool
 # True values are y, yes, t, true, on and 1;
 # False values are n, no, f, false, off and 0.
