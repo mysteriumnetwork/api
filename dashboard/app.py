@@ -16,17 +16,17 @@ from dashboard.model_layer import (
 )
 from werkzeug.contrib.cache import SimpleCache
 from dashboard.helpers import get_week_range
-from flask import Flask, render_template
+from flask import Flask, render_template, request, abort
 from datetime import datetime
 from models import db
 import settings
-from models import db
 
 
 app = Flask(__name__)
 db.init_app(app)
 
 cache = SimpleCache()
+LEADERBOARD_ROWS_PER_PAGE = 10
 
 
 def _generate_database_uri(db_config):
@@ -68,22 +68,42 @@ def main():
 
 @app.route('/leaderboard')
 def leaderboard():
-    page_content = cache.get('leaderboard')
+    page = int(request.args.get('page', 1))
+    if page < 1:
+        abort(400)
+
+    page_content = cache.get('leaderboard-page-{}'.format(page))
     if page_content is None:
+        offset = (page - 1) * LEADERBOARD_ROWS_PER_PAGE
         date_from, date_to = get_week_range(datetime.utcnow().date())
-        leader_board_rows = get_leaderboard_rows(date_from, date_to, 10)
-        enrich_leaderboard_rows(leader_board_rows, date_from, date_to)
+        leaderboard_rows = get_leaderboard_rows(
+            date_from, date_to, offset=offset, limit=LEADERBOARD_ROWS_PER_PAGE
+        )
+        enrich_leaderboard_rows(leaderboard_rows, date_from, date_to)
+
+        previous_page = None
+        if page >= 2:
+            previous_page = page - 1
+
+        next_page = None
+        if len(leaderboard_rows) == LEADERBOARD_ROWS_PER_PAGE:
+            next_page = page + 1
+
+        index_start = (page - 1) * LEADERBOARD_ROWS_PER_PAGE
         page_content = render_template(
             'leaderboard.html',
-            date_from=date_from.strftime("%Y-%m-%d"),
-            date_to=date_to.strftime("%Y-%m-%d"),
-            leaderboard_rows=leader_board_rows,
+            date_from=date_from.strftime('%b %d, %Y'),
+            date_to=date_to.strftime('%b %d, %Y'),
+            leaderboard_rows=leaderboard_rows,
+            previous_page=previous_page,
+            next_page=next_page,
+            index_start=index_start
         )
-        cache.set(
-            'leaderboard',
-            page_content,
-            timeout=1 * 60
-        )
+    cache.set(
+        'leaderboard-page-{}'.format(page),
+        page_content,
+        timeout=1 * 60
+    )
 
     return page_content
 

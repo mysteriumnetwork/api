@@ -6,13 +6,8 @@
             <div class="col-md-12 col-sm-12 col-xs-12">
               <div class="x_panel">
                 <div class="x_title">
-                  <h2>Weekly Leaderboard ({{date_from}} - {{date_to}})</h2>
-                  <ul class="nav navbar-right panel_toolbox">
-                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-                    </li>
-                    <li><a class="close-link"><i class="fa fa-close"></i></a>
-                    </li>
-                  </ul>
+                  <h2>Weekly Leaderboard</h2>
+                  <div class="subtitle">{{date_from}} - {{date_to}}</div>
                   <div class="clearfix"></div>
                 </div>
                 <div class="x_content">
@@ -22,27 +17,46 @@
                       <tr>
                         <th class="enumerator">#</th>
                         <th>Node</th>
-                        <th>Sessions</th>
-                        <th>Unique Users</th>
+                        <th>Weekly Availability</th>
                         <th>Data Transferred</th>
-                        <th>Weekly Availability (openvpn)</th>
-                        <th>Weekly Availability (wireguard)</th>
+                        <th>Sessions</th>
+                        <th class="mobile-hide">Unique Users</th>
+                        <th class="mobile-hide">Country</th>
+                        <th class="mobile-hide">Status</th>
                       </tr>
                     </thead>
                     <tbody>
                       {% for row in leaderboard_rows %}
-                      <tr>
-                        <td scope="row" class="enumerator">{{loop.index}}</td>
+                      <tr onclick="window.document.location='/node/{{row.provider_id}}/openvpn'">
+                        <td scope="row" class="enumerator">{{index_start+loop.index}}</td>
                         <td class="td-node-key">{{row.provider_id}}</td>
-                        <td>{{row.sessions_count}}</td>
-                        <td>{{row.unique_users}}</td>
+                        <td>{{row.availability}}</td>
                         <td>{{row.data_transferred}}</td>
-                        <td>{{row.availability_openvpn}}</td>
-                        <td>{{row.availability_wireguard}}</td>
+                        <td>{{row.sessions_count}}</td>
+                        <td class="mobile-hide">{{row.unique_users}}</td>
+                        <td class="mobile-hide">{{row.country}}</td>
+                        <td class="mobile-hide">{{row.service_status}}</td>
                       </tr>
                       {% endfor %}
                     </tbody>
                   </table>
+
+                  <div class="pull-right">
+                    {% if previous_page != None %}
+                      <a href="?page={{previous_page}}">
+                        <div class="pager">
+                          &lt; Previous
+                        </div>
+                      </a>
+                    {% endif %}
+                    {% if next_page != None %}
+                    <a href="?page={{next_page}}">
+                        <div class="pager">
+                          Next &gt;
+                        </div>
+                      </a>
+                    {% endif %}
+                  </div>
 
                 </div>
               </div>
