@@ -78,6 +78,8 @@ def leaderboard():
         abort(400)
         return
 
+    # TODO: return http error for non-existing pages
+
     cache_key = 'leaderboard-page-{}'.format(page)
     page_content = cache.get(cache_key)
     if page_content is None:
@@ -109,11 +111,12 @@ def leaderboard():
             next_page=next_page,
             offset=offset
         )
-    cache.set(
-        cache_key,
-        page_content,
-        timeout=1 * 60
-    )
+
+        cache.set(
+            cache_key,
+            page_content,
+            timeout=1 * 60
+        )
 
     return page_content
 
