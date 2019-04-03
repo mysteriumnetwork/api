@@ -68,11 +68,18 @@ def main():
 
 @app.route('/leaderboard')
 def leaderboard():
-    page = int(request.args.get('page', 1))
+    try:
+        page = int(request.args.get('page', 1))
+    except ValueError:
+        abort(400)
+        return
+
     if page < 1:
         abort(400)
+        return
 
-    page_content = cache.get('leaderboard-page-{}'.format(page))
+    cache_key = 'leaderboard-page-{}'.format(page)
+    page_content = cache.get(cache_key)
     if page_content is None:
         offset = (page - 1) * LEADERBOARD_ROWS_PER_PAGE
         date_from, date_to = get_week_range(datetime.utcnow().date())
@@ -86,10 +93,13 @@ def leaderboard():
             previous_page = page - 1
 
         next_page = None
+        # This is not always correct - i.e.
+        # if we have 10 rows and we're in first page,
+        # next button should be disabled.
+        # TODO: find optimal way to get total rows count
         if len(leaderboard_rows) == LEADERBOARD_ROWS_PER_PAGE:
             next_page = page + 1
 
-        index_start = (page - 1) * LEADERBOARD_ROWS_PER_PAGE
         page_content = render_template(
             'leaderboard.html',
             date_from=date_from.strftime('%b %d, %Y'),
@@ -97,10 +107,10 @@ def leaderboard():
             leaderboard_rows=leaderboard_rows,
             previous_page=previous_page,
             next_page=next_page,
-            index_start=index_start
+            offset=offset
         )
     cache.set(
-        'leaderboard-page-{}'.format(page),
+        cache_key,
         page_content,
         timeout=1 * 60
     )
