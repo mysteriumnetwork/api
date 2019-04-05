@@ -1,7 +1,8 @@
 from dashboard.db_queries.node_availability import get_node_hours_online
+from dashboard.model_layer import get_country_string, get_node_status
 from dashboard.helpers import get_natural_size
 from sqlalchemy import text
-from models import db
+from models import db, Node
 
 
 class LeaderboardRow:
@@ -10,9 +11,10 @@ class LeaderboardRow:
         self.sessions_count = sessions_count
         self.total_bytes = total_bytes
         self.unique_users = unique_users
-        self.availability_openvpn = None
-        self.availability_wireguard = None
+        self.availability = None
         self.data_transferred = None
+        self.country = None
+        self.service_status = None
 
     @staticmethod
     def from_sql_row(row):
@@ -35,7 +37,7 @@ class LeaderboardRow:
             )
 
 
-def get_leaderboard_rows(date_from, date_to, limit=10):
+def get_leaderboard_rows(date_from, date_to, offset=0, limit=10):
     query = text("""
         SELECT ir.identity AS provider_id,
         COUNT(s.session_key) AS sessions_count,
@@ -52,10 +54,12 @@ def get_leaderboard_rows(date_from, date_to, limit=10):
         GROUP BY ir.identity, n.node_key
         ORDER BY total_bytes DESC
         LIMIT {limit}
+        OFFSET {offset}
         """.format(
             date_from=date_from,
             date_to=date_to,
-            limit=limit
+            limit=limit,
+            offset=offset
         )
     )
     rows = db.engine.execute(query).fetchall()
@@ -68,23 +72,19 @@ def get_leaderboard_rows(date_from, date_to, limit=10):
 
 def enrich_leaderboard_rows(rows, date_from, date_to):
     for row in rows:
-        hours_online_openvpn = get_node_hours_online(
+        node = Node.query.get([row.provider_id, 'openvpn'])
+        row.country = get_country_string(
+            node.get_country_from_service_proposal()
+        )
+        row.service_status = get_node_status(node)
+        hours_online = get_node_hours_online(
             row.provider_id,
             'openvpn',
             date_from,
             date_to
         )
-        hours_online_wireguard = get_node_hours_online(
-            row.provider_id,
-            'wireguard',
-            date_from,
-            date_to
-        )
-        row.availability_openvpn = '{} / 168 h'.format(
-            hours_online_openvpn
-        )
-        row.availability_wireguard = '{} / 168 h'.format(
-            hours_online_wireguard
+        row.availability = '{} / 168 h'.format(
+            hours_online
         )
         row.data_transferred = get_natural_size(
             row.total_bytes

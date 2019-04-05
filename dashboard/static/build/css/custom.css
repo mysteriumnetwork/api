@@ -1093,6 +1093,10 @@ h2 {
 .x_title span {
     color: #BDBDBD
 }
+.x_title .subtitle {
+    clear: both;
+    float: left;
+}
 .x_content {
     padding: 0 5px 6px;
     position: relative;
@@ -4311,4 +4315,19 @@ table.clickable thead tr {
         display: none;
 
     }
+}
+
+@media screen and (max-width: 630px) {
+    .mobile-hide {
+        display: none;
+    }
+}
+
+.pager {
+    background-color: #ddd;
+    display: inline-block;
+    padding: 6px;
+    width: 80px;
+    margin: 10px 0 0 0;
+    text-align: center;
 }
