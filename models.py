@@ -17,10 +17,13 @@ class Node(db.Model):
     node_key = db.Column(db.String(IDENTITY_LENGTH_LIMIT), primary_key=True)
     ip = db.Column(db.String(45))
     connection_config = db.Column(db.Text)
+
     proposal = db.Column(db.Text)
+    service_type = db.Column(db.String(255), primary_key=True)
+    access_list = db.Column(db.String(255))
+
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
-    service_type = db.Column(db.String(255), primary_key=True)
 
     def __init__(self, node_key, service_type):
         self.node_key = node_key
