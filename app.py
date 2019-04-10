@@ -168,8 +168,11 @@ def register_proposal(caller_identity):
 
     node.ip = request.remote_addr
     node.proposal = json.dumps(proposal)
-    # add the column to make querying easier
+
+    # add these columns to make querying easier
     node.service_type = service_type
+    node.access_list = proposal.get('access_list')
+
     node.mark_activity()
     db.session.add(node)
     db.session.commit()
