@@ -1,7 +1,10 @@
 import unittest
 import json
 from datetime import datetime, timedelta
-from models import db, Session, Node, NodeAvailability, AVAILABILITY_TIMEOUT
+from models import (
+    db, Session, Node, ProposalAccessPolicy, NodeAvailability,
+    AVAILABILITY_TIMEOUT
+)
 from tests.test_case import TestCase
 from tests.utils import (
     build_test_authorization,
@@ -35,7 +38,7 @@ class TestApi(TestCase):
         node = Node.query.get([public_address, "openvpn"])
         self.assertEqual(self.REMOTE_ADDR, node.ip)
 
-    def test_register_proposal_saves_access_list(self):
+    def test_register_proposal_saves_access_policy(self):
         public_address = build_static_public_address()
         payload = {
             "service_proposal": {
@@ -43,7 +46,12 @@ class TestApi(TestCase):
                 "format": "service-proposal/v1",
                 "provider_id": public_address,
                 "service_type": "openvpn",
-                "access_list": "test access list"
+                "access_policies": [
+                    {
+                        "id": "test policy",
+                        "source": "http://trust-oracle/test-policy"
+                    }
+                ]
             }
         }
         auth = build_test_authorization(json.dumps(payload))
@@ -55,8 +63,12 @@ class TestApi(TestCase):
         self.assertEqual(200, re.status_code)
         self.assertIsNotNone(re.json)
 
-        node = Node.query.get([public_address, "openvpn"])
-        self.assertEqual("test access list", node.access_list)
+        policy = ProposalAccessPolicy.query.get([
+            public_address,
+            "test policy",
+            "http://trust-oracle/test-policy"
+        ])
+        self.assertIsNotNone(policy)
 
     def test_register_multiple_proposals_successful(self):
         public_address = build_static_public_address()
@@ -467,9 +479,11 @@ class TestApi(TestCase):
         data = json.loads(re.data)
         self.assertEqual([], data['proposals'])
 
-    def test_proposals_returns_all_access_list_proposals(self):
-        self._create_node("node1", "openvpn").mark_activity()
-        self._create_node("node2", "openvpn", "mysterium").mark_activity()
+    def test_proposals_returns_all_proposals_without_policies(self):
+        n1 = self._create_node("node1", "openvpn")
+        n1.mark_activity()
+        n2 = self._create_node("node2", "openvpn", "mysterium", "test source")
+        n2.mark_activity()
 
         re = self._get(
             '/v1/proposals',
@@ -478,15 +492,22 @@ class TestApi(TestCase):
 
         self.assertEqual(200, re.status_code)
         data = json.loads(re.data)
-        self.assertEqual(2, len(data['proposals']))
+        self.assertEqual(1, len(data['proposals']))
+        self.assertEqual('node1', data['proposals'][0]['provider_id'])
 
-    def test_proposals_filtering_by_access_list(self):
-        self._create_node("node1", "openvpn").mark_activity()
-        self._create_node("node2", "openvpn", "mysterium").mark_activity()
+    def test_proposals_filtering_by_access_policy(self):
+        n1 = self._create_node("node1", "openvpn")
+        n1.mark_activity()
+        n2 = self._create_node("node2", "openvpn", "mysterium", "test source")
+        n2.mark_activity()
 
         re = self._get(
             '/v1/proposals',
-            {'service_type': 'all', 'access_list': 'mysterium'}
+            {
+                'service_type': 'all',
+                'access_policy_id': 'mysterium',
+                'access_policy_source': 'test source',
+            }
         )
 
         self.assertEqual(200, re.status_code)
@@ -494,19 +515,20 @@ class TestApi(TestCase):
         self.assertEqual(1, len(data['proposals']))
         self.assertEqual('node2', data['proposals'][0]['provider_id'])
 
-    def test_proposals_filtering_by_null_access_list_returns_proposal(self):
-        self._create_node("node1", "openvpn").mark_activity()
-        self._create_node("node2", "openvpn", "mysterium").mark_activity()
+    def test_proposals_filtering_by_star_policy_returns_all_proposals(self):
+        n1 = self._create_node("node1", "openvpn")
+        n1.mark_activity()
+        n2 = self._create_node("node2", "openvpn", "mysterium", "test source")
+        n2.mark_activity()
 
         re = self._get(
             '/v1/proposals',
-            {'service_type': 'all', 'access_list': 'null'}
+            {'service_type': 'all', 'access_policy': '*'}
         )
 
         self.assertEqual(200, re.status_code)
         data = json.loads(re.data)
-        self.assertEqual(1, len(data['proposals']))
-        self.assertEqual('node1', data['proposals'][0]['provider_id'])
+        self.assertEqual(2, len(data['proposals']))
 
     def test_session_stats_create_without_session_record(self):
         payload = {
@@ -937,15 +959,21 @@ class TestApi(TestCase):
     def _create_sample_node(self):
         return self._create_node("node1", "openvpn")
 
-    def _create_node(self, node_key, service_type, access_list=None):
+    def _create_node(self, node_key, service_type, access_policy_id=None,
+                     access_policy_source=None):
         node = Node(node_key, service_type)
         node.proposal = json.dumps({
             "id": 1,
             "format": "service-proposal/v1",
             "provider_id": node_key,
         })
-        node.access_list = access_list
         db.session.add(node)
+
+        if access_policy_id and access_policy_source:
+            item = ProposalAccessPolicy(node_key, access_policy_id,
+                                        access_policy_source)
+            db.session.add(item)
+
         return node
 
 

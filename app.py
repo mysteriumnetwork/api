@@ -18,7 +18,8 @@ from signature import (
     ValidationError as SignatureValidationError
 )
 from models import (
-    db, Node, Session, NodeAvailability, Identity, IdentityRegistration
+    db, Node, ProposalAccessPolicy, NodeAvailability, Session, Identity,
+    IdentityRegistration
 )
 
 if not settings.DISABLE_LOGS:
@@ -168,10 +169,15 @@ def register_proposal(caller_identity):
 
     node.ip = request.remote_addr
     node.proposal = json.dumps(proposal)
-
-    # add these columns to make querying easier
+    # add the column to make querying easier
     node.service_type = service_type
-    node.access_list = proposal.get('access_list')
+
+    access_policies = proposal.get('access_policies')
+    if access_policies:
+        for policy_data in access_policies:
+            id = policy_data['id']
+            source = policy_data['source']
+            db.session.add(ProposalAccessPolicy(node_key, id, source))
 
     node.mark_activity()
     db.session.add(node)
@@ -219,10 +225,30 @@ def proposals():
     if node_key:
         nodes = nodes.filter_by(node_key=node_key)
 
-    access_list = request.args.get('access_list')
-    if access_list:
-        filtered = access_list if access_list != 'null' else None
-        nodes = nodes.filter_by(access_list=filtered)
+    if request.args.get('access_policy') == '*':
+        pass
+    else:
+        access_policy_id = request.args.get('access_policy_id')
+        access_policy_source = request.args.get('access_policy_source')
+        if access_policy_id and access_policy_source:
+            policies = ProposalAccessPolicy\
+                .query\
+                .filter_by(id=access_policy_id, source=access_policy_source)\
+                .all()
+            node_keys = []
+            for p in policies:
+                node_keys.append(p.node_key)
+            # TODO: keep only unique node_keys?
+            nodes = nodes.filter(Node.node_key.in_(node_keys))
+        else:
+            policies = ProposalAccessPolicy \
+                .query \
+                .all()
+            node_keys = []
+            for p in policies:
+                node_keys.append(p.node_key)
+            # TODO: keep only unique node_keys?
+            nodes = nodes.filter(Node.node_key.notin_(node_keys))
 
     service_proposals = []
     for node in nodes:

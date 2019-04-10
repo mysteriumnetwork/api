@@ -12,6 +12,7 @@ AVAILABILITY_TIMEOUT = timedelta(minutes=2)
 SESSION_EXPIRATION = timedelta(minutes=10)
 
 
+# TODO: rename to Proposal, since single Node can have multiple proposals
 class Node(db.Model):
     __tablename__ = 'node'
     node_key = db.Column(db.String(IDENTITY_LENGTH_LIMIT), primary_key=True)
@@ -20,7 +21,6 @@ class Node(db.Model):
 
     proposal = db.Column(db.Text)
     service_type = db.Column(db.String(255), primary_key=True)
-    access_list = db.Column(db.String(255))
 
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime, index=True)
@@ -58,6 +58,18 @@ class Node(db.Model):
             return pr['service_definition']['location_originate']['country']
         except KeyError:
             return None
+
+
+class ProposalAccessPolicy(db.Model):
+    __tablename__ = 'proposal_access_policy'
+    node_key = db.Column(db.String(IDENTITY_LENGTH_LIMIT), primary_key=True)
+    id = db.Column(db.String(255), primary_key=True)
+    source = db.Column(db.String(255), primary_key=True)
+
+    def __init__(self, node_key: str, id: str, source: str):
+        self.node_key = node_key
+        self.id = id
+        self.source = source
 
 
 class Session(db.Model):
