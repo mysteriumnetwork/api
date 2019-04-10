@@ -216,6 +216,11 @@ def proposals():
     if node_key:
         nodes = nodes.filter_by(node_key=node_key)
 
+    access_list = request.args.get('access_list')
+    if access_list:
+        filtered = access_list if access_list != 'null' else None
+        nodes = nodes.filter_by(access_list=filtered)
+
     service_proposals = []
     for node in nodes:
         service_proposals += node.get_service_proposals()
