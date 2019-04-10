@@ -444,6 +444,47 @@ class TestApi(TestCase):
         data = json.loads(re.data)
         self.assertEqual([], data['proposals'])
 
+    def test_proposals_returns_all_access_list_proposals(self):
+        self._create_node("node1", "openvpn").mark_activity()
+        self._create_node("node2", "openvpn", "mysterium").mark_activity()
+
+        re = self._get(
+            '/v1/proposals',
+            {'service_type': 'all'}
+        )
+
+        self.assertEqual(200, re.status_code)
+        data = json.loads(re.data)
+        self.assertEqual(2, len(data['proposals']))
+
+    def test_proposals_filtering_by_access_list(self):
+        self._create_node("node1", "openvpn").mark_activity()
+        self._create_node("node2", "openvpn", "mysterium").mark_activity()
+
+        re = self._get(
+            '/v1/proposals',
+            {'service_type': 'all', 'access_list': 'mysterium'}
+        )
+
+        self.assertEqual(200, re.status_code)
+        data = json.loads(re.data)
+        self.assertEqual(1, len(data['proposals']))
+        self.assertEqual('node2', data['proposals'][0]['provider_id'])
+
+    def test_proposals_filtering_by_null_access_list_returns_proposal(self):
+        self._create_node("node1", "openvpn").mark_activity()
+        self._create_node("node2", "openvpn", "mysterium").mark_activity()
+
+        re = self._get(
+            '/v1/proposals',
+            {'service_type': 'all', 'access_list': 'null'}
+        )
+
+        self.assertEqual(200, re.status_code)
+        data = json.loads(re.data)
+        self.assertEqual(1, len(data['proposals']))
+        self.assertEqual('node1', data['proposals'][0]['provider_id'])
+
     def test_session_stats_create_without_session_record(self):
         payload = {
             'bytes_sent': 20,
@@ -873,13 +914,14 @@ class TestApi(TestCase):
     def _create_sample_node(self):
         return self._create_node("node1", "openvpn")
 
-    def _create_node(self, node_key, service_type):
+    def _create_node(self, node_key, service_type, access_list=None):
         node = Node(node_key, service_type)
         node.proposal = json.dumps({
             "id": 1,
             "format": "service-proposal/v1",
             "provider_id": node_key,
         })
+        node.access_list = access_list
         db.session.add(node)
         return node
 
