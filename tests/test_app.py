@@ -35,6 +35,29 @@ class TestApi(TestCase):
         node = Node.query.get([public_address, "openvpn"])
         self.assertEqual(self.REMOTE_ADDR, node.ip)
 
+    def test_register_proposal_saves_access_list(self):
+        public_address = build_static_public_address()
+        payload = {
+            "service_proposal": {
+                "id": 1,
+                "format": "service-proposal/v1",
+                "provider_id": public_address,
+                "service_type": "openvpn",
+                "access_list": "test access list"
+            }
+        }
+        auth = build_test_authorization(json.dumps(payload))
+        main.identity_contract = IdentityContractFake(True)
+        re = self._post(
+            '/v1/register_proposal',
+            payload,
+            headers=auth['headers'])
+        self.assertEqual(200, re.status_code)
+        self.assertIsNotNone(re.json)
+
+        node = Node.query.get([public_address, "openvpn"])
+        self.assertEqual("test access list", node.access_list)
+
     def test_register_multiple_proposals_successful(self):
         public_address = build_static_public_address()
         payload = {
