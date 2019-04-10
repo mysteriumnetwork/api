@@ -551,7 +551,7 @@ class TestApi(TestCase):
         }
         auth = build_test_authorization(json.dumps(payload))
 
-        session = Session('123')
+        session = Session('123', 'openvpn')
         session.consumer_id = auth['public_address']
         db.session.add(session)
         db.session.commit()
@@ -571,7 +571,7 @@ class TestApi(TestCase):
         self.assertIsNone(session.node_key)
 
     def test_session_stats_create_with_different_consumer_id(self):
-        session = Session('123')
+        session = Session('123', 'openvpn')
         session.consumer_id = 'different'
         db.session.add(session)
         db.session.commit()
@@ -701,7 +701,7 @@ class TestApi(TestCase):
             'provider_id': '0x1',
         }
         auth = build_test_authorization(json.dumps(payload))
-        session = Session('123')
+        session = Session('123', 'openvpn')
         session.consumer_id = auth['public_address']
         session.created_at = datetime.utcnow() - timedelta(minutes=11)
         session.client_updated_at = None
