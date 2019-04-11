@@ -16,7 +16,7 @@ from dashboard.model_layer import (
 )
 from werkzeug.contrib.cache import SimpleCache
 from dashboard.helpers import get_week_range
-from flask import Flask, render_template, request, abort
+from flask import Flask, render_template, request, abort, jsonify
 from datetime import datetime
 from models import db
 import settings
@@ -182,6 +182,11 @@ def sessions_country():
         'sessions-country.html',
         stats=results
     )
+
+
+@app.route('/ping')
+def ping():
+    return jsonify({'status': 'ok'})
 
 
 def init_db(custom_config=None):

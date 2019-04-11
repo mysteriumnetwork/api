@@ -1,8 +1,15 @@
 #!/bin/sh
 
 (cd tests; docker-compose up --build -d)
-printf "Sleeping for 10s until everything initializes...\n"
-sleep 10
+
+printf "Waiting until db initializes..."
+until [ "` (docker inspect $(cd tests; docker-compose ps -q db) -f {{.State.Health.Status}})`" == "healthy" ]; do
+    printf "."
+    sleep 1
+done;
+sleep 3 # needed for db to fully initialize
+printf "\n"
+
 (cd tests; docker-compose exec api bin/db-upgrade)
 
 DISABLE_LOGS=1 bin/test

@@ -7,7 +7,6 @@ services:
       dockerfile: Dockerfile
     container_name: mysterium-api-test
     environment:
-      APP_PORT: 80
       DB_HOST: mysterium-mysql-test
       DB_NAME: myst_api
       DB_USER: myst_api
@@ -16,6 +15,11 @@ services:
       - ..:/code
     depends_on:
       - db
+    healthcheck:
+      test: curl -f http://localhost
+      interval: 5s
+      timeout: 5s
+      retries: 15
 
   db:
     image: percona:5.7
@@ -27,3 +31,8 @@ services:
       MYSQL_DATABASE: myst_api
       MYSQL_USER: myst_api
       MYSQL_PASSWORD: myst_api
+    healthcheck:
+      test: mysqladmin ping --silent
+      interval: 5s
+      timeout: 5s
+      retries: 15
