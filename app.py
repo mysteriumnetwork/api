@@ -401,10 +401,7 @@ def start_debug_app():
     app.run(debug=True)
 
 
-def init_db(custom_config=None):
-    if custom_config is not None:
-        app.config['SQLALCHEMY_DATABASE_URI'] =\
-            _generate_database_uri(custom_config)
+def init_db():
     db.init_app(app)
 
 

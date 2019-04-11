@@ -18,11 +18,6 @@ services:
       - .:/code
     depends_on:
       - db
-    healthcheck:
-      test: curl -f http://localhost
-      interval: 5s
-      timeout: 5s
-      retries: 15
 
   dashboard:
     build:
@@ -41,11 +36,6 @@ services:
       - .:/code
     depends_on:
       - db
-    healthcheck:
-      test: curl -f http://localhost/ping
-      interval: 5s
-      timeout: 5s
-      retries: 15
 
   db:
     image: percona:5.7

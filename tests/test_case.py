@@ -6,14 +6,7 @@ from models import db
 
 class TestCase(TestCase):
     def create_app(self):
-        db_config = {
-            'host': 'localhost:33062',
-            'name': 'myst_api',
-            'user': 'myst_api',
-            'passwd': 'myst_api'
-        }
-
-        init_db(db_config)
+        init_db()
         return app
 
     def setUp(self):
