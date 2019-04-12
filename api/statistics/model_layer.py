@@ -3,7 +3,7 @@ from queries import (
     filter_active_nodes,
     get_active_nodes_count_query
 )
-from dashboard.db_queries.node_availability import get_node_hours_online
+from api.statistics.db_queries.node_availability import get_node_hours_online
 from datetime import datetime, timedelta
 from sqlalchemy import func, desc, text
 from models import db, Node, Session

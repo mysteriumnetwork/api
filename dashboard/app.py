@@ -1,4 +1,4 @@
-from dashboard.db_queries.leaderboard import (
+from api.statistics.db_queries.leaderboard import (
     get_leaderboard_rows,
     enrich_leaderboard_rows
 )
