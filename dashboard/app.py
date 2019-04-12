@@ -16,7 +16,7 @@ from dashboard.model_layer import (
 )
 from werkzeug.contrib.cache import SimpleCache
 from dashboard.helpers import get_week_range
-from flask import Flask, render_template, request, abort
+from flask import Flask, render_template, request, abort, jsonify
 from datetime import datetime
 from models import db
 import settings
@@ -184,10 +184,12 @@ def sessions_country():
     )
 
 
-def init_db(custom_config=None):
-    if custom_config is not None:
-        app.config['SQLALCHEMY_DATABASE_URI'] =\
-            _generate_database_uri(custom_config)
+@app.route('/ping')
+def ping():
+    return jsonify({'status': 'ok'})
+
+
+def init_db():
     db.init_app(app)
 
 

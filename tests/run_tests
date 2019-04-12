@@ -1,8 +1,18 @@
-#!/bin/sh
+#!/bin/bash
+set -e
 
 (cd tests; docker-compose up --build -d)
-printf "Sleeping for 10s until everything initializes...\n"
-sleep 10
-(cd tests; docker-compose exec api bin/db-upgrade)
 
-DISABLE_LOGS=1 bin/test
+printf "Waiting until db initializes..."
+until [ "` (docker inspect $(cd tests; docker-compose ps -q db) -f {{.State.Health.Status}})`" == "healthy" ]; do
+    printf "."
+    sleep 1
+done;
+sleep 3 # needed for db to fully initialize
+printf "\n"
+
+printf "Running api tests...\n"
+(cd tests; docker-compose exec api python -m unittest discover tests)
+
+printf "Running dashboard tests...\n"
+(cd tests; docker-compose exec dashboard env PYTHONPATH=/code python -m unittest discover tests)

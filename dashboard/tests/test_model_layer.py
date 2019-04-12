@@ -22,6 +22,6 @@ class TestModelLayer(TestCase):
 
     @staticmethod
     def _create_session(session_key, country):
-        session = Session(session_key)
+        session = Session(session_key, 'openvpn')
         session.client_country = country
         db.session.add(session)

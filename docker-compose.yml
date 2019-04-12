@@ -32,7 +32,6 @@ services:
       DB_NAME: myst_api
       DB_USER: myst_api
       DB_PASSWORD: myst_api
-
     volumes:
       - .:/code
     depends_on:
@@ -49,3 +48,8 @@ services:
       MYSQL_DATABASE: myst_api
       MYSQL_USER: myst_api
       MYSQL_PASSWORD: myst_api
+    healthcheck:
+      test: mysqladmin ping --silent
+      interval: 5s
+      timeout: 5s
+      retries: 15

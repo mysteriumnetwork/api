@@ -104,10 +104,9 @@ class TestGetLeaderBoardRows(TestCase):
     @staticmethod
     def _create_session(session_key, consumer_id, provider_id, service_type,
                         updated_at, bytes_sent, bytes_received):
-        ses = Session(session_key)
+        ses = Session(session_key, service_type)
         ses.consumer_id = consumer_id
         ses.node_key = provider_id
-        ses.service_type = service_type
         ses.client_updated_at = updated_at
         ses.client_bytes_sent = bytes_sent
         ses.client_bytes_received = bytes_received

@@ -22,7 +22,7 @@ def _create_node():
 
 
 def _create_session(node):
-    session = Session("test session")
+    session = Session("test session", "openvpn")
     session.node_key = node.node_key
     session.client_updated_at = datetime.utcnow()
     return session

@@ -24,17 +24,37 @@ docker-compose exec api bin/db-upgrade
 
 ## Development
 
+### Testing
+
 Install the requirements using pip
 ```
 $ pip install -r requirements.txt
 ```
 
-To execute tests:
-- Ensure that python 3.6+ is installed globally (`python --version`)
+To execute tests in docker container:
 - Run:
 ```bash
 tests/run_tests
 ```
+
+(Optional)
+
+After that test database will be kept running in the background, so you can execute.
+To do that, you need to do additional steps:
+- Ensure that python 3.6+ is installed globally (`python --version`)
+- Add ENV variables:
+```bash
+DB_HOST=localhost:33062
+DB_NAME=myst_api
+DB_USER=myst_api
+DB_PASSWORD=myst_api
+```
+- Run tests from IDE or bash:
+```bash
+bin/test
+```
+
+### Linter
 
 To run linter:
 ```bash

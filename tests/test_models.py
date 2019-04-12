@@ -6,7 +6,7 @@ import json
 
 class TestSession(TestCase):
     def test_is_active(self):
-        session = Session("session")
+        session = Session("session", "openvpn")
 
         self.assertFalse(session.is_active())
 

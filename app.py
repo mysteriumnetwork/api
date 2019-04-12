@@ -251,12 +251,14 @@ def session_stats_create(session_key, caller_identity):
     session = Session.query.get(session_key)
     if session is None:
         consumer_country = payload.get('consumer_country', '')
-        session = Session(session_key)
+        session = Session(session_key, service_type)
         ip = request.remote_addr
         session.client_ip = mask_ip_partially(ip)
         session.client_country = consumer_country
         session.consumer_id = caller_identity
         session.node_key = provider_id
+    else:
+        session.service_type = service_type
 
     if session.consumer_id != caller_identity:
         message = 'session identity does not match current one'
@@ -270,7 +272,6 @@ def session_stats_create(session_key, caller_identity):
     session.client_bytes_sent = bytes_sent
     session.client_bytes_received = bytes_received
     session.client_updated_at = datetime.utcnow()
-    session.service_type = service_type
 
     db.session.add(session)
     db.session.commit()
@@ -401,10 +402,7 @@ def start_debug_app():
     app.run(debug=True)
 
 
-def init_db(custom_config=None):
-    if custom_config is not None:
-        app.config['SQLALCHEMY_DATABASE_URI'] =\
-            _generate_database_uri(custom_config)
+def init_db():
     db.init_app(app)
 
 

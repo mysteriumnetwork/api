@@ -1,7 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Index
 from datetime import datetime, timedelta
 import json
-
 
 db = SQLAlchemy()
 
@@ -19,7 +19,7 @@ class Node(db.Model):
     connection_config = db.Column(db.Text)
     proposal = db.Column(db.Text)
     created_at = db.Column(db.DateTime)
-    updated_at = db.Column(db.DateTime)
+    updated_at = db.Column(db.DateTime, index=True)
     service_type = db.Column(db.String(255), primary_key=True)
 
     def __init__(self, node_key, service_type):
@@ -62,10 +62,10 @@ class Session(db.Model):
 
     session_key = db.Column(db.String(SESSION_KEY_LIMIT), primary_key=True)
     # TODO: rename to provider_id
-    node_key = db.Column(db.String(IDENTITY_LENGTH_LIMIT))
+    node_key = db.Column(db.String(IDENTITY_LENGTH_LIMIT), index=True)
     created_at = db.Column(db.DateTime)
     node_updated_at = db.Column(db.DateTime)
-    client_updated_at = db.Column(db.DateTime)
+    client_updated_at = db.Column(db.DateTime, index=True)
     node_bytes_sent = db.Column(db.BigInteger)
     node_bytes_received = db.Column(db.BigInteger)
     consumer_id = db.Column(db.String(IDENTITY_LENGTH_LIMIT))
@@ -74,10 +74,11 @@ class Session(db.Model):
     client_ip = db.Column(db.String(45))
     client_country = db.Column(db.String(255))
     established = db.Column(db.Boolean)
-    service_type = db.Column(db.String(255))
+    service_type = db.Column(db.String(255), nullable=False)
 
-    def __init__(self, session_key):
+    def __init__(self, session_key, service_type=None):
         self.session_key = session_key
+        self.service_type = service_type
         self.created_at = datetime.utcnow()
         self.established = False
         self.node_bytes_sent = 0
@@ -98,11 +99,17 @@ class NodeAvailability(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     node_key = db.Column(db.String(IDENTITY_LENGTH_LIMIT))
     date = db.Column(db.DateTime)
-    service_type = db.Column(db.String(255))
+    service_type = db.Column(db.String(255), nullable=False)
 
     def __init__(self, node_key):
         self.node_key = node_key
         self.date = datetime.utcnow()
+
+
+Index(
+    'node_availability_fast_stats_index',
+    NodeAvailability.node_key, NodeAvailability.date
+)
 
 
 class Identity(db.Model):

@@ -10,4 +10,7 @@ ADD models.py /code/models.py
 ADD queries.py /code/queries.py
 ADD settings.py /code/settings.py
 
+HEALTHCHECK --interval=5s --timeout=5s --retries=15\
+    CMD curl -f http://localhost/ping || exit 1
+
 ENTRYPOINT ["python", "server.py"]

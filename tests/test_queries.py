@@ -19,11 +19,11 @@ class TestQueries(TestCase):
         self.assertEqual([node1], nodes)
 
     def test_filter_active_sessions(self):
-        session1 = Session("session1")
+        session1 = Session("session1", "openvpn")
         session1.client_updated_at = datetime.utcnow()
         db.session.add(session1)
 
-        session2 = Session("session2")
+        session2 = Session("session2", "openvpn")
         db.session.add(session2)
 
         sessions = filter_active_sessions().all()
