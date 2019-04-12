@@ -1,5 +1,5 @@
 from dashboard.db_queries.node_availability import get_node_hours_online
-from dashboard.model_layer import get_country_string, get_node_status
+from api.statistics.model_layer import get_country_string, get_node_status
 from dashboard.helpers import get_natural_size
 from sqlalchemy import text
 from models import db, Node

@@ -1,5 +1,5 @@
-from dashboard.tests.test_case import TestCase
-from dashboard.model_layer import get_sessions_country_stats
+from tests.test_case import TestCase
+from api.statistics.model_layer import get_sessions_country_stats
 from datetime import datetime, timedelta
 from models import db, Session
 

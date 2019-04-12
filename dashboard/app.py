@@ -2,7 +2,7 @@ from dashboard.db_queries.leaderboard import (
     get_leaderboard_rows,
     enrich_leaderboard_rows
 )
-from dashboard.model_layer import (
+from api.statistics.model_layer import (
     get_active_nodes_count,
     get_sessions_count,
     get_average_session_time,
@@ -20,6 +20,7 @@ from flask import Flask, render_template, request, abort, jsonify
 from datetime import datetime
 from models import db
 import settings
+from dashboard.filters import initialize_filters
 
 
 app = Flask(__name__)
@@ -27,6 +28,8 @@ db.init_app(app)
 
 cache = SimpleCache()
 LEADERBOARD_ROWS_PER_PAGE = 10
+
+initialize_filters(app)
 
 
 def _generate_database_uri(db_config):
@@ -43,7 +46,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] =\
 def main():
     page_content = cache.get('dashboard-page')
     if page_content is None:
-
         page_content = render_template(
             'dashboard.html',
             active_nodes_count=get_active_nodes_count(),
@@ -132,7 +134,6 @@ def node(key, service_type):
 
 @app.route('/nodes')
 def nodes():
-
     nodes = cache.get('all-nodes')
     if nodes is None:
         nodes = get_nodes(limit=500)

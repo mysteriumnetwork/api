@@ -3,16 +3,10 @@ from queries import (
     filter_active_nodes,
     get_active_nodes_count_query
 )
-from dashboard.helpers import (
-    format_duration,
-    get_natural_size,
-    shorten_node_key
-)
 from dashboard.db_queries.node_availability import get_node_hours_online
 from datetime import datetime, timedelta
 from sqlalchemy import func, desc, text
 from models import db, Node, Session
-from humanize import naturaltime
 
 
 def get_active_nodes_count():
@@ -49,7 +43,7 @@ def get_average_session_time():
     result = db.engine.execute(sql)
     myrow = result.fetchone()
     seconds = int(myrow[0]) if myrow[0] is not None else 0
-    return format_duration(timedelta(seconds=seconds))
+    return timedelta(seconds=seconds)
 
 
 def get_total_data_transferred():
@@ -58,7 +52,7 @@ def get_total_data_transferred():
     result = db.engine.execute(sql)
     myrow = result.fetchone()
     total_bytes = (myrow[0] or 0) + (myrow[1] or 0)
-    return get_natural_size(total_bytes)
+    return total_bytes
 
 
 def get_country_string(country):
@@ -81,7 +75,7 @@ def get_nodes(limit=None):
             node.node_key, node.service_type
         )
         delta = datetime.utcnow() - node.updated_at
-        node.last_seen = naturaltime(delta.total_seconds())
+        node.last_seen = delta.total_seconds()
         node.status = get_node_status(node)
 
     return nodes
@@ -103,7 +97,7 @@ def get_available_nodes(limit=None):
             node.node_key, node.service_type
         )
         delta = datetime.utcnow() - node.updated_at
-        node.last_seen = naturaltime(delta.total_seconds())
+        node.last_seen = delta.total_seconds()
     return nodes
 
 
@@ -114,7 +108,7 @@ def get_node_status(node):
 def get_node_info(node_key, service_type):
     node = Node.query.get([node_key, service_type])
     delta = datetime.utcnow() - node.updated_at
-    node.last_seen = naturaltime(delta.total_seconds())
+    node.last_seen = delta.total_seconds()
     node.country_string = get_country_string(
         node.get_country_from_service_proposal()
     )
@@ -129,7 +123,7 @@ def get_node_info(node_key, service_type):
         total_bytes += se.client_bytes_sent
         total_bytes += se.client_bytes_received
 
-    node.data_transferred = get_natural_size(total_bytes)
+    node.data_transferred = total_bytes
     node.sessions_count = get_sessions_count_by_service_type(
         node_key,
         service_type
@@ -165,16 +159,13 @@ def get_node_info(node_key, service_type):
 
 def enrich_session_info(se):
     duration = (se.node_updated_at or se.client_updated_at) - se.created_at
-    se.duration = format_duration(duration)
-    se.data_sent = get_natural_size(se.client_bytes_sent)
-    se.data_received = get_natural_size(se.client_bytes_received)
-    se.data_transferred = get_natural_size(
-        se.client_bytes_sent + se.client_bytes_received
-    )
+    se.duration = duration
+    se.data_sent = se.client_bytes_sent
+    se.data_received = se.client_bytes_received
+    se.data_transferred = se.client_bytes_sent + se.client_bytes_received
     session_time = datetime.utcnow() - se.created_at
-    se.started = naturaltime(session_time.total_seconds())
+    se.started = session_time.total_seconds()
     se.status = 'Ongoing' if se.is_active() else 'Completed'
-    se.shortened_node_key = shorten_node_key(se.node_key)
     se.client_country_string = get_country_string(se.client_country)
 
 
