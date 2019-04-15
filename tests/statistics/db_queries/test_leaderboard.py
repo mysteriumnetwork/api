@@ -1,6 +1,6 @@
-from dashboard.db_queries.leaderboard import get_leaderboard_rows
+from api.statistics.db_queries.leaderboard import get_leaderboard_rows
 from models import db, Node, IdentityRegistration, Session
-from dashboard.tests.test_case import TestCase
+from tests.test_case import TestCase
 from datetime import datetime, timedelta
 
 now = datetime.utcnow()

@@ -22,7 +22,7 @@
             </div>
             <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
               <span class="count_top"><i class="fa fa-globe"></i> Data Transferred Total</span>
-              <div class="count">{{total_data_transferred}}</div>
+              <div class="count">{{total_data_transferred|format_bytes_count}}</div>
             </div>
           </div>
           <!-- /top tiles -->
@@ -63,7 +63,7 @@
                         <td>{{node.service_type}}</td>
                         <td>{{node.country_string}}</td>
                         <td>{{node.sessions_count}}</td>
-                        <td>{{node.last_seen}}</td>
+                        <td>{{node.last_seen|format_time}}</td>
                       </tr>
                       {% endfor %}
                     </tbody>
@@ -101,8 +101,8 @@
                     {% for se in sessions %}
                     <tr onclick="window.document.location='/session/{{se.session_key}}'">
                       <td scope="row" class="enumerator">{{loop.index}}</td>
-                      <td>{{se.duration}}</td>
-                      <td>{{se.data_transferred}}</td>
+                      <td>{{se.duration|format_duration}}</td>
+                      <td>{{se.data_transferred|format_bytes_count}}</td>
                       <td>{{se.status}}</td>
                     </tr>
                     {% endfor %}

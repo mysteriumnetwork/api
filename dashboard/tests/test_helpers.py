@@ -2,7 +2,7 @@ import unittest
 from datetime import timedelta, datetime, date
 from dashboard.helpers import (
     shorten_node_key,
-    get_natural_size,
+    format_bytes_count,
     format_duration,
     get_week_range
 )
@@ -27,25 +27,25 @@ class TestHelpers(unittest.TestCase):
             shorten_node_key(None)
         )
 
-    def test_get_natural_size(self):
+    def test_format_bytes_count(self):
         self.assertEqual(
             '1 Byte',
-            get_natural_size(1)
+            format_bytes_count(1)
         )
 
         self.assertEqual(
             '1.00 KB',
-            get_natural_size(1024)
+            format_bytes_count(1024)
         )
 
         self.assertEqual(
             '1.00 MB',
-            get_natural_size(1024 * 1024)
+            format_bytes_count(1024 * 1024)
         )
 
         self.assertEqual(
             '1.00 GB',
-            get_natural_size(1024 * 1024 * 1024)
+            format_bytes_count(1024 * 1024 * 1024)
         )
 
     def test_format_duration(self):

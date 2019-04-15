@@ -35,15 +35,19 @@
                 </li>
                 <li class="col-md-2 col-sm-4 col-xs-6">
                   <span class="name">Duration</span>
-                  <span class="value">{{ session.duration }}</span>
+                  <span class="value">{{ session.duration|format_duration }}</span>
                 </li>
                 <li class="col-md-2 col-sm-4 col-xs-6">
                   <span class="name">Started</span>
-                  <span class="value">{{ session.started }}</span>
+                  <span class="value">{{ session.started|format_time }}</span>
                 </li>
                 <li class="col-md-2 col-sm-4 col-xs-6">
                   <span class="name">Node</span>
-                  <span class="value"><a href="/node/{{ session.node_key }}/{{ session.service_type }}">{{ session.shortened_node_key }}</a></span>
+                  <span class="value">
+                    <a href="/node/{{ session.node_key }}/{{ session.service_type }}">
+                      {{ session.node_key|shorten_node_key }}
+                    </a>
+                  </span>
                 </li>
                 <li class="col-md-2 col-sm-4 col-xs-6">
                   <span class="name">Protocol</span>
@@ -51,11 +55,11 @@
                 </li>
                 <li class="col-md-2 col-sm-4 col-xs-6">
                   <span class="name">Data Transferred Total</span>
-                  <span class="value">{{ session.data_transferred }}</span>
+                  <span class="value">{{ session.data_transferred|format_bytes_count }}</span>
                 </li>
                 <li class="col-md-2 col-sm-4 col-xs-6">
                   <span class="name">Data Sent / Received</span>
-                  <span class="value">{{ session.data_sent }} / {{ session.data_received }}</span>
+                  <span class="value">{{ session.data_sent|format_bytes_count }} / {{ session.data_received|format_bytes_count }}</span>
                 </li>
                 <li class="col-md-2 col-sm-4 col-xs-6">
                   <span class="name">Consumer Country</span>

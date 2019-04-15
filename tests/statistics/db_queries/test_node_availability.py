@@ -1,5 +1,5 @@
-from dashboard.db_queries.node_availability import get_node_hours_online
-from dashboard.tests.test_case import TestCase
+from api.statistics.db_queries.node_availability import get_node_hours_online
+from tests.test_case import TestCase
 from models import db, NodeAvailability
 from datetime import datetime, timedelta
 

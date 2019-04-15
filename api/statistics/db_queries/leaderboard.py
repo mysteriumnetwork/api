@@ -1,6 +1,5 @@
-from dashboard.db_queries.node_availability import get_node_hours_online
-from dashboard.model_layer import get_country_string, get_node_status
-from dashboard.helpers import get_natural_size
+from api.statistics.db_queries.node_availability import get_node_hours_online
+from api.statistics.model_layer import get_country_string, get_node_status
 from sqlalchemy import text
 from models import db, Node
 
@@ -86,6 +85,4 @@ def enrich_leaderboard_rows(rows, date_from, date_to):
         row.availability = '{} / 168 h'.format(
             hours_online
         )
-        row.data_transferred = get_natural_size(
-            row.total_bytes
-        )
+        row.data_transferred = row.total_bytes

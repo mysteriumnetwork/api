@@ -21,8 +21,6 @@ services:
       context: ..
       dockerfile: Dockerfile.dashboard
     container_name: mysterium-dashboard-test
-    ports:
-      - 8002:80
     environment:
       DB_HOST: mysterium-mysql-test
       DB_NAME: myst_api
