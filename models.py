@@ -1,7 +1,9 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Index
+from sqlalchemy import Index, ForeignKey
 from datetime import datetime, timedelta
 import json
+
+from sqlalchemy.orm import relationship
 
 db = SQLAlchemy()
 
@@ -24,6 +26,8 @@ class Node(db.Model):
 
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime, index=True)
+
+    access_policies = relationship("ProposalAccessPolicy")
 
     def __init__(self, node_key, service_type):
         self.node_key = node_key
@@ -62,7 +66,8 @@ class Node(db.Model):
 
 class ProposalAccessPolicy(db.Model):
     __tablename__ = 'proposal_access_policy'
-    node_key = db.Column(db.String(IDENTITY_LENGTH_LIMIT), primary_key=True)
+    node_key = db.Column(db.String(IDENTITY_LENGTH_LIMIT),
+                         ForeignKey('node.node_key'), primary_key=True)
     id = db.Column(db.String(255), primary_key=True)
     source = db.Column(db.String(255), primary_key=True)
 

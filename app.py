@@ -229,24 +229,14 @@ def proposals():
         id = request.args.get('access_policy[id]')
         source = request.args.get('access_policy[source]')
         if id and source:
-            policies = ProposalAccessPolicy\
-                .query\
-                .filter_by(id=id, source=source)\
-                .all()
-            node_keys = []
-            for p in policies:
-                node_keys.append(p.node_key)
-            # TODO: keep only unique node_keys?
-            nodes = nodes.filter(Node.node_key.in_(node_keys))
+            nodes = nodes\
+                .join(ProposalAccessPolicy)\
+                .filter(ProposalAccessPolicy.id == id
+                        and ProposalAccessPolicy.source == source)
         else:
-            policies = ProposalAccessPolicy \
-                .query \
-                .all()
-            node_keys = []
-            for p in policies:
-                node_keys.append(p.node_key)
-            # TODO: keep only unique node_keys?
-            nodes = nodes.filter(Node.node_key.notin_(node_keys))
+            nodes = nodes \
+                .outerjoin(ProposalAccessPolicy)\
+                .filter(~Node.access_policies.any())
 
     service_proposals = []
     for node in nodes:

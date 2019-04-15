@@ -500,6 +500,8 @@ class TestApi(TestCase):
         n1.mark_activity()
         n2 = self._create_node("node2", "openvpn", "mysterium", "test source")
         n2.mark_activity()
+        n3 = self._create_node("node3", "openvpn", "private", "test source")
+        n3.mark_activity()
 
         re = self._get(
             '/v1/proposals',
