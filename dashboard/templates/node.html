@@ -42,11 +42,11 @@
                 </li>
                 <li class="col-md-2 col-sm-4 col-xs-6 ">
                   <span class="name">Seen</span>
-                  <span class="value">{{ node.last_seen|naturaltime }}</span>
+                  <span class="value">{{ node.last_seen|format_time }}</span>
                 </li>
                 <li class="col-md-2 col-sm-4 col-xs-6">
                   <span class="name">Data Transferred</span>
-                  <span class="value">{{ node.data_transferred|get_natural_size }}</span>
+                  <span class="value">{{ node.data_transferred|format_bytes_count }}</span>
                 </li>
                 <li class="col-md-2 col-sm-4 col-xs-6">
                   <span class="name">Transport Protocol</span>
@@ -123,9 +123,9 @@
                 <td scope="row" class="enumerator">{{loop.index}}</td>
                 <td class="td-session-key">{{se.session_key}}</td>
                 <td>{{se.status}}</td>
-                <td>{{se.started|naturaltime}}</td>
+                <td>{{se.started|format_time}}</td>
                 <td>{{se.duration|format_duration}}</td>
-                <td>{{se.data_transferred|get_natural_size}}</td>
+                <td>{{se.data_transferred|format_bytes_count}}</td>
               </tr>
               {% endfor %}
 

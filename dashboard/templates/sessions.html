@@ -35,9 +35,9 @@
                 <td scope="row" class="enumerator">{{loop.index}}</td>
                 <td>{{se.session_key}}</td>
                 <td>{{se.status}}</td>
-                <td>{{se.started|naturaltime}}</td>
+                <td>{{se.started|format_time}}</td>
                 <td>{{se.duration|format_duration}}</td>
-                <td>{{se.data_transferred|get_natural_size}}</td>
+                <td>{{se.data_transferred|format_bytes_count}}</td>
               </tr>
               {% endfor %}
 

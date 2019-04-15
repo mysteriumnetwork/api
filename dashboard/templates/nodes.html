@@ -35,7 +35,7 @@
                   <td scope="row" class="enumerator">{{loop.index}}</td>
                   <td class="td-node-key">{{node.node_key}}</td>
                   <td>{{node.status}}</td>
-                  <td>{{node.last_seen|naturaltime}}</td>
+                  <td>{{node.last_seen|format_time}}</td>
                   <td>{{node.sessions_count}}</td>
                   <td>{{node.country_string}}</td>
                   <td class="mobile-hide">{{node.service_type}}</td>
