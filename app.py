@@ -10,7 +10,12 @@ from flask_migrate import Migrate
 from werkzeug.debug import get_current_traceback
 from functools import wraps
 from ip import mask_ip_partially
-from queries import filter_active_nodes, filter_active_nodes_by_service_type
+from queries import (
+    filter_active_nodes,
+    filter_active_nodes_by_service_type,
+    filter_nodes_without_access_policies,
+    filter_nodes_by_access_policy
+)
 from identity_contract import IdentityContract
 from eth_utils.address import is_hex_address as is_valid_eth_address
 from signature import (
@@ -229,14 +234,9 @@ def proposals():
         id = request.args.get('access_policy[id]')
         source = request.args.get('access_policy[source]')
         if id and source:
-            nodes = nodes\
-                .join(ProposalAccessPolicy)\
-                .filter(ProposalAccessPolicy.id == id
-                        and ProposalAccessPolicy.source == source)
+            nodes = filter_nodes_by_access_policy(nodes, id, source)
         else:
-            nodes = nodes \
-                .outerjoin(ProposalAccessPolicy)\
-                .filter(~Node.access_policies.any())
+            nodes = filter_nodes_without_access_policies(nodes)
 
     service_proposals = []
     for node in nodes:
