@@ -1,6 +1,7 @@
 from datetime import datetime
 from models import Node, Session, AVAILABILITY_TIMEOUT, ProposalAccessPolicy
 from sqlalchemy import func, distinct
+from typing import Optional
 
 
 def get_active_nodes_count_query():
@@ -33,12 +34,19 @@ def filter_active_nodes_by_service_type(service_type):
     )
 
 
-def filter_nodes_by_access_policy(
-        nodes: any, access_policy_id: str, access_policy_source: str) -> any:
-    return nodes \
-        .join(ProposalAccessPolicy) \
-        .filter(ProposalAccessPolicy.id == access_policy_id
-                and ProposalAccessPolicy.source == access_policy_source)
+def filter_nodes_by_access_policy(nodes: any, access_policy_id: Optional[str],
+                                  access_policy_source: Optional[str]) -> any:
+    if not access_policy_id and not access_policy_source:
+        return nodes
+
+    nodes = nodes.join(ProposalAccessPolicy)
+    if access_policy_id:
+        nodes = nodes.filter(ProposalAccessPolicy.id == access_policy_id)
+    if access_policy_source:
+        nodes = nodes.filter(
+            ProposalAccessPolicy.source == access_policy_source)
+
+    return nodes
 
 
 def filter_nodes_without_access_policies(nodes):
