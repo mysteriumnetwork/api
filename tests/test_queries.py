@@ -56,11 +56,24 @@ class TestQueries(TestCase):
         dummy_node_2.mark_activity()
         db.session.add(dummy_node_2)
 
-        nodes = filter_active_nodes()
-        filtered = filter_nodes_in_bounty_programme(nodes).all()
-        self.assertEqual([], filtered)
-
         ir = IdentityRegistration("node1", "test")
         db.session.add(ir)
+
+        nodes = filter_active_nodes()
+
         filtered = filter_nodes_in_bounty_programme(nodes).all()
         self.assertEqual([dummy_node], filtered)
+
+    def test_filter_nodes_in_bounty_programme_with_no_registration(self):
+        dummy_node = Node("node1", "dummy")
+        dummy_node.mark_activity()
+        db.session.add(dummy_node)
+
+        dummy_node_2 = Node("node2", "dummy")
+        dummy_node_2.mark_activity()
+        db.session.add(dummy_node_2)
+
+        nodes = filter_active_nodes()
+
+        filtered = filter_nodes_in_bounty_programme(nodes).all()
+        self.assertEqual([], filtered)

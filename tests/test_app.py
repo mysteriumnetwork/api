@@ -522,7 +522,7 @@ class TestApi(TestCase):
         n1.mark_activity()
         n2 = self._create_node("node2", "openvpn")
         n2.mark_activity()
-        
+
         self._create_identity_registration("node2", "some_address")
 
         re = self._get(
