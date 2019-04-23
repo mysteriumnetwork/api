@@ -1,9 +1,10 @@
 from datetime import datetime
 
 from tests.test_case import TestCase
-from models import db, Node, Session
+from models import db, Node, Session, IdentityRegistration
 from queries import filter_active_nodes, filter_active_sessions
 from queries import filter_active_nodes_by_service_type
+from queries import filter_nodes_in_bounty_programme
 
 
 class TestQueries(TestCase):
@@ -45,3 +46,21 @@ class TestQueries(TestCase):
             "openvpn"
         ).all()
         self.assertEqual([openvpn_node], openvpn_nodes)
+
+    def test_filter_nodes_in_bounty_programme(self):
+        dummy_node = Node("node1", "dummy")
+        dummy_node.mark_activity()
+        db.session.add(dummy_node)
+
+        dummy_node_2 = Node("node2", "dummy")
+        dummy_node_2.mark_activity()
+        db.session.add(dummy_node_2)
+
+        nodes = filter_active_nodes()
+        filtered = filter_nodes_in_bounty_programme(nodes).all()
+        self.assertEqual([], filtered)
+
+        ir = IdentityRegistration("node1", "test")
+        db.session.add(ir)
+        filtered = filter_nodes_in_bounty_programme(nodes).all()
+        self.assertEqual([dummy_node], filtered)

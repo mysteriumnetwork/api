@@ -3,7 +3,7 @@ import json
 from datetime import datetime, timedelta
 from models import (
     db, Session, Node, ProposalAccessPolicy, NodeAvailability,
-    AVAILABILITY_TIMEOUT
+    AVAILABILITY_TIMEOUT, IdentityRegistration
 )
 from tests.test_case import TestCase
 from tests.utils import (
@@ -517,6 +517,27 @@ class TestApi(TestCase):
         self.assertEqual(1, len(data['proposals']))
         self.assertEqual('node2', data['proposals'][0]['provider_id'])
 
+    def test_proposals_filtering_bounty_only(self):
+        n1 = self._create_node("node1", "openvpn")
+        n1.mark_activity()
+        n2 = self._create_node("node2", "openvpn")
+        n2.mark_activity()
+        
+        self._create_identity_registration("node2", "some_address")
+
+        re = self._get(
+            '/v1/proposals',
+            {
+                'service_type': 'all',
+                'bounty_only': 'true',
+            }
+        )
+
+        self.assertEqual(200, re.status_code)
+        data = json.loads(re.data)
+        self.assertEqual(1, len(data['proposals']))
+        self.assertEqual('node2', data['proposals'][0]['provider_id'])
+
     def test_proposals_filtering_by_star_policy_returns_all_proposals(self):
         n1 = self._create_node("node1", "openvpn")
         n1.mark_activity()
@@ -977,6 +998,11 @@ class TestApi(TestCase):
             db.session.add(item)
 
         return node
+
+    def _create_identity_registration(self, node_key, eth_address):
+        ir = IdentityRegistration(node_key, eth_address)
+        db.session.add(ir)
+        return ir
 
 
 if __name__ == '__main__':
