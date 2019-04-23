@@ -14,7 +14,8 @@ from queries import (
     filter_active_nodes,
     filter_active_nodes_by_service_type,
     filter_nodes_without_access_policies,
-    filter_nodes_by_access_policy
+    filter_nodes_by_access_policy,
+    filter_nodes_in_bounty_programme
 )
 from identity_contract import IdentityContract
 from eth_utils.address import is_hex_address as is_valid_eth_address
@@ -237,6 +238,9 @@ def proposals():
             nodes = filter_nodes_by_access_policy(nodes, id, source)
         else:
             nodes = filter_nodes_without_access_policies(nodes)
+
+    if request.args.get('bounty_only') == 'true':
+        nodes = filter_nodes_in_bounty_programme(nodes)
 
     service_proposals = []
     for node in nodes:

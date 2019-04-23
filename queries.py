@@ -1,5 +1,6 @@
 from datetime import datetime
-from models import Node, Session, AVAILABILITY_TIMEOUT, ProposalAccessPolicy
+from models import Node, Session, AVAILABILITY_TIMEOUT
+from models import ProposalAccessPolicy, IdentityRegistration
 from sqlalchemy import func, distinct
 from typing import Optional
 
@@ -53,3 +54,10 @@ def filter_nodes_without_access_policies(nodes):
     return nodes \
         .outerjoin(ProposalAccessPolicy) \
         .filter(~Node.access_policies.any())
+
+
+def filter_nodes_in_bounty_programme(nodes):
+    return nodes \
+        .join(
+           IdentityRegistration, Node.node_key == IdentityRegistration.identity
+        ).filter(IdentityRegistration.payout_eth_address != "")
