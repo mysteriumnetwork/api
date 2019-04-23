@@ -29,6 +29,8 @@ class Node(db.Model):
 
     access_policies = relationship("ProposalAccessPolicy")
 
+    node_type = db.Column(db.String(255))
+
     def __init__(self, node_key, service_type):
         self.node_key = node_key
         self.service_type = service_type

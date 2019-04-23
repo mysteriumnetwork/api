@@ -136,6 +136,58 @@ class TestApi(TestCase):
         self.assertEqual(self.REMOTE_ADDR, node.ip)
         self.assertEqual("dummy", node.service_type)
 
+    def test_register_proposal_successful_with_node_type(self):
+        public_address = build_static_public_address()
+        payload = {
+            "service_proposal": {
+                "id": 1,
+                "format": "service-proposal/v1",
+                "provider_id": public_address,
+                "service_type": "dummy",
+                "service_definition": {
+                    "location": {
+                        "node_type": "dummy_type"
+                    }
+                }
+            }
+        }
+        auth = build_test_authorization(json.dumps(payload))
+        main.identity_contract = IdentityContractFake(True)
+        re = self._post(
+            '/v1/register_proposal',
+            payload,
+            headers=auth['headers'])
+        self.assertEqual(200, re.status_code)
+        self.assertIsNotNone(re.json)
+
+        node = Node.query.get([public_address, "dummy"])
+        self.assertEqual(self.REMOTE_ADDR, node.ip)
+        self.assertEqual("dummy_type", node.node_type)
+
+    def test_register_proposal_successful_with_invalid_definition(self):
+        public_address = build_static_public_address()
+        payload = {
+            "service_proposal": {
+                "id": 1,
+                "format": "service-proposal/v1",
+                "provider_id": public_address,
+                "service_type": "dummy",
+                "service_definition": "test"
+            }
+        }
+        auth = build_test_authorization(json.dumps(payload))
+        main.identity_contract = IdentityContractFake(True)
+        re = self._post(
+            '/v1/register_proposal',
+            payload,
+            headers=auth['headers'])
+        self.assertEqual(200, re.status_code)
+        self.assertIsNotNone(re.json)
+
+        node = Node.query.get([public_address, "dummy"])
+        self.assertEqual(self.REMOTE_ADDR, node.ip)
+        self.assertEqual(None, node.node_type)
+
     def test_register_proposal_with_unknown_ip(self):
         public_address = build_static_public_address()
         payload = {
@@ -552,6 +604,22 @@ class TestApi(TestCase):
         self.assertEqual(200, re.status_code)
         data = json.loads(re.data)
         self.assertEqual(2, len(data['proposals']))
+
+    def test_proposals_filtering_by_node_type(self):
+        n1 = self._create_node("node1", "openvpn")
+        n1.node_type = "dummy_type"
+        n1.mark_activity()
+        n2 = self._create_node("node2", "openvpn", "mysterium", "test source")
+        n2.mark_activity()
+
+        re = self._get(
+            '/v1/proposals',
+            {'node_type': 'dummy_type'}
+        )
+
+        self.assertEqual(200, re.status_code)
+        data = json.loads(re.data)
+        self.assertEqual(1, len(data['proposals']))
 
     def test_session_stats_create_without_session_record(self):
         payload = {

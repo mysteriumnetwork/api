@@ -33,3 +33,18 @@ def setup_logger():
     console.setFormatter(logging.Formatter(log_format, datefmt=log_datefmt))
     logging.getLogger('').addHandler(console)
     logging.getLogger('urllib3').setLevel(logging.WARNING)
+
+
+def parse_node_type_from_proposal(proposal):
+    service_definition = proposal.get('service_definition', None)
+    if not service_definition:
+        return None
+
+    if not isinstance(service_definition, dict):
+        return None
+
+    location = service_definition.get('location', None)
+    if not location:
+        return None
+
+    return location.get("node_type", None)
