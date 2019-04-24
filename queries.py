@@ -61,3 +61,7 @@ def filter_nodes_in_bounty_programme(nodes):
         .join(
            IdentityRegistration, Node.node_key == IdentityRegistration.identity
         ).filter(IdentityRegistration.payout_eth_address != "")
+
+
+def filter_nodes_by_node_type(nodes, node_type):
+    return nodes.filter(Node.node_type == node_type)

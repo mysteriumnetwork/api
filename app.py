@@ -15,7 +15,8 @@ from queries import (
     filter_active_nodes_by_service_type,
     filter_nodes_without_access_policies,
     filter_nodes_by_access_policy,
-    filter_nodes_in_bounty_programme
+    filter_nodes_in_bounty_programme,
+    filter_nodes_by_node_type
 )
 from identity_contract import IdentityContract
 from eth_utils.address import is_hex_address as is_valid_eth_address
@@ -185,6 +186,10 @@ def register_proposal(caller_identity):
             source = policy_data['source']
             db.session.add(ProposalAccessPolicy(node_key, id, source))
 
+    node_type = helpers.parse_node_type_from_proposal(proposal)
+    if node_type:
+        node.node_type = node_type
+
     node.mark_activity()
     db.session.add(node)
     db.session.commit()
@@ -241,6 +246,10 @@ def proposals():
 
     if request.args.get('bounty_only') == 'true':
         nodes = filter_nodes_in_bounty_programme(nodes)
+
+    node_type_arg = request.args.get('node_type')
+    if node_type_arg:
+        nodes = filter_nodes_by_node_type(nodes, node_type_arg)
 
     service_proposals = []
     for node in nodes:

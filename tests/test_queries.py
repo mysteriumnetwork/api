@@ -5,6 +5,7 @@ from models import db, Node, Session, IdentityRegistration
 from queries import filter_active_nodes, filter_active_sessions
 from queries import filter_active_nodes_by_service_type
 from queries import filter_nodes_in_bounty_programme
+from queries import filter_nodes_by_node_type
 
 
 class TestQueries(TestCase):
@@ -76,4 +77,33 @@ class TestQueries(TestCase):
         nodes = filter_active_nodes()
 
         filtered = filter_nodes_in_bounty_programme(nodes).all()
+        self.assertEqual([], filtered)
+
+    def test_filter_nodes_by_node_type(self):
+        dummy_node = Node("node1", "dummy")
+        dummy_node.node_type = "some-type"
+        dummy_node.mark_activity()
+        db.session.add(dummy_node)
+
+        dummy_node_2 = Node("node2", "dummy")
+        dummy_node_2.mark_activity()
+        db.session.add(dummy_node_2)
+
+        nodes = filter_active_nodes()
+
+        filtered = filter_nodes_by_node_type(nodes, "some-type").all()
+        self.assertEqual([dummy_node], filtered)
+
+    def test_filter_nodes_by_node_type_no_match(self):
+        dummy_node = Node("node1", "dummy")
+        dummy_node.mark_activity()
+        db.session.add(dummy_node)
+
+        dummy_node_2 = Node("node2", "dummy")
+        dummy_node_2.mark_activity()
+        db.session.add(dummy_node_2)
+
+        nodes = filter_active_nodes()
+
+        filtered = filter_nodes_by_node_type(nodes, "some-type").all()
         self.assertEqual([], filtered)
