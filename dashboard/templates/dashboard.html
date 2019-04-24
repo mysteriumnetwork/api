@@ -49,6 +49,7 @@
                       <tr>
                         <th class="enumerator">#</th>
                         <th>Node</th>
+                        <th>Service</th>
                         <th>Type</th>
                         <th>Country</th>
                         <th>Sessions</th>
@@ -61,6 +62,7 @@
                         <td scope="row" class="enumerator">{{loop.index}}</td>
                         <td class="td-node-key">{{node.node_key}}</td>
                         <td>{{node.service_type}}</td>
+                        <td>{{node.node_type}}</td>
                         <td>{{node.country_string}}</td>
                         <td>{{node.sessions_count}}</td>
                         <td>{{node.last_seen|format_time}}</td>
