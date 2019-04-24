@@ -70,15 +70,20 @@ def get_leaderboard_rows(date_from, date_to, offset=0, limit=10):
 
 
 def enrich_leaderboard_rows(rows, date_from, date_to):
+    supportedTypes = ['openvpn', 'wireguard', 'noop']
     for row in rows:
-        node = Node.query.get([row.provider_id, 'openvpn'])
+        for t in supportedTypes:
+            node = Node.query.get([row.provider_id, t])
+            if node:
+                break
+
         row.country = get_country_string(
             node.get_country_from_service_proposal()
         )
         row.service_status = get_node_status(node)
         hours_online = get_node_hours_online(
             row.provider_id,
-            'openvpn',
+            node.service_type,
             date_from,
             date_to
         )
