@@ -44,7 +44,7 @@ def parse_node_type_from_proposal(proposal):
         return None
 
     location = service_definition.get('location', None)
-    if not location:
+    if not isinstance(location, dict):
         return None
 
     return location.get("node_type", None)
