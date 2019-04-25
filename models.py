@@ -60,8 +60,12 @@ class Node(db.Model):
         proposals = self.get_service_proposals()
 
         try:
-            pr = proposals[0]
-            return pr['service_definition']['location_originate']['country']
+            return proposals[0]['service_definition']['location_originate']['country']
+        except KeyError:
+            pass
+
+        try:
+            return proposals[0]['service_definition']['location']['country']
         except KeyError:
             return None
 
