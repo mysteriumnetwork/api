@@ -26,6 +26,7 @@
                   <th>Seen</th>
                   <th>Sessions</th>
                   <th>Country</th>
+                  <th class="mobile-hide">Service</th>
                   <th class="mobile-hide">Type</th>
                 </tr>
               </thead>
@@ -39,6 +40,7 @@
                   <td>{{node.sessions_count}}</td>
                   <td>{{node.country_string}}</td>
                   <td class="mobile-hide">{{node.service_type}}</td>
+                  <td class="mobile-hide">{{node.node_type.capitalize()}}</td>
                 </tr>
                 {% endfor %}
               </tbody>
