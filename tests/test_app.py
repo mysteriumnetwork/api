@@ -186,7 +186,7 @@ class TestApi(TestCase):
 
         node = Node.query.get([public_address, "dummy"])
         self.assertEqual(self.REMOTE_ADDR, node.ip)
-        self.assertEqual(None, node.node_type)
+        self.assertEqual('data-center', node.node_type)
 
     def test_register_proposal_with_unknown_ip(self):
         public_address = build_static_public_address()
