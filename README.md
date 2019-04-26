@@ -60,3 +60,17 @@ To run linter:
 ```bash
 bin/lint
 ```
+
+### Database schema changes
+
+To change database schema:
+
+- Change schema in `models.py` (i.e. add new table, column or change existing schema)
+- Run `bin/db-migrate` to create migration script
+- Check created script manually to ensure it is correct.
+It sometimes fail, so you might need to modify it.
+- Run `bin/db-upgrade` to apply migration
+
+That's it!
+As a bonus point, you can try running `bin/db-migrate` again.
+It should not create a new migration file - if it does, that means previous migration is incorrect and should be fixed.
