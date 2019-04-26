@@ -189,6 +189,8 @@ def register_proposal(caller_identity):
     node_type = helpers.parse_node_type_from_proposal(proposal)
     if node_type:
         node.node_type = node_type
+    else:
+        node.node_type = "data-center"
 
     node.mark_activity()
     db.session.add(node)
