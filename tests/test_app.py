@@ -1,4 +1,3 @@
-import unittest
 import json
 from datetime import datetime, timedelta
 from models import (
@@ -9,7 +8,6 @@ from tests.utils import build_test_authorization, setting
 
 
 class TestApi(TestCase):
-
     def test_session_stats_create_without_session_record(self):
         payload = {
             'bytes_sent': 20,
@@ -455,7 +453,3 @@ class TestApi(TestCase):
             db.session.add(item)
 
         return node
-
-
-if __name__ == '__main__':
-    unittest.main()
