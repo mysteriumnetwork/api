@@ -1,6 +1,6 @@
 import unittest
 from tests.test_case import TestCase
-from app import decode_authorization_header
+from request_helpers import decode_authorization_header
 import base64
 from tests.utils import (
     sign_message_with_static_key,
