@@ -569,6 +569,25 @@ class TestApi(TestCase):
         self.assertEqual(1, len(data['proposals']))
         self.assertEqual('node2', data['proposals'][0]['provider_id'])
 
+    def test_proposals_filtering_by_access_policy_single_param(self):
+        n1 = self._create_node("node1", "openvpn")
+        n1.mark_activity()
+        n2 = self._create_node("node2", "openvpn", "mysterium", "test source")
+        n2.mark_activity()
+
+        re = self._get(
+            '/v1/proposals',
+            {
+                'service_type': 'all',
+                'access_policy[id]': 'mysterium'
+            }
+        )
+
+        self.assertEqual(200, re.status_code)
+        data = json.loads(re.data)
+        self.assertEqual(1, len(data['proposals']))
+        self.assertEqual('node2', data['proposals'][0]['provider_id'])
+
     def test_proposals_filtering_bounty_only(self):
         n1 = self._create_node("node1", "openvpn")
         n1.mark_activity()

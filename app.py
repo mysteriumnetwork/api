@@ -239,7 +239,7 @@ def proposals():
     if request.args.get('access_policy') != '*':
         id = request.args.get('access_policy[id]')
         source = request.args.get('access_policy[source]')
-        if id and source:
+        if id or source:
             nodes = filter_nodes_by_access_policy(nodes, id, source)
         else:
             nodes = filter_nodes_without_access_policies(nodes)
