@@ -108,7 +108,7 @@ class Session(db.Model):
     established = db.Column(db.Boolean)
     service_type = db.Column(db.String(255), nullable=False)
 
-    def __init__(self, session_key, service_type=None):
+    def __init__(self, session_key, service_type):
         self.session_key = session_key
         self.service_type = service_type
         self.created_at = datetime.utcnow()

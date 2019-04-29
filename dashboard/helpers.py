@@ -17,8 +17,7 @@ def format_bytes_count(value):
     return str_value.replace('i', '')
 
 
-def format_duration(duration: timedelta) -> str:
-    total_seconds = duration.total_seconds()
+def format_duration(total_seconds: float) -> str:
     if total_seconds < 60:
         return '< 1 minute'
     total_minutes, _ = divmod(total_seconds, 60)

@@ -49,29 +49,13 @@ class TestHelpers(unittest.TestCase):
         )
 
     def test_format_duration(self):
-        self.assertEqual(
-            '< 1 minute',
-            format_duration(timedelta(seconds=0))
-        )
-
-        self.assertEqual(
-            '< 1 minute',
-            format_duration(timedelta(seconds=59))
-        )
-
-        self.assertEqual(
-            '1min',
-            format_duration(timedelta(seconds=60))
-        )
-
-        self.assertEqual(
-            '1hr 0min',
-            format_duration(timedelta(minutes=60))
-        )
-
+        self.assertEqual('< 1 minute', format_duration(0))
+        self.assertEqual('< 1 minute', format_duration(59))
+        self.assertEqual('1min', format_duration(60))
+        self.assertEqual('1hr 0min', format_duration(60 * 60))
         self.assertEqual(
             '100hr 1min',
-            format_duration(timedelta(hours=100, minutes=1))
+            format_duration(timedelta(hours=100, minutes=1).total_seconds())
         )
 
     def test_get_week_range(self):

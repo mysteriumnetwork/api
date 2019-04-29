@@ -1,6 +1,6 @@
 import helpers
 import logging
-import settings
+from api import settings
 from flask import Flask, render_template, jsonify
 from flask_migrate import Migrate
 from werkzeug.debug import get_current_traceback

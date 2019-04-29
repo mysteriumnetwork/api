@@ -1,3 +1,5 @@
+import json
+import urllib3
 from api.stats.db_queries.leaderboard import (
     get_leaderboard_rows,
     enrich_leaderboard_rows
@@ -14,13 +16,15 @@ from api.stats.model_layer import (
     get_nodes,
     get_session_info
 )
+from api.settings import DB_CONFIG
 from werkzeug.contrib.cache import SimpleCache
 from dashboard.helpers import get_week_range
 from flask import Flask, render_template, request, abort, jsonify
 from datetime import datetime
 from models import db
-import settings
 from dashboard.filters import initialize_filters
+from dashboard.settings import API_HOST
+from typing import List
 
 
 app = Flask(__name__)
@@ -39,13 +43,14 @@ def _generate_database_uri(db_config):
 
 
 app.config['SQLALCHEMY_DATABASE_URI'] =\
-    _generate_database_uri(settings.DB_CONFIG)
+    _generate_database_uri(DB_CONFIG)
 
 
 @app.route('/')
 def main():
     page_content = cache.get('dashboard-page')
     if page_content is None:
+        sessions = fetch_sessions(10)
         page_content = render_template(
             'dashboard.html',
             active_nodes_count=get_active_nodes_count(),
@@ -56,13 +61,13 @@ def main():
             average_session_time=get_average_session_time(),
             total_data_transferred=get_total_data_transferred(),
             available_nodes=get_available_nodes(limit=10),
-            sessions=get_sessions(limit=10),
+            sessions=sessions,
         )
 
         cache.set(
             'dashboard-page',
             page_content,
-            timeout=1 * 60
+            timeout=1  # TODO: re-enable cache
         )
 
     return page_content
@@ -188,6 +193,14 @@ def sessions_country():
 @app.route('/ping')
 def ping():
     return jsonify({'status': 'ok'})
+
+
+def fetch_sessions(limit: int) -> List[any]:
+    http = urllib3.PoolManager()
+    params = {'limit': limit}
+    r = http.request('GET', '%s/v1/statistics/sessions' % API_HOST, params)
+    data = json.loads(r.data.decode('utf-8'))
+    return data['sessions']
 
 
 def init_db():
