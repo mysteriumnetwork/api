@@ -5,6 +5,14 @@ from flask import request, jsonify
 from models import db, Node, ProposalAccessPolicy
 from request_helpers import validate_json, restrict_by_ip, recover_identity
 from identity_contract import IdentityContract
+from queries import (
+    filter_active_nodes,
+    filter_active_nodes_by_service_type,
+    filter_nodes_without_access_policies,
+    filter_nodes_by_access_policy,
+    filter_nodes_in_bounty_programme,
+    filter_nodes_by_node_type
+)
 
 
 identity_contract = IdentityContract(
@@ -95,3 +103,36 @@ def register_endpoints(app):
         db.session.commit()
 
         return jsonify({})
+
+    @app.route('/v1/proposals', methods=['GET'])
+    def proposals():
+        service_type = request.args.get('service_type', 'openvpn')
+        if service_type == "all":
+            nodes = filter_active_nodes()
+        else:
+            nodes = filter_active_nodes_by_service_type(service_type)
+
+        node_key = request.args.get('node_key')
+        if node_key:
+            nodes = nodes.filter_by(node_key=node_key)
+
+        if request.args.get('access_policy') != '*':
+            id = request.args.get('access_policy[id]')
+            source = request.args.get('access_policy[source]')
+            if id or source:
+                nodes = filter_nodes_by_access_policy(nodes, id, source)
+            else:
+                nodes = filter_nodes_without_access_policies(nodes)
+
+        if request.args.get('bounty_only') == 'true':
+            nodes = filter_nodes_in_bounty_programme(nodes)
+
+        node_type_arg = request.args.get('node_type')
+        if node_type_arg:
+            nodes = filter_nodes_by_node_type(nodes, node_type_arg)
+
+        service_proposals = []
+        for node in nodes:
+            service_proposals += node.get_service_proposals()
+
+        return jsonify({'proposals': service_proposals})
