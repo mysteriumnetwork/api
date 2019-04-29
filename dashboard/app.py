@@ -1,8 +1,8 @@
-from api.statistics.db_queries.leaderboard import (
+from api.stats.db_queries.leaderboard import (
     get_leaderboard_rows,
     enrich_leaderboard_rows
 )
-from api.statistics.model_layer import (
+from api.stats.model_layer import (
     get_active_nodes_count,
     get_sessions_count,
     get_average_session_time,

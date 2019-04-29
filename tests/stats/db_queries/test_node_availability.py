@@ -1,4 +1,4 @@
-from api.statistics.db_queries.node_availability import get_node_hours_online
+from api.stats.db_queries.node_availability import get_node_hours_online
 from tests.test_case import TestCase
 from models import db, NodeAvailability
 from datetime import datetime, timedelta
