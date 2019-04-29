@@ -184,7 +184,7 @@ def register_proposal(caller_identity):
         for policy_data in access_policies:
             id = policy_data['id']
             source = policy_data['source']
-            db.session.add(ProposalAccessPolicy(node_key, id, source))
+            db.session.merge(ProposalAccessPolicy(node_key, id, source))
 
     node_type = helpers.parse_node_type_from_proposal(proposal)
     if node_type:

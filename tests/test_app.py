@@ -70,6 +70,37 @@ class TestApi(TestCase):
         ])
         self.assertIsNotNone(policy)
 
+    def test_register_proposal_with_access_policy_succeeds_twice(self):
+        public_address = build_static_public_address()
+        payload = {
+            "service_proposal": {
+                "id": 1,
+                "format": "service-proposal/v1",
+                "provider_id": public_address,
+                "service_type": "openvpn",
+                "access_policies": [
+                    {
+                        "id": "test policy",
+                        "source": "http://trust-oracle/test-policy"
+                    }
+                ]
+            }
+        }
+        auth = build_test_authorization(json.dumps(payload))
+        main.identity_contract = IdentityContractFake(True)
+        re = self._post(
+            '/v1/register_proposal',
+            payload,
+            headers=auth['headers'])
+        self.assertEqual(200, re.status_code)
+
+        re = self._post(
+            '/v1/register_proposal',
+            payload,
+            headers=auth['headers'])
+
+        self.assertEqual(200, re.status_code)
+
     def test_register_multiple_proposals_successful(self):
         public_address = build_static_public_address()
         payload = {
