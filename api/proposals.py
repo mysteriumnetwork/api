@@ -2,7 +2,7 @@ import settings
 import helpers
 import json
 from flask import request, jsonify
-from models import db, Node, ProposalAccessPolicy
+from models import db, Node, ProposalAccessPolicy, NodeAvailability
 from request_helpers import validate_json, restrict_by_ip, recover_identity
 from identity_contract import IdentityContract
 from queries import (
@@ -136,3 +136,29 @@ def register_endpoints(app):
             service_proposals += node.get_service_proposals()
 
         return jsonify({'proposals': service_proposals})
+
+    # node call this function each minute.
+    @app.route('/v1/ping_proposal', methods=['post'])
+    # TODO: remove deprecated route when it's not used anymore
+    @app.route('/v1/node_send_stats', methods=['POST'])
+    @restrict_by_ip
+    @validate_json
+    @recover_identity
+    def ping_proposal(caller_identity):
+        payload = request.get_json(force=True)
+        service_type = payload.get('service_type', 'openvpn')
+
+        node = Node.query.get([caller_identity, service_type])
+        if not node:
+            return jsonify(error='node key not found'), 400
+
+        node.mark_activity()
+
+        # add record to NodeAvailability
+        na = NodeAvailability(caller_identity)
+        na.service_type = service_type
+
+        db.session.add(na)
+        db.session.commit()
+
+        return jsonify({})

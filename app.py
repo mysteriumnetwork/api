@@ -1,11 +1,11 @@
 import helpers
 import logging
 import settings
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, render_template, jsonify
 from flask_migrate import Migrate
 from werkzeug.debug import get_current_traceback
-from models import db, Node, NodeAvailability
-from request_helpers import validate_json, restrict_by_ip, recover_identity
+from models import db
+from request_helpers import recover_identity
 from api.proposals import register_endpoints as register_proposal_endpoints
 from api.identities import register_endpoints as register_identity_endpoints
 from api.sessions import register_endpoints as register_session_endpoints
@@ -39,33 +39,6 @@ def home():
     return render_template(
         'api.html',
     )
-
-
-# Node call this function each minute.
-@app.route('/v1/ping_proposal', methods=['POST'])
-# TODO: remove deprecated route when it's not used anymore
-@app.route('/v1/node_send_stats', methods=['POST'])
-@restrict_by_ip
-@validate_json
-@recover_identity
-def ping_proposal(caller_identity):
-    payload = request.get_json(force=True)
-    service_type = payload.get('service_type', 'openvpn')
-
-    node = Node.query.get([caller_identity, service_type])
-    if not node:
-        return jsonify(error='node key not found'), 400
-
-    node.mark_activity()
-
-    # add record to NodeAvailability
-    na = NodeAvailability(caller_identity)
-    na.service_type = service_type
-
-    db.session.add(na)
-    db.session.commit()
-
-    return jsonify({})
 
 
 # End Point example which recovers public address from signed payload
