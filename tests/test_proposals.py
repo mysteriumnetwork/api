@@ -14,7 +14,7 @@ from identity_contract import IdentityContractFake
 from api import proposals as proposalEndpoints
 
 
-class TestApi(TestCase):
+class TestProposals(TestCase):
     def test_register_proposal_successful(self):
         public_address = build_static_public_address()
         payload = {

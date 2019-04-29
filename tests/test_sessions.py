@@ -7,7 +7,7 @@ from tests.utils import (
 )
 
 
-class TestApi(TestCase):
+class TestSessions(TestCase):
     def test_session_stats_create_without_session_record(self):
         payload = {
             'bytes_sent': 20,
