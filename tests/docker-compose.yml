@@ -23,7 +23,6 @@ services:
       dockerfile: Dockerfile.dashboard
     container_name: mysterium-dashboard-test
     environment:
-      API_HOST: http://api
       DB_HOST: mysterium-mysql-test
       DB_NAME: myst_api
       DB_USER: myst_api

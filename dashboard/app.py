@@ -1,4 +1,3 @@
-import requests
 from api.stats.db_queries.leaderboard import (
     get_leaderboard_rows,
     enrich_leaderboard_rows
@@ -21,8 +20,7 @@ from flask import Flask, render_template, request, abort, jsonify
 from datetime import datetime
 from models import db
 from dashboard.filters import initialize_filters
-from dashboard.settings import API_HOST
-from typing import List
+from dashboard.discovery_api import fetch_sessions, ApiError
 
 
 app = Flask(__name__)
@@ -48,7 +46,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] =\
 def main():
     page_content = cache.get('dashboard-page')
     if page_content is None:
-        sessions = fetch_sessions(10)
+        try:
+            sessions = fetch_sessions(10)
+        except ApiError:
+            abort(503)
+            return
         page_content = render_template(
             'dashboard.html',
             active_nodes_count=get_active_nodes_count(),
@@ -191,13 +193,6 @@ def sessions_country():
 @app.route('/ping')
 def ping():
     return jsonify({'status': 'ok'})
-
-
-def fetch_sessions(limit: int) -> List[any]:
-    params = {'limit': limit}
-    response = requests.get('%s/v1/statistics/sessions' % API_HOST, params)
-    json = response.json()
-    return json['sessions']
 
 
 def init_db():
