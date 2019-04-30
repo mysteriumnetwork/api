@@ -100,6 +100,113 @@ class TestApi(TestCase):
 
         self.assertEqual(200, re.status_code)
 
+    def test_register_proposal_with_and_without_access_policy(self):
+        public_address = build_static_public_address()
+        payload1 = {
+            "service_proposal": {
+                "id": 1,
+                "format": "service-proposal/v1",
+                "provider_id": public_address,
+                "service_type": "openvpn",
+                "access_policies": [
+                    {
+                        "id": "test policy",
+                        "source": "http://trust-oracle/test-policy"
+                    }
+                ]
+            }
+        }
+        auth1 = build_test_authorization(json.dumps(payload1))
+        proposalEndpoints.identity_contract = IdentityContractFake(True)
+        re = self._post(
+            '/v1/register_proposal',
+            payload1,
+            headers=auth1['headers'])
+        self.assertEqual(200, re.status_code)
+
+        payload2 = {
+            "service_proposal": {
+                "id": 1,
+                "format": "service-proposal/v1",
+                "provider_id": public_address,
+                "service_type": "openvpn"
+            }
+        }
+        auth2 = build_test_authorization(json.dumps(payload2))
+        re = self._post(
+            '/v1/register_proposal',
+            payload2,
+            headers=auth2['headers'])
+
+        self.assertEqual(200, re.status_code)
+
+        policy = ProposalAccessPolicy.query.get([
+            public_address,
+            "test policy",
+            "http://trust-oracle/test-policy"
+        ])
+        self.assertIsNone(policy)
+
+    def test_register_proposal_with_different_access_policies(self):
+        public_address = build_static_public_address()
+        payload1 = {
+            "service_proposal": {
+                "id": 1,
+                "format": "service-proposal/v1",
+                "provider_id": public_address,
+                "service_type": "openvpn",
+                "access_policies": [
+                    {
+                        "id": "test policy 1",
+                        "source": "http://trust-oracle/test-policy-1"
+                    }
+                ]
+            }
+        }
+        auth1 = build_test_authorization(json.dumps(payload1))
+        proposalEndpoints.identity_contract = IdentityContractFake(True)
+        re = self._post(
+            '/v1/register_proposal',
+            payload1,
+            headers=auth1['headers'])
+        self.assertEqual(200, re.status_code)
+
+        payload2 = {
+            "service_proposal": {
+                "id": 1,
+                "format": "service-proposal/v1",
+                "provider_id": public_address,
+                "service_type": "openvpn",
+                "access_policies": [
+                    {
+                        "id": "test policy 2",
+                        "source": "http://trust-oracle/test-policy-2"
+                    }
+                ]
+            }
+        }
+        auth2 = build_test_authorization(json.dumps(payload2))
+        re = self._post(
+            '/v1/register_proposal',
+            payload2,
+            headers=auth2['headers'])
+
+        self.assertEqual(200, re.status_code)
+
+        policy2 = ProposalAccessPolicy.query.get([
+            public_address,
+            "test policy 2",
+            "http://trust-oracle/test-policy-2"
+        ])
+        self.assertIsNotNone(policy2)
+
+        policy1 = ProposalAccessPolicy.query.get([
+            public_address,
+            "test policy 1",
+            "http://trust-oracle/test-policy-1"
+        ])
+        self.assertIsNone(policy1)
+
     def test_register_multiple_proposals_successful(self):
         public_address = build_static_public_address()
         payload = {
