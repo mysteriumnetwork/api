@@ -6,7 +6,7 @@ import responses
 
 class TestEndpoints(TestCase):
     mocked_session = {
-        'session_key': '0x123',
+        'session_key': 'test-session',
         'duration': 4,
         'data_sent': 5,
         'data_received': 3,
@@ -41,20 +41,36 @@ class TestEndpoints(TestCase):
         self.assertEqual(503, re.status_code)
 
     @responses.activate
-    def test_sessions(self):
+    def test_sessions_succeds(self):
         self.mock_sessions(200, {'sessions': [self.mocked_session]})
         re = self._get('/sessions')
         self.assertEqual(200, re.status_code)
 
-    def test_session(self):
+    @responses.activate
+    def test_session_succeeds(self):
+        responses.add(
+            responses.GET,
+            'http://localhost:8001/v1/statistics/sessions/test-session',
+            json={'session': self.mocked_session},
+        )
         re = self._get('/session/test-session')
         self.assertEqual(200, re.status_code)
 
-    def test_leaderboard(self):
+    @responses.activate
+    def test_session_handles_api_error(self):
+        responses.add(
+            responses.GET,
+            'http://localhost:8001/v1/statistics/sessions/test-session',
+            status=500
+        )
+        re = self._get('/session/test-session')
+        self.assertEqual(503, re.status_code)
+
+    def test_leaderboard_succeeds(self):
         re = self._get('/leaderboard')
         self.assertEqual(200, re.status_code)
 
-    def test_leaderboard_get_page(self):
+    def test_leaderboard_get_page_succeeds(self):
         re = self._get('/leaderboard', {'page': 1})
         self.assertEqual(200, re.status_code)
 

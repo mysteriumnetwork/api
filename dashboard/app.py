@@ -10,8 +10,7 @@ from api.stats.model_layer import (
     get_available_nodes,
     get_node_info,
     get_sessions_country_stats,
-    get_nodes,
-    get_session_info
+    get_nodes
 )
 from api.settings import DB_CONFIG
 from werkzeug.contrib.cache import SimpleCache
@@ -20,7 +19,7 @@ from flask import Flask, render_template, request, abort, jsonify
 from datetime import datetime
 from models import db
 from dashboard.filters import initialize_filters
-from dashboard.discovery_api import fetch_sessions, ApiError
+from dashboard.discovery_api import fetch_sessions, ApiError, fetch_session
 
 
 app = Flask(__name__)
@@ -157,7 +156,12 @@ def nodes():
 # TODO: change to `/sessions/<key>`
 @app.route('/session/<key>')
 def session(key):
-    session = get_session_info(key)
+    try:
+        session = fetch_session(key)
+    except ApiError:
+        abort(503)
+        return
+
     return render_template(
         'session.html',
         session=session,
