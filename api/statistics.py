@@ -1,11 +1,11 @@
-from flask import jsonify, request
+from flask import jsonify, request, abort
 
-from api.stats.model_layer import get_sessions
+from api.stats.model_layer import get_sessions, get_session_info
 
 
 def register_endpoints(app):
     @app.route('/v1/statistics/sessions', methods=['GET'])
-    def session_statistics():
+    def sessions():
         limit = request.args.get('limit')
 
         sessions = get_sessions(limit=limit)
@@ -13,7 +13,15 @@ def register_endpoints(app):
 
         return jsonify({
             'sessions': serialized
-        }), 200
+        })
+
+    @app.route('/v1/statistics/sessions/<key>')
+    def session(key):
+        session = get_session_info(key)
+        if session is None:
+            abort(404)
+            return
+        return jsonify({'session': serialize_enriched_session(session)})
 
 
 def serialize_enriched_session(session):

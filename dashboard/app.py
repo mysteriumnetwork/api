@@ -154,6 +154,7 @@ def nodes():
     )
 
 
+# TODO: change to `/sessions/<key>`
 @app.route('/session/<key>')
 def session(key):
     session = get_session_info(key)
