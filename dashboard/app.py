@@ -1,5 +1,4 @@
-import json
-import urllib3
+import requests
 from api.stats.db_queries.leaderboard import (
     get_leaderboard_rows,
     enrich_leaderboard_rows
@@ -195,11 +194,10 @@ def ping():
 
 
 def fetch_sessions(limit: int) -> List[any]:
-    http = urllib3.PoolManager()
     params = {'limit': limit}
-    r = http.request('GET', '%s/v1/statistics/sessions' % API_HOST, params)
-    data = json.loads(r.data.decode('utf-8'))
-    return data['sessions']
+    response = requests.get('%s/v1/statistics/sessions' % API_HOST, params)
+    json = response.json()
+    return json['sessions']
 
 
 def init_db():
