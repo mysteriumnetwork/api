@@ -11,22 +11,23 @@ class ApiError(Exception):
 
 def fetch_sessions(limit: int) -> List[any]:
     params = {'limit': limit}
-    json = _make_request('/v1/statistics/sessions', params)
-    return json['sessions']
+    return _make_request('/v1/statistics/sessions', 'sessions', params)
 
 
 def fetch_session(key: str) -> any:
-    json = _make_request('/v1/statistics/sessions/%s' % key)
-    return json['session']
+    return _make_request('/v1/statistics/sessions/%s' % key, 'session')
 
 
-def _make_request(path: str, params: any = None) -> any:
+def _make_request(path: str, response_key: str, params: any = None) -> any:
     response = requests.get(API_HOST + path, params)
     if response.status_code != 200:
-        raise ApiError()
+        raise ApiError(
+            'Invalid response status code: %s' % response.status_code)
 
     try:
         json = response.json()
     except JSONDecodeError:
         raise ApiError('Unable to parse response body json')
-    return json
+    if response_key not in json:
+        raise ApiError('Missing response key in response json')
+    return json[response_key]

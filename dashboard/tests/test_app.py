@@ -41,6 +41,12 @@ class TestEndpoints(TestCase):
         self.assertEqual(503, re.status_code)
 
     @responses.activate
+    def test_home_handles_api_invalid_json_response(self):
+        self.mock_sessions(200, body='mock response')
+        re = self._get('/')
+        self.assertEqual(503, re.status_code)
+
+    @responses.activate
     def test_sessions_succeds(self):
         self.mock_sessions(200, {'sessions': [self.mocked_session]})
         re = self._get('/sessions')
@@ -49,6 +55,12 @@ class TestEndpoints(TestCase):
     @responses.activate
     def test_sessions_handles_api_error(self):
         self.mock_sessions(500)
+        re = self._get('/sessions')
+        self.assertEqual(503, re.status_code)
+
+    @responses.activate
+    def test_sessions_handles_missing_data(self):
+        self.mock_sessions(200, {})
         re = self._get('/sessions')
         self.assertEqual(503, re.status_code)
 
