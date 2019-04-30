@@ -61,12 +61,13 @@ def register_endpoints(app):
         # add the column to make querying easier
         node.service_type = service_type
 
+        delete_proposal_policies(node_key)
         access_policies = proposal.get('access_policies')
         if access_policies:
             for policy_data in access_policies:
                 id = policy_data['id']
                 source = policy_data['source']
-                db.session.merge(ProposalAccessPolicy(node_key, id, source))
+                db.session.add(ProposalAccessPolicy(node_key, id, source))
 
         node_type = helpers.parse_node_type_from_proposal(proposal)
         if node_type:
@@ -162,3 +163,10 @@ def register_endpoints(app):
         db.session.commit()
 
         return jsonify({})
+
+
+def delete_proposal_policies(node_key):
+    ProposalAccessPolicy \
+        .query \
+        .filter(ProposalAccessPolicy.node_key == node_key) \
+        .delete()
