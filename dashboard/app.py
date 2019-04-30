@@ -10,7 +10,6 @@ from api.stats.model_layer import (
     get_average_session_time,
     get_total_data_transferred,
     get_available_nodes,
-    get_sessions,
     get_node_info,
     get_sessions_country_stats,
     get_nodes,
@@ -167,7 +166,7 @@ def session(key):
 def sessions():
     sessions = cache.get('all-sessions')
     if sessions is None:
-        sessions = get_sessions(limit=500)
+        sessions = fetch_sessions(limit=500)
         cache.set(
             'all-sessions',
             sessions,
