@@ -172,7 +172,11 @@ def session(key):
 def sessions():
     sessions = cache.get('all-sessions')
     if sessions is None:
-        sessions = fetch_sessions(limit=500)
+        try:
+            sessions = fetch_sessions(limit=500)
+        except ApiError:
+            abort(503)
+            return
         cache.set(
             'all-sessions',
             sessions,

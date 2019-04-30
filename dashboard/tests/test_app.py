@@ -47,6 +47,12 @@ class TestEndpoints(TestCase):
         self.assertEqual(200, re.status_code)
 
     @responses.activate
+    def test_sessions_handles_api_error(self):
+        self.mock_sessions(500)
+        re = self._get('/sessions')
+        self.assertEqual(503, re.status_code)
+
+    @responses.activate
     def test_session_succeeds(self):
         responses.add(
             responses.GET,
