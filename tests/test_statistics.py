@@ -34,6 +34,14 @@ class TestStatistics(TestCase):
         sessions = re.json['sessions']
         self.assertEqual(1, len(sessions))
 
+    def test_sessions_returns_error_when_requesting_too_many_sessions(self):
+        self._create_session('test-session-1')
+
+        re = self._get('/v1/statistics/sessions', {'limit': 1000})
+        self.assertEqual(400, re.status_code)
+
+        self.assertEqual({'error': 'Too many sessions requested'}, re.json)
+
     def test_session_returns_session(self):
         self._create_session('test-session')
 

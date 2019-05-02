@@ -4,12 +4,17 @@ from api.stats.model_layer import get_sessions, get_session_info
 
 
 DEFAULT_SESSIONS_LIMIT = 100
+MAX_SESSIONS_LIMIT = 500
 
 
 def register_endpoints(app):
     @app.route('/v1/statistics/sessions', methods=['GET'])
     def sessions():
-        limit = request.args.get('limit', DEFAULT_SESSIONS_LIMIT)
+        limit = DEFAULT_SESSIONS_LIMIT
+        if 'limit' in request.args:
+            limit = int(request.args.get('limit'))
+            if limit > MAX_SESSIONS_LIMIT:
+                return jsonify({'error': 'Too many sessions requested'}), 400
 
         sessions = get_sessions(limit=limit)
         serialized = list(map(serialize_enriched_session, sessions))
