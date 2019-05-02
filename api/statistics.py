@@ -3,10 +3,13 @@ from flask import jsonify, request, abort
 from api.stats.model_layer import get_sessions, get_session_info
 
 
+DEFAULT_SESSIONS_LIMIT = 100
+
+
 def register_endpoints(app):
     @app.route('/v1/statistics/sessions', methods=['GET'])
     def sessions():
-        limit = request.args.get('limit')
+        limit = request.args.get('limit', DEFAULT_SESSIONS_LIMIT)
 
         sessions = get_sessions(limit=limit)
         serialized = list(map(serialize_enriched_session, sessions))
