@@ -1,3 +1,4 @@
+import logging
 from api.stats.db_queries.leaderboard import (
     get_leaderboard_rows,
     enrich_leaderboard_rows
@@ -194,6 +195,7 @@ def ping():
 
 @app.errorhandler(ApiError)
 def handle_api_error(e):
+    logging.exception('Request to discovery failed')
     return 'Request to discovery failed', 503
 
 
