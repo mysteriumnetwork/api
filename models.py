@@ -167,6 +167,7 @@ class IdentityRegistration(db.Model):
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
     payout_eth_address = db.Column(db.String(IDENTITY_LENGTH_LIMIT))
+    bounty_program = db.Column(db.Boolean, default=False, nullable=False)
 
     def __init__(self, identity, payout_eth_address):
         self.identity = identity
