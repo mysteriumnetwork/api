@@ -45,11 +45,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] =\
 def main():
     page_content = cache.get('dashboard-page')
     if page_content is None:
-        try:
-            sessions = fetch_sessions(10)
-        except ApiError:
-            abort(503)
-            return
+        sessions = fetch_sessions(10)
         page_content = render_template(
             'dashboard.html',
             active_nodes_count=get_active_nodes_count(),
@@ -156,11 +152,7 @@ def nodes():
 # TODO: change to `/sessions/<key>`
 @app.route('/session/<key>')
 def session(key):
-    try:
-        session = fetch_session(key)
-    except ApiError:
-        abort(503)
-        return
+    session = fetch_session(key)
 
     return render_template(
         'session.html',
@@ -172,11 +164,7 @@ def session(key):
 def sessions():
     sessions = cache.get('all-sessions')
     if sessions is None:
-        try:
-            sessions = fetch_sessions(limit=500)
-        except ApiError:
-            abort(503)
-            return
+        sessions = fetch_sessions(limit=500)
         cache.set(
             'all-sessions',
             sessions,
@@ -202,6 +190,11 @@ def sessions_country():
 @app.route('/ping')
 def ping():
     return jsonify({'status': 'ok'})
+
+
+@app.errorhandler(ApiError)
+def handle_api_error(e):
+    return 'Request to discovery failed', 503
 
 
 def init_db():

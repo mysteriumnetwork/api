@@ -84,6 +84,8 @@ class TestEndpoints(TestCase):
         )
         re = self._get('/session/test-session')
         self.assertEqual(503, re.status_code)
+        body = re.get_data(as_text=True)
+        self.assertIn('Request to discovery failed', body)
 
     @responses.activate
     def test_session_handles_api_error(self):
