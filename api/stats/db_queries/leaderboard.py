@@ -1,5 +1,5 @@
-from api.statistics.db_queries.node_availability import get_node_hours_online
-from api.statistics.model_layer import get_country_string, get_node_status
+from api.stats.db_queries.node_availability import get_node_hours_online
+from api.stats.model_layer import get_country_string, get_node_status
 from sqlalchemy import text
 from models import db, Node
 

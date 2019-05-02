@@ -1,7 +1,7 @@
 from eth_keys import keys
 import base64
 
-import settings
+from api import settings
 
 
 def sign_message_with_static_key(message):

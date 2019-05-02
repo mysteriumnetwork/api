@@ -2,7 +2,7 @@ import binascii
 from functools import wraps
 import json
 from flask import request, jsonify
-import settings
+from api import settings
 import base64
 from signature import (
     recover_public_address,

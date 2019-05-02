@@ -1,4 +1,4 @@
-from api.statistics.db_queries.leaderboard import get_leaderboard_rows
+from api.stats.db_queries.leaderboard import get_leaderboard_rows
 from models import db, Node, IdentityRegistration, Session
 from tests.test_case import TestCase
 from datetime import datetime, timedelta

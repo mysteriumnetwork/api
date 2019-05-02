@@ -1,6 +1,6 @@
 import helpers
 import logging
-import settings
+from api import settings
 from flask import Flask, render_template, jsonify
 from flask_migrate import Migrate
 from werkzeug.debug import get_current_traceback
@@ -9,6 +9,7 @@ from request_helpers import recover_identity
 from api.proposals import register_endpoints as register_proposal_endpoints
 from api.identities import register_endpoints as register_identity_endpoints
 from api.sessions import register_endpoints as register_session_endpoints
+from api.statistics import register_endpoints as register_statistic_endpoints
 
 if not settings.DISABLE_LOGS:
     helpers.setup_logger()
@@ -18,6 +19,7 @@ app = Flask(__name__)
 register_proposal_endpoints(app)
 register_identity_endpoints(app)
 register_session_endpoints(app)
+register_statistic_endpoints(app)
 
 
 def _generate_database_uri(db_config):

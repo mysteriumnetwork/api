@@ -1,4 +1,4 @@
-import settings
+from api import settings
 import helpers
 import json
 from flask import request, jsonify

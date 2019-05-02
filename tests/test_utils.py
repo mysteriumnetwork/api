@@ -1,5 +1,5 @@
 from unittest import TestCase
-import settings
+from api import settings
 
 from tests.utils import setting
 

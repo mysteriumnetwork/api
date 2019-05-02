@@ -1,26 +1,26 @@
-from api.statistics.db_queries.leaderboard import (
+import logging
+from api.stats.db_queries.leaderboard import (
     get_leaderboard_rows,
     enrich_leaderboard_rows
 )
-from api.statistics.model_layer import (
+from api.stats.model_layer import (
     get_active_nodes_count,
     get_sessions_count,
     get_average_session_time,
     get_total_data_transferred,
     get_available_nodes,
-    get_sessions,
     get_node_info,
     get_sessions_country_stats,
-    get_nodes,
-    get_session_info
+    get_nodes
 )
+from api.settings import DB_CONFIG
 from werkzeug.contrib.cache import SimpleCache
 from dashboard.helpers import get_week_range
 from flask import Flask, render_template, request, abort, jsonify
 from datetime import datetime
 from models import db
-import settings
 from dashboard.filters import initialize_filters
+from dashboard.discovery_api import fetch_sessions, ApiError, fetch_session
 
 
 app = Flask(__name__)
@@ -39,13 +39,14 @@ def _generate_database_uri(db_config):
 
 
 app.config['SQLALCHEMY_DATABASE_URI'] =\
-    _generate_database_uri(settings.DB_CONFIG)
+    _generate_database_uri(DB_CONFIG)
 
 
 @app.route('/')
 def main():
     page_content = cache.get('dashboard-page')
     if page_content is None:
+        sessions = fetch_sessions(10)
         page_content = render_template(
             'dashboard.html',
             active_nodes_count=get_active_nodes_count(),
@@ -56,13 +57,13 @@ def main():
             average_session_time=get_average_session_time(),
             total_data_transferred=get_total_data_transferred(),
             available_nodes=get_available_nodes(limit=10),
-            sessions=get_sessions(limit=10),
+            sessions=sessions,
         )
 
         cache.set(
             'dashboard-page',
             page_content,
-            timeout=1 * 60
+            timeout=1  # TODO: re-enable cache
         )
 
     return page_content
@@ -149,9 +150,11 @@ def nodes():
     )
 
 
+# TODO: change to `/sessions/<key>`
 @app.route('/session/<key>')
 def session(key):
-    session = get_session_info(key)
+    session = fetch_session(key)
+
     return render_template(
         'session.html',
         session=session,
@@ -162,7 +165,7 @@ def session(key):
 def sessions():
     sessions = cache.get('all-sessions')
     if sessions is None:
-        sessions = get_sessions(limit=500)
+        sessions = fetch_sessions(limit=500)
         cache.set(
             'all-sessions',
             sessions,
@@ -188,6 +191,12 @@ def sessions_country():
 @app.route('/ping')
 def ping():
     return jsonify({'status': 'ok'})
+
+
+@app.errorhandler(ApiError)
+def handle_api_error(e):
+    logging.exception('Request to discovery failed')
+    return 'Request to discovery failed', 503
 
 
 def init_db():

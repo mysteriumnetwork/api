@@ -15,3 +15,5 @@ humanize==0.5.1
 idna==2.6
 itsdangerous==0.24
 urllib3==1.22
+requests==2.21.0
+responses==0.10.6
