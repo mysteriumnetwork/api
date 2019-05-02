@@ -1,5 +1,6 @@
+import json
 from dashboard.tests.test_case import TestCase
-from models import db, Session
+from models import db, Session, Node
 from datetime import datetime
 import responses
 import requests
@@ -96,6 +97,24 @@ class TestEndpoints(TestCase):
         )
         re = self._get('/session/test-session')
         self.assertEqual(503, re.status_code)
+
+    def test_node_succeeds(self):
+        node = Node('test-node', 'openvpn')
+        node.proposal = json.dumps({
+            "id": 1,
+            "format": "service-proposal/v1",
+            "provider_id": 'test-node',
+        })
+        node.mark_activity()
+        db.session.add(node)
+
+        session = Session('test-node-session', 'openvpn')
+        session.client_updated_at = datetime.utcnow()
+        session.node_key = 'test-node'
+        db.session.add(session)
+
+        re = self._get('/node/test-node/openvpn')
+        self.assertEqual(200, re.status_code)
 
     def test_leaderboard_succeeds(self):
         re = self._get('/leaderboard')
