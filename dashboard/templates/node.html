@@ -128,7 +128,7 @@
                 <td class="td-session-key">{{se.session_key}}</td>
                 <td>{{se.status}}</td>
                 <td>{{se.started|format_time}}</td>
-                <td>{{se.duration|format_duration}}</td>
+                <td>{{se.duration.total_seconds()|format_duration}}</td>
                 <td>{{se.data_transferred|format_bytes_count}}</td>
               </tr>
               {% endfor %}
