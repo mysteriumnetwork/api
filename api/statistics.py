@@ -1,4 +1,4 @@
-from flask import jsonify, request, abort
+from flask import jsonify, request
 
 from api.stats.model_layer import get_sessions, get_session_info
 
@@ -27,8 +27,7 @@ def register_endpoints(app):
     def session(key):
         session = get_session_info(key)
         if session is None:
-            abort(404)
-            return
+            return jsonify({'error': 'Session not found'}), 404
         return jsonify({'session': serialize_enriched_session(session)})
 
 

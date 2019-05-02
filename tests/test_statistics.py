@@ -54,6 +54,7 @@ class TestStatistics(TestCase):
     def test_session_returns_error_when_session_is_not_found(self):
         re = self._get('/v1/statistics/sessions/test-session')
         self.assertEqual(404, re.status_code)
+        self.assertEqual({'error': 'Session not found'}, re.json)
 
     def _create_session(self, key):
         session = Session(key, 'openvpn')
