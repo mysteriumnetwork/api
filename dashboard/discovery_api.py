@@ -19,7 +19,10 @@ def fetch_session(key: str) -> any:
 
 
 def _make_request(path: str, response_key: str, params: any = None) -> any:
-    response = requests.get(API_HOST + path, params)
+    try:
+        response = requests.get(API_HOST + path, params, timeout=5)
+    except requests.exceptions.RequestException:
+        raise ApiError('Request failed')
     if response.status_code != 200:
         raise ApiError(
             'Invalid response status code: %s' % response.status_code)

@@ -2,6 +2,7 @@ from dashboard.tests.test_case import TestCase
 from models import db, Session
 from datetime import datetime
 import responses
+import requests
 
 
 class TestEndpoints(TestCase):
@@ -73,6 +74,16 @@ class TestEndpoints(TestCase):
         )
         re = self._get('/session/test-session')
         self.assertEqual(200, re.status_code)
+
+    @responses.activate
+    def test_session_handles_request_exception(self):
+        responses.add(
+            responses.GET,
+            'http://localhost:8001/v1/statistics/sessions/test-session',
+            body=requests.exceptions.RequestException('Mock request exception')
+        )
+        re = self._get('/session/test-session')
+        self.assertEqual(503, re.status_code)
 
     @responses.activate
     def test_session_handles_api_error(self):
