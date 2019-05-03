@@ -63,7 +63,7 @@ def main():
         cache.set(
             'dashboard-page',
             page_content,
-            timeout=1  # TODO: re-enable cache
+            timeout=1 * 60
         )
 
     return page_content
