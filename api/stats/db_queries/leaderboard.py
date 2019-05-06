@@ -50,6 +50,7 @@ def get_leaderboard_rows(date_from, date_to, offset=0, limit=10):
             AND s.client_updated_at <= '{date_to}'
             AND n.updated_at >= '{date_from}'
             AND n.updated_at <= '{date_to}'
+            AND ir.bounty_program = TRUE
         GROUP BY ir.identity, n.node_key
         ORDER BY total_bytes DESC
         LIMIT {limit}

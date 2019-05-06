@@ -9,7 +9,7 @@ second = timedelta(seconds=1)
 
 class TestGetLeaderBoardRows(TestCase):
     def test_correct_unique_users_and_service_type_match(self):
-        self._create_identity_registration('provider id')
+        self._create_identity_registration('provider id', True)
         self._create_node('provider id', 'service x', now)
         self._create_node('provider id', 'service y', now)
         self._create_session(
@@ -35,8 +35,31 @@ class TestGetLeaderBoardRows(TestCase):
         self.assertEqual(10, rows[0].total_bytes)
         self.assertEqual(3, rows[0].unique_users)
 
+    def test_does_not_filter_non_bounty_programme(self):
+        self._create_identity_registration('provider id', False)
+        self._create_node('provider id', 'service x', now)
+        self._create_node('provider id', 'service y', now)
+        self._create_session(
+            'session 1', 'consumer id 1',
+            'provider id', 'service x', now, 1, 2
+        )
+        self._create_session(
+            'session 2', 'consumer id 1',
+            'provider id', 'service y', now, 0, 0
+        )
+        self._create_session(
+            'session 3', 'consumer id 2',
+            'provider id', 'service y', now, 0, 0
+        )
+        self._create_session(
+            'session 4', 'consumer id 3',
+            'provider id', 'service y', now, 3, 4
+        )
+        rows = get_leaderboard_rows(now - second, now + second)
+        self.assertEqual(0, len(rows))
+
     def test_node_updated_at_mismatch(self):
-        self._create_identity_registration('provider id')
+        self._create_identity_registration('provider id', True)
         self._create_node('provider id', 'service 1', now - second)
         self._create_node('provider id', 'service 2', now + second)
         self._create_session(
@@ -51,7 +74,7 @@ class TestGetLeaderBoardRows(TestCase):
         self.assertEqual(0, len(rows))
 
     def test_session_updated_at_mismatch(self):
-        self._create_identity_registration('provider id')
+        self._create_identity_registration('provider id', True)
         self._create_node('provider id', 'service', now)
         self._create_session(
             'session 1', None, 'provider id',
@@ -65,7 +88,7 @@ class TestGetLeaderBoardRows(TestCase):
         self.assertEqual(0, len(rows))
 
     def test_node_has_no_sessions(self):
-        self._create_identity_registration('provider id')
+        self._create_identity_registration('provider id', True)
         self._create_node('provider id', 'service', now)
         rows = get_leaderboard_rows(now, now)
         self.assertEqual(0, len(rows))
@@ -80,7 +103,7 @@ class TestGetLeaderBoardRows(TestCase):
         self.assertEqual(0, len(rows))
 
     def test_registered_without_node(self):
-        self._create_identity_registration('provider id')
+        self._create_identity_registration('provider id', True)
         self._create_session(
             'session', None, 'provider id',
             'service', now, 0, 0
@@ -89,8 +112,9 @@ class TestGetLeaderBoardRows(TestCase):
         self.assertEqual(0, len(rows))
 
     @staticmethod
-    def _create_identity_registration(id):
+    def _create_identity_registration(id, bounty_program):
         ir = IdentityRegistration(id, '')
+        ir.bounty_program = bounty_program
         db.session.add(ir)
         db.session.commit()
 
