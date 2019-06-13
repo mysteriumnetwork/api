@@ -140,7 +140,7 @@ class TestIdentities(TestCase):
             headers=auth['headers']
         )
         self.assertEqual(200, re.status_code)
-        self.assertEqual({'eth_address': eth_address}, re.json)
+        self.assertEqual({'eth_address': eth_address, 'referral_code': ''}, re.json)
 
     def test_get_payout_returns_404_with_no_payout_info(self):
         identity = build_static_public_address().upper()
