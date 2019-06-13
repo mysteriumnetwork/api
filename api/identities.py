@@ -32,7 +32,10 @@ def register_endpoints(app):
             return jsonify(error='payout info for this identity not found'), \
                    404
 
-        return jsonify({'eth_address': record.payout_eth_address, 'referral_code': record.referral_code})
+        return jsonify({
+            'eth_address': record.payout_eth_address,
+            'referral_code': record.referral_code
+        })
 
     # End Point which creates or updates payout info next to identity
     @app.route('/v1/identities/<identity_url_param>/payout', methods=['PUT'])
