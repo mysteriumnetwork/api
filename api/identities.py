@@ -1,7 +1,8 @@
-from request_helpers import validate_json, recover_identity
-from flask import request, jsonify
-from models import db, Identity, IdentityRegistration
 from eth_utils.address import is_hex_address as is_valid_eth_address
+from flask import request, jsonify
+
+from models import db, Identity, IdentityRegistration
+from request_helpers import validate_json, recover_identity
 
 
 def register_endpoints(app):
@@ -28,7 +29,7 @@ def register_endpoints(app):
 
         record = IdentityRegistration.query.get(caller_identity)
         if not record:
-            return jsonify(error='payout info for this identity not found'),\
+            return jsonify(error='payout info for this identity not found'), \
                    404
 
         return jsonify({'eth_address': record.payout_eth_address})
@@ -41,6 +42,8 @@ def register_endpoints(app):
         payload = request.get_json(force=True)
 
         payout_eth_address = payload.get('payout_eth_address', None)
+        referral_code = payload.get('referral_code', None)
+
         if payout_eth_address is None:
             msg = 'missing payout_eth_address parameter in body'
             return jsonify(error=msg), 400
@@ -55,11 +58,12 @@ def register_endpoints(app):
 
         record = IdentityRegistration.query.get(caller_identity)
         if record:
-            record.update(payout_eth_address)
+            record.update(payout_eth_address, referral_code)
             db.session.add(record)
         else:
             new_record = IdentityRegistration(
-                caller_identity, payout_eth_address)
+                caller_identity, payout_eth_address, referral_code
+            )
             db.session.add(new_record)
 
         db.session.commit()

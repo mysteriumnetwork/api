@@ -8,6 +8,7 @@ from sqlalchemy.orm import relationship
 db = SQLAlchemy()
 
 
+REFERRAL_CODE_LIMIT = 64
 IDENTITY_LENGTH_LIMIT = 42
 SESSION_KEY_LIMIT = 36
 AVAILABILITY_TIMEOUT = timedelta(minutes=2)
@@ -167,13 +168,18 @@ class IdentityRegistration(db.Model):
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
     payout_eth_address = db.Column(db.String(IDENTITY_LENGTH_LIMIT))
+    referral_code = db.Column(db.String(REFERRAL_CODE_LIMIT))
     bounty_program = db.Column(db.Boolean, default=False, nullable=False)
 
-    def __init__(self, identity, payout_eth_address):
+    def __init__(self, identity, payout_eth_address, referral_code=""):
         self.identity = identity
         self.created_at = datetime.utcnow()
         self.payout_eth_address = payout_eth_address
+        self.referral_code = referral_code
 
-    def update(self, payout_eth_address):
+    def update(self, payout_eth_address, referral_code=""):
         self.updated_at = datetime.utcnow()
         self.payout_eth_address = payout_eth_address
+        if bool(referral_code and referral_code.strip()):
+            if not bool(self.referral_code and self.referral_code.strip()):
+                self.referral_code = referral_code
