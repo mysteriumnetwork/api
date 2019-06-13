@@ -100,6 +100,33 @@ class TestIdentities(TestCase):
         )
         self.assertIsNotNone(record.updated_at)
 
+    def test_referral_code_update(self):
+        identity = build_static_public_address().upper()
+        pre_record = IdentityRegistration(identity.lower(), '')
+        db.session.add(pre_record)
+        db.session.commit()
+
+        payload = {
+            'payout_eth_address': '0x000000000000000000000000000000000000000a',
+            'referral_code': 'ABC123'
+        }
+        auth = build_test_authorization(json.dumps(payload))
+        re = self._put(
+            '/v1/identities/{}/payout'.format(identity),
+            payload,
+            headers=auth['headers']
+        )
+        self.assertEqual({}, re.json)
+        self.assertEqual(200, re.status_code)
+
+        # test updated values
+        record = IdentityRegistration.query.get(identity.lower())
+        self.assertEqual(
+            'ABC123',
+            record.referral_code
+        )
+        self.assertIsNotNone(record.updated_at)
+
     def test_get_payout_returns_eth_address(self):
         identity = build_static_public_address().upper()
         eth_address = build_static_public_address().upper()
