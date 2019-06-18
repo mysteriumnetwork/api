@@ -107,12 +107,11 @@ class TestIdentities(TestCase):
         db.session.commit()
 
         payload = {
-            'payout_eth_address': '0x000000000000000000000000000000000000000a',
             'referral_code': 'ABC123'
         }
         auth = build_test_authorization(json.dumps(payload))
         re = self._put(
-            '/v1/identities/{}/payout'.format(identity),
+            '/v1/identities/{}/referral'.format(identity),
             payload,
             headers=auth['headers']
         )

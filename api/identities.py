@@ -37,6 +37,36 @@ def register_endpoints(app):
             'referral_code': record.referral_code
         })
 
+    # End Point which creates or updates referral info next to identity
+    @app.route('/v1/identities/<identity_url_param>/referral', methods=['PUT'])
+    @validate_json
+    @recover_identity
+    def set_referral_info(identity_url_param, caller_identity):
+        payload = request.get_json(force=True)
+
+        referral_code = payload.get('referral_code', None)
+
+        if referral_code is None:
+            msg = 'missing referral_code parameter in body'
+            return jsonify(error=msg), 400
+
+        if identity_url_param.lower() != caller_identity:
+            msg = 'no permission to modify this identity'
+            return jsonify(error=msg), 403
+
+        record = IdentityRegistration.query.get(caller_identity)
+        if record:
+            record.update_referral_code(referral_code)
+            db.session.add(record)
+        else:
+            new_record = IdentityRegistration(
+                caller_identity, None, referral_code
+            )
+            db.session.add(new_record)
+
+        db.session.commit()
+        return jsonify({})
+
     # End Point which creates or updates payout info next to identity
     @app.route('/v1/identities/<identity_url_param>/payout', methods=['PUT'])
     @validate_json
@@ -45,7 +75,6 @@ def register_endpoints(app):
         payload = request.get_json(force=True)
 
         payout_eth_address = payload.get('payout_eth_address', None)
-        referral_code = payload.get('referral_code', None)
 
         if payout_eth_address is None:
             msg = 'missing payout_eth_address parameter in body'
@@ -61,11 +90,12 @@ def register_endpoints(app):
 
         record = IdentityRegistration.query.get(caller_identity)
         if record:
-            record.update(payout_eth_address, referral_code)
+            record.update(payout_eth_address)
             db.session.add(record)
         else:
             new_record = IdentityRegistration(
-                caller_identity, payout_eth_address, referral_code
+                caller_identity,
+                payout_eth_address
             )
             db.session.add(new_record)
 

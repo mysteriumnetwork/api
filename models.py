@@ -177,9 +177,12 @@ class IdentityRegistration(db.Model):
         self.payout_eth_address = payout_eth_address
         self.referral_code = referral_code
 
-    def update(self, payout_eth_address, referral_code=""):
+    def update(self, payout_eth_address):
         self.updated_at = datetime.utcnow()
         self.payout_eth_address = payout_eth_address
+
+    def update_referral_code(self, referral_code=""):
+        self.updated_at = datetime.utcnow()
         if bool(referral_code and referral_code.strip()):
             if not bool(self.referral_code and self.referral_code.strip()):
                 self.referral_code = referral_code
