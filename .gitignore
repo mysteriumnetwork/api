@@ -1,4 +1,5 @@
 .idea/
 api.log
 venv/
+env
 *.pyc
