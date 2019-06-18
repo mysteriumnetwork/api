@@ -6,6 +6,17 @@ from request_helpers import validate_json, recover_identity
 
 
 def register_endpoints(app):
+    @app.route('/v1/identities/<identity_url_param>', methods=['GET'])
+    @recover_identity
+    def get_identity(identity_url_param, caller_identity):
+        if identity_url_param.lower() != caller_identity:
+            return jsonify(error='no permission to access this identity'), 403
+        identity = Identity.query.get(caller_identity)
+        if not identity:
+            return jsonify(error='identity not found'), 404
+
+        return jsonify({})
+
     # End Point to save identity
     @app.route('/v1/identities', methods=['POST'])
     @recover_identity

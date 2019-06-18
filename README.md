@@ -24,6 +24,10 @@ docker-compose exec api bin/db-upgrade
 
 ## Development
 
+### Pre-requisites
+
+Follow [Google cloud guide](https://cloud.google.com/python/setup) to setup python development environment.
+
 ### Testing
 
 Install the requirements using pip
