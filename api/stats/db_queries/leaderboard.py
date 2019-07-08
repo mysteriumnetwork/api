@@ -88,7 +88,9 @@ def enrich_leaderboard_rows(rows, date_from, date_to):
             date_from,
             date_to
         )
-        row.availability = '{} / 168 h'.format(
-            hours_online
+
+        total_hours_in_range = round((date_to - date_from).total_seconds() / 3600)
+        row.availability = '{0} / {1} h'.format(
+            hours_online, total_hours_in_range
         )
         row.data_transferred = row.total_bytes

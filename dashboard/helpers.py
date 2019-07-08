@@ -39,7 +39,7 @@ def get_week_range(date):
     return date_from, date_to
 
 
-# calculates month range starting from first day to last day of month for provided date
+# calculates month range starting from first day to last day of month
 def get_month_range(date):
     first_day = datetime.combine(date.replace(day=1), datetime.min.time())
     last_day = first_day + relativedelta(months=+1) - timedelta(seconds=1)
