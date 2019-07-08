@@ -89,7 +89,9 @@ def enrich_leaderboard_rows(rows, date_from, date_to):
             date_to
         )
 
-        total_hours_in_range = round((date_to - date_from).total_seconds() / 3600)
+        total_hours_in_range = round(
+            (date_to - date_from).total_seconds() / 3600
+        )
         row.availability = '{0} / {1} h'.format(
             hours_online, total_hours_in_range
         )
