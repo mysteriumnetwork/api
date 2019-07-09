@@ -172,7 +172,7 @@ class IdentityRegistration(db.Model):
     referral_code = db.Column(db.String(REFERRAL_CODE_LIMIT))
     bounty_program = db.Column(db.Boolean, default=False, nullable=False)
 
-    def __init__(self, identity, payout_eth_address, referral_code=None, email=None):
+    def __init__(self, identity, payout_eth_address, referral_code='', email=''):
         self.identity = identity
         self.created_at = datetime.utcnow()
         self.payout_eth_address = payout_eth_address
