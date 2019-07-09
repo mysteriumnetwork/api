@@ -2,6 +2,7 @@ import models
 import humanize
 from datetime import timedelta, datetime
 import calendar
+from dateutil.relativedelta import relativedelta
 
 
 def shorten_node_key(node_key):
@@ -36,3 +37,10 @@ def get_week_range(date):
     date_from = datetime.utcfromtimestamp(monday_timestamp)
     date_to = date_from + timedelta(days=7)
     return date_from, date_to
+
+
+# calculates month range starting from first day to last day of month
+def get_month_range(date):
+    first_day = datetime.combine(date.replace(day=1), datetime.min.time())
+    last_day = first_day + relativedelta(months=+1) - timedelta(seconds=1)
+    return first_day, last_day

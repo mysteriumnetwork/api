@@ -4,7 +4,8 @@ from dashboard.helpers import (
     shorten_node_key,
     format_bytes_count,
     format_duration,
-    get_week_range
+    get_week_range,
+    get_month_range
 )
 
 
@@ -63,3 +64,9 @@ class TestHelpers(unittest.TestCase):
         date_from, date_to = get_week_range(fixed_date)
         self.assertEqual(datetime(2019, 3, 18, 0, 0, 0), date_from)
         self.assertEqual(datetime(2019, 3, 25, 0, 0, 0), date_to)
+
+    def test_get_month_range(self):
+        fixed_date = date(2019, 7, 8)
+        date_from, date_to = get_month_range(fixed_date)
+        self.assertEqual(datetime(2019, 7, 1, 0, 0, 0), date_from)
+        self.assertEqual(datetime(2019, 7, 31, 23, 59, 59), date_to)

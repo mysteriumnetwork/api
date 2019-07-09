@@ -15,7 +15,7 @@ from api.stats.model_layer import (
 )
 from api.settings import DB_CONFIG
 from werkzeug.contrib.cache import SimpleCache
-from dashboard.helpers import get_week_range
+from dashboard.helpers import get_month_range
 from flask import Flask, render_template, request, abort, jsonify
 from datetime import datetime
 from models import db
@@ -87,7 +87,7 @@ def leaderboard():
     page_content = cache.get(cache_key)
     if page_content is None:
         offset = (page - 1) * LEADERBOARD_ROWS_PER_PAGE
-        date_from, date_to = get_week_range(datetime.utcnow().date())
+        date_from, date_to = get_month_range(datetime.utcnow().date())
         leaderboard_rows = get_leaderboard_rows(
             date_from, date_to, offset=offset, limit=LEADERBOARD_ROWS_PER_PAGE
         )
