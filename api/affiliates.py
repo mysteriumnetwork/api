@@ -52,11 +52,20 @@ def validate_fields(email, payout_eth_address, referral_code):
 
     if referral_code:
         if len(referral_code) > 20:
-            return jsonify(field='referral_code', message='Referral code should not exceed 20 characters')
+            return jsonify(
+                field='referral_code',
+                message='Referral code should not exceed 20 characters'
+            )
         if len(referral_code) < 6:
-            return jsonify(field='referral_code', message='Referral code should be at least 6 characters')
+            return jsonify(
+                field='referral_code',
+                message='Referral code should be at least 6 characters'
+            )
         if referral_code_exists(referral_code):
-            return jsonify(field='referral_code', message='This referral code already exists')
+            return jsonify(
+                field='referral_code',
+                message='This referral code already exists'
+            )
 
     record = Affiliate.query.filter_by(email=email).first()
     if record:
@@ -76,7 +85,11 @@ def register_endpoints(app):
         payout_eth_address = payload.get('payout_eth_address', '').strip()
         referral_code = payload.get('referral_code', '').strip()
 
-        validation_error = validate_fields(email, payout_eth_address, referral_code)
+        validation_error = validate_fields(
+            email,
+            payout_eth_address,
+            referral_code
+        )
         if validation_error is not None:
             return validation_error, 400
 
