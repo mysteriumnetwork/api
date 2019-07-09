@@ -27,6 +27,44 @@ def generate_referral_code(email):
     return code
 
 
+def referral_code_exists(referral_code):
+    return Affiliate.query.filter_by(referral_code=referral_code).first()
+
+
+def validate_fields(email, payout_eth_address, referral_code):
+    if email is None:
+        return jsonify(field='email', message='Email is required')
+
+    if not validate_email_address(email):
+        return jsonify(field='email', message='Email is invalid')
+
+    if payout_eth_address is None:
+        return jsonify(
+            field='payout_eth_address',
+            message='Payout address is required'
+        )
+
+    if not is_valid_eth_address(payout_eth_address):
+        return jsonify(
+            field='payout_eth_address',
+            message='Payout address is not a valid Ethereum address'
+        )
+
+    if referral_code:
+        if len(referral_code) > 20:
+            return jsonify(field='referral_code', message='Referral code should not exceed 20 characters')
+        if len(referral_code) < 6:
+            return jsonify(field='referral_code', message='Referral code should be at least 6 characters')
+        if referral_code_exists(referral_code):
+            return jsonify(field='referral_code', message='This referral code already exists')
+
+    record = Affiliate.query.filter_by(email=email).first()
+    if record:
+        return jsonify(field='email', message='Email already exists')
+
+    return None
+
+
 def register_endpoints(app):
     # End Point which creates an affiliate record
     @app.route('/v1/affiliates', methods=['POST'])
@@ -34,46 +72,24 @@ def register_endpoints(app):
     def create_affiliate():
         payload = request.get_json(force=True)
 
-        email = payload.get('email', None)
-        referral_code = payload.get('referral_code', None)
-        if referral_code:
-            referral_code = referral_code.strip()
+        email = payload.get('email', '').strip()
+        payout_eth_address = payload.get('payout_eth_address', '').strip()
+        referral_code = payload.get('referral_code', '').strip()
 
-        payout_eth_address = payload.get('payout_eth_address', None)
-
-        if email is None:
-            return jsonify(field='email', message='Email is required'), 400
-
-        if not validate_email_address(email):
-            return jsonify(field='email', message='Email is invalid'), 400
-
-        if payout_eth_address is None:
-            return jsonify(
-                field='payout_eth_address',
-                message='Payout address is required'
-            ), 400
-
-        if not is_valid_eth_address(payout_eth_address):
-            return jsonify(
-                field='payout_eth_address',
-                message='Payout address is not a valid Ethereum address'
-            ), 400
+        validation_error = validate_fields(email, payout_eth_address, referral_code)
+        if validation_error is not None:
+            return validation_error, 400
 
         if not referral_code:
             referral_code = generate_referral_code(email)
 
-        record = Affiliate.query.filter_by(email=email).first()
-        if record:
-            return jsonify(field='email', message='Email already exists'), 400
-
-        if record is None:
-            new_record = Affiliate(
-                email,
-                payout_eth_address,
-                referral_code
-            )
-            db.session.add(new_record)
-            db.session.commit()
+        record = Affiliate(
+            email,
+            payout_eth_address,
+            referral_code
+        )
+        db.session.add(record)
+        db.session.commit()
 
         return jsonify(
             message="Successfully registered your referral code.",
