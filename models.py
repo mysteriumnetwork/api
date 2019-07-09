@@ -1,13 +1,13 @@
+import json
+from datetime import datetime, timedelta
+
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Index, ForeignKey
-from datetime import datetime, timedelta
-import json
-
 from sqlalchemy.orm import relationship
 
 db = SQLAlchemy()
 
-
+EMAIL_LENGTH_LIMIT = 254
 REFERRAL_CODE_LIMIT = 64
 IDENTITY_LENGTH_LIMIT = 42
 SESSION_KEY_LIMIT = 36
@@ -165,24 +165,46 @@ def _is_active(last_update_time):
 class IdentityRegistration(db.Model):
     __tablename__ = 'identity_registration'
     identity = db.Column(db.String(IDENTITY_LENGTH_LIMIT), primary_key=True)
+    email = db.Column(db.String(EMAIL_LENGTH_LIMIT))
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
     payout_eth_address = db.Column(db.String(IDENTITY_LENGTH_LIMIT))
     referral_code = db.Column(db.String(REFERRAL_CODE_LIMIT))
     bounty_program = db.Column(db.Boolean, default=False, nullable=False)
 
-    def __init__(self, identity, payout_eth_address, referral_code=""):
+    def __init__(self, identity, payout_eth_address, referral_code=None, email=None):
         self.identity = identity
         self.created_at = datetime.utcnow()
         self.payout_eth_address = payout_eth_address
+        self.email = email
         self.referral_code = referral_code
 
     def update(self, payout_eth_address):
         self.updated_at = datetime.utcnow()
         self.payout_eth_address = payout_eth_address
 
+    def update_email(self, email):
+        self.updated_at = datetime.utcnow()
+        self.email = email
+
     def update_referral_code(self, referral_code=""):
         self.updated_at = datetime.utcnow()
         if bool(referral_code and referral_code.strip()):
             if not bool(self.referral_code and self.referral_code.strip()):
                 self.referral_code = referral_code
+
+
+class Affiliate(db.Model):
+    __tablename__ = 'affiliates'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    email = db.Column(db.String(EMAIL_LENGTH_LIMIT))
+    payout_eth_address = db.Column(db.String(IDENTITY_LENGTH_LIMIT))
+    referral_code = db.Column(db.String(REFERRAL_CODE_LIMIT))
+    created_at = db.Column(db.DateTime)
+    updated_at = db.Column(db.DateTime)
+
+    def __init__(self, email, payout_eth_address, referral_code):
+        self.email = email
+        self.created_at = datetime.utcnow()
+        self.payout_eth_address = payout_eth_address
+        self.referral_code = referral_code
