@@ -89,7 +89,7 @@ def register_endpoints(app):
         email = payload.get('email', None)
 
         if email is None:
-            msg = 'missing referral_code parameter in body'
+            msg = 'missing email parameter in body'
             return jsonify(error=msg), 400
 
         if identity_url_param.lower() != caller_identity:
