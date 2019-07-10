@@ -1,5 +1,3 @@
-from random import randint
-
 from email_validator import validate_email, EmailNotValidError
 from eth_utils.address import is_hex_address as is_valid_eth_address
 from flask import request, jsonify
@@ -16,13 +14,13 @@ def validate_email_address(email):
     return True
 
 
-def generate_referral_code(email):
-    name = ''.join(email[:2]).upper()
-    while True:
-        code = name + "RPI" + str(randint(100, 999))
-        record = Affiliate.query.filter_by(referral_code=code).first()
-        if not record:
-            break
+def generate_referral_code(email, row_id):
+    # get first part of email and first 2 characters
+    initials = email.split("@")[0][:2]
+    if len(initials) == 1:
+        initials += initials
+
+    code = initials.upper() + "RPI" + str(row_id + 100).zfill(4)
 
     return code
 
@@ -74,6 +72,24 @@ def validate_fields(email, payout_eth_address, referral_code):
     return None
 
 
+def create_record(email, payout_address, referral_code):
+    record = Affiliate(
+        email,
+        payout_address,
+        referral_code
+    )
+    db.session.add(record)
+    db.session.commit()
+
+    return record
+
+
+def update_record(record, referral_code):
+    record.update(referral_code)
+    db.session.add(record)
+    db.session.commit()
+
+
 def register_endpoints(app):
     # End Point which creates an affiliate record
     @app.route('/v1/affiliates', methods=['POST'])
@@ -83,7 +99,7 @@ def register_endpoints(app):
 
         email = payload.get('email', '').strip()
         payout_eth_address = payload.get('payout_eth_address', '').strip()
-        referral_code = payload.get('referral_code', '').strip()
+        referral_code = payload.get('referral_code', '').strip().upper()
 
         validation_error = validate_fields(
             email,
@@ -93,16 +109,10 @@ def register_endpoints(app):
         if validation_error is not None:
             return validation_error, 400
 
+        record = create_record(email, payout_eth_address, referral_code)
         if not referral_code:
-            referral_code = generate_referral_code(email)
-
-        record = Affiliate(
-            email,
-            payout_eth_address,
-            referral_code
-        )
-        db.session.add(record)
-        db.session.commit()
+            referral_code = generate_referral_code(email, record.id)
+            update_record(record, referral_code)
 
         return jsonify(
             message="Successfully registered your referral code.",

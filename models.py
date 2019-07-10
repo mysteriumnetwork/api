@@ -209,3 +209,7 @@ class Affiliate(db.Model):
         self.created_at = datetime.utcnow()
         self.payout_eth_address = payout_eth_address
         self.referral_code = referral_code
+
+    def update(self, referral_code):
+        self.updated_at = datetime.utcnow()
+        self.referral_code = referral_code
