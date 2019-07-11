@@ -45,7 +45,8 @@ def register_endpoints(app):
 
         return jsonify({
             'eth_address': record.payout_eth_address,
-            'referral_code': record.referral_code
+            'referral_code': record.referral_code,
+            'email': record.email
         })
 
     # End Point which creates or updates referral info next to identity
@@ -72,6 +73,36 @@ def register_endpoints(app):
         else:
             new_record = IdentityRegistration(
                 caller_identity, None, referral_code
+            )
+            db.session.add(new_record)
+
+        db.session.commit()
+        return jsonify({})
+
+    # End Point which creates or updates email address next to identity
+    @app.route('/v1/identities/<identity_url_param>/email', methods=['PUT'])
+    @validate_json
+    @recover_identity
+    def set_email(identity_url_param, caller_identity):
+        payload = request.get_json(force=True)
+
+        email = payload.get('email', None)
+
+        if email is None:
+            msg = 'missing email parameter in body'
+            return jsonify(error=msg), 400
+
+        if identity_url_param.lower() != caller_identity:
+            msg = 'no permission to modify this identity'
+            return jsonify(error=msg), 403
+
+        record = IdentityRegistration.query.get(caller_identity)
+        if record:
+            record.update_email(email)
+            db.session.add(record)
+        else:
+            new_record = IdentityRegistration(
+                caller_identity, None, None, email
             )
             db.session.add(new_record)
 

@@ -1,11 +1,12 @@
+import json
+
+from models import IdentityRegistration
+from models import db
 from tests.test_case import TestCase
 from tests.utils import (
     build_test_authorization,
     build_static_public_address
 )
-from models import IdentityRegistration
-import json
-from models import db
 
 
 class TestIdentities(TestCase):
@@ -141,8 +142,10 @@ class TestIdentities(TestCase):
         self.assertEqual(200, re.status_code)
         self.assertEqual({
             'eth_address': eth_address,
+            'email': '',
             'referral_code': ''},
-            re.json)
+            re.json
+        )
 
     def test_get_payout_returns_404_with_no_payout_info(self):
         identity = build_static_public_address().upper()
