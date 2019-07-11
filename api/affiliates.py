@@ -111,7 +111,4 @@ def register_endpoints(app):
             referral_code = generate_referral_code(email, record.id)
             update_record(record, referral_code)
 
-        return jsonify(
-            message="Successfully registered your referral code",
-            referral_code=referral_code
-        )
+        return jsonify(referral_code=referral_code)
