@@ -22,8 +22,10 @@ def add_response_headers(headers={}):
 
 def enable_cors_for_post(f):
     @wraps(f)
-    @add_response_headers({'Access-Control-Allow-Origin': 'https://mysterium.network'})
-    @add_response_headers({'Access-Control-Allow-Methods': 'POST'})
+    @add_response_headers({
+        'Access-Control-Allow-Origin': 'https://mysterium.network',
+        'Access-Control-Allow-Methods': 'POST'
+    })
     def decorated_function(*args, **kwargs):
         return f(*args, **kwargs)
 
