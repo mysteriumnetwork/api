@@ -1,10 +1,7 @@
 from email_validator import validate_email, EmailNotValidError
 from eth_utils.address import is_hex_address as is_valid_eth_address
 from flask import request, jsonify
-
-from cors import enable_cors_for_post
 from models import db, Affiliate
-from request_helpers import validate_json
 
 
 def validate_email_address(email):
@@ -94,8 +91,6 @@ def update_record(record, referral_code):
 def register_endpoints(app):
     # End Point which creates an affiliate record
     @app.route('/v1/affiliates', methods=['POST'])
-    @validate_json
-    @enable_cors_for_post
     def create_affiliate():
         payload = request.get_json(force=True)
 
@@ -117,6 +112,6 @@ def register_endpoints(app):
             update_record(record, referral_code)
 
         return jsonify(
-            message="Successfully registered your referral code.",
+            message="Successfully registered your referral code",
             referral_code=referral_code
         )
