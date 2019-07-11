@@ -1,3 +1,5 @@
+from flask_cors import CORS
+
 import helpers
 import logging
 from api import settings
@@ -16,7 +18,7 @@ if not settings.DISABLE_LOGS:
     helpers.setup_logger()
 
 app = Flask(__name__)
-
+CORS(app, resources=[r'/v1/affiliates'])
 register_proposal_endpoints(app)
 register_identity_endpoints(app)
 register_session_endpoints(app)
