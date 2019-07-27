@@ -55,6 +55,22 @@ def get_total_data_transferred():
     return total_bytes
 
 
+def get_total_data_transferred_by_node(node_key, service_type):
+    sql = text("""
+        SELECT
+        SUM(client_bytes_sent) AS clientBytesSent,
+        SUM(client_bytes_received) AS clientBytesReceived
+        FROM session
+        WHERE node_key=:node_key AND service_type=:service_type;
+        """)
+    result = db.engine.execute(
+        sql, node_key=node_key, service_type=service_type
+    )
+    myrow = result.fetchone()
+    total_bytes = (myrow[0] or 0) + (myrow[1] or 0)
+    return total_bytes
+
+
 def get_country_string(country):
     return country or 'N/A'
 
@@ -117,13 +133,9 @@ def get_node_info(node_key, service_type):
         service_type=service_type,
         limit=10
     )
-
-    total_bytes = 0
-    for se in node.sessions:
-        total_bytes += se.client_bytes_sent
-        total_bytes += se.client_bytes_received
-
-    node.data_transferred = total_bytes
+    node.data_transferred = get_total_data_transferred_by_node(
+        node_key, service_type
+    )
     node.sessions_count = get_sessions_count_by_service_type(
         node_key,
         service_type

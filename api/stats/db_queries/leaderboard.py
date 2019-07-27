@@ -46,23 +46,19 @@ def get_leaderboard_rows(date_from, date_to, offset=0, limit=10):
         INNER JOIN node n ON n.node_key = ir.identity
         INNER JOIN session s ON s.node_key = ir.identity
             AND s.service_type = n.service_type
-        WHERE s.client_updated_at >= '{date_from}'
-            AND s.client_updated_at <= '{date_to}'
-            AND n.updated_at >= '{date_from}'
-            AND n.updated_at <= '{date_to}'
+        WHERE s.client_updated_at >= :date_from
+            AND s.client_updated_at <= :date_to
+            AND n.updated_at >= :date_from
+            AND n.updated_at <= :date_to
             AND ir.bounty_program = TRUE
         GROUP BY ir.identity, n.node_key
         ORDER BY total_bytes DESC
-        LIMIT {limit}
-        OFFSET {offset}
-        """.format(
-            date_from=date_from,
-            date_to=date_to,
-            limit=limit,
-            offset=offset
-        )
-    )
-    rows = db.engine.execute(query).fetchall()
+        LIMIT :limit
+        OFFSET :offset
+        """)
+    rows = db.engine.execute(
+        query, date_from=date_from, date_to=date_to, limit=limit, offset=offset
+    ).fetchall()
     leader_board_rows = []
     for row in rows:
         leader_board_row = LeaderboardRow.from_sql_row(row)
