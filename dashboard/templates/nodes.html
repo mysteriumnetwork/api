@@ -24,7 +24,6 @@
                   <th>Node</th>
                   <th>Status</th>
                   <th>Seen</th>
-                  <th>Sessions</th>
                   <th>Country</th>
                   <th class="mobile-hide">Service</th>
                   <th class="mobile-hide">Type</th>
@@ -35,9 +34,8 @@
                 <tr onclick="window.document.location='/node/{{node.node_key}}/{{node.service_type}}'">
                   <td scope="row" class="enumerator">{{loop.index}}</td>
                   <td class="td-node-key">{{node.node_key}}</td>
-                  <td>{{node.status}}</td>
+                  <td>{{node.status()}}</td>
                   <td>{{node.last_seen|format_time}}</td>
-                  <td>{{node.sessions_count}}</td>
                   <td>{{node.country_string}}</td>
                   <td class="mobile-hide">{{node.service_type}}</td>
                   <td class="mobile-hide">{{node.node_type.capitalize()}}</td>

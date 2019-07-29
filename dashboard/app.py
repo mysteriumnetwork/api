@@ -11,13 +11,12 @@ from api.stats.model_layer import (
     get_available_nodes,
     get_node_info,
     get_sessions_country_stats,
-    get_nodes
 )
+from api.stats.node_list import get_nodes
 from dashboard.settings import (
     METRICS_CACHE_TIMEOUT,
     DASHBOARD_CACHE_TIMEOUT,
     LEADERBOARD_CACHE_TIMEOUT,
-    VIEW_NODES_CACHE_TIMEOUT,
     VIEW_SESSIONS_CACHE_TIMEOUT
 )
 from api.settings import DB_CONFIG
@@ -161,18 +160,9 @@ def node(key, service_type):
 
 @app.route('/nodes')
 def nodes():
-    nodes = cache.get('all-nodes')
-    if nodes is None:
-        nodes = get_nodes(limit=500)
-        cache.set(
-            'all-nodes',
-            nodes,
-            timeout=VIEW_NODES_CACHE_TIMEOUT
-        )
-
     return render_template(
         'nodes.html',
-        nodes=nodes
+        nodes=get_nodes()
     )
 
 

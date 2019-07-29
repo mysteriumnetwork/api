@@ -44,6 +44,9 @@ class Node(db.Model):
     def is_active(self):
         return _is_active(self.updated_at)
 
+    def status(self):
+        return 'Online' if self.is_active() else 'Offline'
+
     def mark_activity(self):
         self.updated_at = datetime.utcnow()
 
