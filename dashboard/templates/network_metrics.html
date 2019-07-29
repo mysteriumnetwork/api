@@ -1,0 +1,24 @@
+  <!-- top tiles -->
+  <div class="row tile_count">
+    <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
+      <span class="count_top"><i class="fa fa-wifi"></i> Available Nodes</span>
+      <div class="count green">{{active_nodes_count}}</div>
+    </div>
+    <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
+      <span class="count_top"><i class="fa fa-bars"></i> Active Sessions</span>
+      <div class="count">{{active_sessions_count}}</div>
+    </div>
+    <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
+      <span class="count_top"><i class="fa fa-users"></i> Sessions Total</span>
+      <div class="count">{{sessions_count}}</div>
+    </div>
+    <div class="col-md-3 col-sm-4 col-xs-6 tile_stats_count">
+      <span class="count_top"><i class="fa fa-clock-o"></i> Average Session Time</span>
+      <div class="count">{{average_session_time}}</div>
+    </div>
+    <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
+      <span class="count_top"><i class="fa fa-globe"></i> Data Transferred Total</span>
+      <div class="count">{{total_data_transferred|format_bytes_count}}</div>
+    </div>
+  </div>
+  <!-- /top tiles -->

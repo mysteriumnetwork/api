@@ -13,6 +13,13 @@ from api.stats.model_layer import (
     get_sessions_country_stats,
     get_nodes
 )
+from dashboard.settings import (
+    METRICS_CACHE_TIMEOUT,
+    DASHBOARD_CACHE_TIMEOUT,
+    LEADERBOARD_CACHE_TIMEOUT,
+    VIEW_NODES_CACHE_TIMEOUT,
+    VIEW_SESSIONS_CACHE_TIMEOUT
+)
 from api.settings import DB_CONFIG
 from werkzeug.contrib.cache import SimpleCache
 from dashboard.helpers import get_month_range
@@ -42,30 +49,45 @@ app.config['SQLALCHEMY_DATABASE_URI'] =\
     _generate_database_uri(DB_CONFIG)
 
 
-@app.route('/')
-def main():
-    page_content = cache.get('dashboard-page')
-    if page_content is None:
-        sessions = fetch_sessions(10)
-        page_content = render_template(
-            'dashboard.html',
-            active_nodes_count=get_active_nodes_count(),
-            sessions_count=get_sessions_count(),
-            active_sessions_count=get_sessions_count(
+def collect_metrics():
+    metrics = cache.get('metrics')
+    if metrics is None:
+        metrics = {
+            'active_nodes_count': get_active_nodes_count(),
+            'sessions_count': get_sessions_count(),
+            'active_sessions_count': get_sessions_count(
                 only_active_sessions=True
             ),
-            average_session_time=get_average_session_time(),
-            total_data_transferred=get_total_data_transferred(),
-            available_nodes=get_available_nodes(limit=10),
-            sessions=sessions,
-        )
-
+            'average_session_time': get_average_session_time(),
+            'total_data_transferred': get_total_data_transferred(),
+        }
         cache.set(
-            'dashboard-page',
-            page_content,
-            timeout=1 * 60
+            'metrics',
+            metrics,
+            timeout=METRICS_CACHE_TIMEOUT
+        )
+    return metrics
+
+
+@app.route('/')
+def main():
+    dashboard_data = cache.get('dashboard-data')
+    if dashboard_data is None:
+        dashboard_data = {
+            'available_nodes': get_available_nodes(limit=10),
+            'sessions': fetch_sessions(10),
+        }
+        cache.set(
+            'dashboard-data',
+            dashboard_data,
+            timeout=DASHBOARD_CACHE_TIMEOUT
         )
 
+    page_content = render_template(
+        'dashboard.html',
+        **collect_metrics(),
+        **dashboard_data
+    )
     return page_content
 
 
@@ -84,8 +106,8 @@ def leaderboard():
     # TODO: return http error for non-existing pages
 
     cache_key = 'leaderboard-page-{}'.format(page)
-    page_content = cache.get(cache_key)
-    if page_content is None:
+    page_data = cache.get(cache_key)
+    if page_data is None:
         offset = (page - 1) * LEADERBOARD_ROWS_PER_PAGE
         date_from, date_to = get_month_range(datetime.utcnow().date())
         leaderboard_rows = get_leaderboard_rows(
@@ -105,22 +127,26 @@ def leaderboard():
         if len(leaderboard_rows) == LEADERBOARD_ROWS_PER_PAGE:
             next_page = page + 1
 
-        page_content = render_template(
-            'leaderboard.html',
-            date_from=date_from.strftime('%b %d, %Y'),
-            date_to=date_to.strftime('%b %d, %Y'),
-            leaderboard_rows=leaderboard_rows,
-            previous_page=previous_page,
-            next_page=next_page,
-            offset=offset
-        )
+        page_data = {
+            'date_from': date_from.strftime('%b %d, %Y'),
+            'date_to': date_to.strftime('%b %d, %Y'),
+            'leaderboard_rows': leaderboard_rows,
+            'previous_page': previous_page,
+            'next_page': next_page,
+            'offset': offset,
+        }
 
         cache.set(
             cache_key,
-            page_content,
-            timeout=1 * 60
+            page_data,
+            timeout=LEADERBOARD_CACHE_TIMEOUT
         )
 
+    page_content = render_template(
+        'leaderboard.html',
+        **page_data,
+        **collect_metrics()
+    )
     return page_content
 
 
@@ -141,7 +167,7 @@ def nodes():
         cache.set(
             'all-nodes',
             nodes,
-            timeout=1 * 60
+            timeout=VIEW_NODES_CACHE_TIMEOUT
         )
 
     return render_template(
@@ -169,7 +195,7 @@ def sessions():
         cache.set(
             'all-sessions',
             sessions,
-            timeout=1 * 60
+            timeout=VIEW_SESSIONS_CACHE_TIMEOUT
         )
 
     return render_template(
