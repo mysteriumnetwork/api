@@ -16,3 +16,7 @@ VIEW_NODES_CACHE_TIMEOUT = os.environ.get('VIEW_NODES_CACHE_TIMEOUT') \
 
 VIEW_SESSIONS_CACHE_TIMEOUT = os.environ.get('VIEW_SESSIONS_CACHE_TIMEOUT') \
                         or 1 * 60  # in seconds
+
+VIEW_NODES_MAX_ROWS = os.environ.get('VIEW_NODES_MAX_ROWS') or 100
+
+VIEW_SESSIONS_MAX_ROWS = os.environ.get('VIEW_SESSIONS_MAX_ROWS') or 100

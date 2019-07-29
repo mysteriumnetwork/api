@@ -18,7 +18,9 @@ from dashboard.settings import (
     DASHBOARD_CACHE_TIMEOUT,
     LEADERBOARD_CACHE_TIMEOUT,
     VIEW_NODES_CACHE_TIMEOUT,
-    VIEW_SESSIONS_CACHE_TIMEOUT
+    VIEW_SESSIONS_CACHE_TIMEOUT,
+    VIEW_NODES_MAX_ROWS,
+    VIEW_SESSIONS_MAX_ROWS
 )
 from api.settings import DB_CONFIG
 from werkzeug.contrib.cache import SimpleCache
@@ -163,7 +165,7 @@ def node(key, service_type):
 def nodes():
     nodes = cache.get('all-nodes')
     if nodes is None:
-        nodes = get_nodes(limit=500)
+        nodes = get_nodes(limit=VIEW_NODES_MAX_ROWS)
         cache.set(
             'all-nodes',
             nodes,
@@ -191,7 +193,7 @@ def session(key):
 def sessions():
     sessions = cache.get('all-sessions')
     if sessions is None:
-        sessions = fetch_sessions(limit=500)
+        sessions = fetch_sessions(limit=VIEW_SESSIONS_MAX_ROWS)
         cache.set(
             'all-sessions',
             sessions,
