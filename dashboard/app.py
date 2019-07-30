@@ -30,6 +30,7 @@ from dashboard.discovery_api import fetch_sessions, ApiError, fetch_session
 
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
 cache = SimpleCache()
