@@ -20,7 +20,8 @@ from dashboard.settings import (
     VIEW_NODES_CACHE_TIMEOUT,
     VIEW_SESSIONS_CACHE_TIMEOUT,
     VIEW_NODES_MAX_ROWS,
-    VIEW_SESSIONS_MAX_ROWS
+    VIEW_SESSIONS_MAX_ROWS,
+    NODE_AVAILABILITY_DAYS
 )
 from api.settings import DB_CONFIG
 from werkzeug.contrib.cache import SimpleCache
@@ -154,7 +155,7 @@ def leaderboard():
 
 @app.route('/node/<key>/<service_type>')
 def node(key, service_type):
-    node = get_node_info(key, service_type)
+    node = get_node_info(key, service_type, NODE_AVAILABILITY_DAYS)
     return render_template(
         'node.html',
         node=node,

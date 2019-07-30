@@ -121,7 +121,7 @@ def get_node_status(node):
     return 'Online' if node.is_active() else 'Offline'
 
 
-def get_node_info(node_key, service_type):
+def get_node_info(node_key, service_type, availability_days_count):
     node = Node.query.get([node_key, service_type])
     delta = datetime.utcnow() - node.updated_at
     node.last_seen = delta.total_seconds()
@@ -143,8 +143,7 @@ def get_node_info(node_key, service_type):
 
     availability = []
 
-    # 7 days
-    for i in range(6, -1, -1):
+    for i in range(availability_days_count - 1, -1, -1):
         now = datetime.utcnow()
         today = now.replace(hour=0, minute=0, second=0, microsecond=0)
         day = today - timedelta(days=i)
