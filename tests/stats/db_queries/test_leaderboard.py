@@ -120,7 +120,8 @@ class TestGetLeaderBoardRows(TestCase):
         db.session.commit()
 
     @staticmethod
-    def _create_node(node_key, service_type, updated_at, node_type='residential'):
+    def _create_node(node_key, service_type, updated_at,
+                     node_type='residential'):
         node = Node(node_key, service_type)
         node.updated_at = updated_at
         node.node_type = node_type
