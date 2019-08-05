@@ -60,7 +60,7 @@ def get_leaderboard_rows(date_from, date_to, offset=0, limit=10):
             AND s.service_type = n.service_type
         WHERE
             s.client_updated_at BETWEEN :date_from AND :date_to
-        GROUP BY ir.identity, n.node_key
+        GROUP BY ir.identity, n.node_key, n.node_type, n.service_type
         HAVING
             node_type = :node_type
             AND service_type = :service_type
