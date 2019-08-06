@@ -2,6 +2,7 @@ from api.stats.db_queries.leaderboard import get_leaderboard_rows
 from models import db, Node, IdentityRegistration, Session
 from tests.test_case import TestCase
 from datetime import datetime, timedelta
+import json
 
 now = datetime.utcnow()
 second = timedelta(seconds=1)
@@ -10,30 +11,30 @@ second = timedelta(seconds=1)
 class TestGetLeaderBoardRows(TestCase):
     def test_correct_unique_users_and_service_type_match(self):
         self._create_identity_registration('provider id', True)
-        self._create_node('provider id', 'service x', now)
-        self._create_node('provider id', 'service y', now)
+        self._create_node('provider id', 'openvpn', now)
+        self._create_node('provider id', 'other service', now)
         self._create_session(
             'session 1', 'consumer id 1',
-            'provider id', 'service x', now, 1, 2
+            'provider id', 'openvpn', now, 1, 2
         )
         self._create_session(
-            'session 2', 'consumer id 1',
-            'provider id', 'service y', now, 0, 0
+            'session 2', 'consumer id 2',
+            'provider id', 'openvpn', now, 3, 4
         )
         self._create_session(
             'session 3', 'consumer id 2',
-            'provider id', 'service y', now, 0, 0
+            'provider id', 'openvpn', now, 0, 0
         )
         self._create_session(
             'session 4', 'consumer id 3',
-            'provider id', 'service y', now, 3, 4
+            'provider id', 'other service', now, 20, 20
         )
         rows = get_leaderboard_rows(now - second, now + second)
         self.assertEqual(1, len(rows))
         self.assertEqual('provider id', rows[0].provider_id)
-        self.assertEqual(4, rows[0].sessions_count)
+        self.assertEqual(3, rows[0].sessions_count)
         self.assertEqual(10, rows[0].total_bytes)
-        self.assertEqual(3, rows[0].unique_users)
+        self.assertEqual(2, rows[0].unique_users)
 
     def test_does_not_filter_non_bounty_programme(self):
         self._create_identity_registration('provider id', False)
@@ -119,9 +120,16 @@ class TestGetLeaderBoardRows(TestCase):
         db.session.commit()
 
     @staticmethod
-    def _create_node(node_key, service_type, updated_at):
+    def _create_node(node_key, service_type, updated_at,
+                     node_type='residential'):
         node = Node(node_key, service_type)
         node.updated_at = updated_at
+        node.node_type = node_type
+        node.proposal = json.dumps({
+            "service_definition": {
+                "location": {"country": "IT"},
+            }
+        })
         db.session.add(node)
         db.session.commit()
 
