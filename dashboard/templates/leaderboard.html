@@ -31,11 +31,11 @@
                     </thead>
                     <tbody>
                       {% for row in leaderboard_rows %}
-                      <tr onclick="window.document.location='/node/{{row.provider_id}}/openvpn'">
+                      <tr onclick="window.document.location='/node/{{row.provider_id}}/{{row.service_type}}'">
                         <td scope="row" class="enumerator">{{offset+loop.index}}</td>
                         <td class="td-node-key">{{row.provider_id}}</td>
                         <td>{{row.availability}}</td>
-                        <td>{{row.data_transferred|format_bytes_count}}</td>
+                        <td>{{row.total_bytes|format_bytes_count}}</td>
                         <td>{{row.sessions_count}}</td>
                         <td class="mobile-hide">{{row.unique_users}}</td>
                         <td class="mobile-hide">{{row.country}}</td>
