@@ -35,6 +35,7 @@ services:
   db:
     image: percona:5.7
     container_name: mysterium-mysql-test
+    command: ['--event-scheduler=ON']
     ports:
       - 33062:3306
     environment:
