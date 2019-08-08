@@ -2,10 +2,6 @@
 
 {% block body %}
 
-          {% include "network_metrics.html" %}
-
-          <br />
-
           <div class="row">
             <div class="col-md-12 col-sm-12 col-xs-12">
               <div class="x_panel">
@@ -32,7 +28,7 @@
                     <tbody>
                       {% for row in leaderboard_rows %}
                       <tr onclick="window.document.location='/node/{{row.provider_id}}/{{row.service_type}}'">
-                        <td scope="row" class="enumerator">{{offset+loop.index}}</td>
+                        <td scope="row" class="enumerator">{{loop.index}}</td>
                         <td class="td-node-key">{{row.provider_id}}</td>
                         <td>{{row.availability}}</td>
                         <td>{{row.total_bytes|format_bytes_count}}</td>
@@ -44,24 +40,6 @@
                       {% endfor %}
                     </tbody>
                   </table>
-
-                  <div class="pull-right">
-                    {% if previous_page != None %}
-                      <a href="?page={{previous_page}}">
-                        <div class="pager">
-                          &lt; Previous
-                        </div>
-                      </a>
-                    {% endif %}
-                    {% if next_page != None %}
-                    <a href="?page={{next_page}}">
-                        <div class="pager">
-                          Next &gt;
-                        </div>
-                      </a>
-                    {% endif %}
-                  </div>
-
                 </div>
               </div>
             </div>
