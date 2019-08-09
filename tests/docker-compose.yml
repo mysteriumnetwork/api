@@ -1,14 +1,13 @@
-version: '3'
+version: '2.4'
 services:
 
   api:
     build:
       context: ..
       dockerfile: Dockerfile
-    container_name: mysterium-api-test
     environment:
       APP_PORT: 80
-      DB_HOST: mysterium-mysql-test
+      DB_HOST: db:3306
       DB_NAME: myst_api
       DB_USER: myst_api
       DB_PASSWORD: myst_api
@@ -21,9 +20,8 @@ services:
     build:
       context: ..
       dockerfile: Dockerfile.dashboard
-    container_name: mysterium-dashboard-test
     environment:
-      DB_HOST: mysterium-mysql-test
+      DB_HOST: db:3306
       DB_NAME: myst_api
       DB_USER: myst_api
       DB_PASSWORD: myst_api
@@ -34,7 +32,6 @@ services:
 
   db:
     image: percona:5.7
-    container_name: mysterium-mysql-test
     command: ['--event-scheduler=ON']
     ports:
       - 33062:3306

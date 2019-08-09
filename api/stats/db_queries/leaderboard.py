@@ -13,7 +13,10 @@ class LeaderboardRow:
         self.availability = '{0} / {1} h'.format(
             row.hours_available, total_hours_in_range
         )
-        self.service_status = 'Online' if row.last_seen < AVAILABILITY_TIMEOUT.seconds else 'Offline'
+        if row.last_seen is not None and row.last_seen < AVAILABILITY_TIMEOUT.seconds:
+            self.service_status = 'Online'
+        else:
+            self.service_status = 'Offline'
 
     def __repr__(self):
         return 'provider_id: {0}, sessions_count: {1}, ' \
