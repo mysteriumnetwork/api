@@ -22,11 +22,11 @@ class LeaderboardRow:
         return 'provider_id: {0}, sessions_count: {1}, ' \
                'total_bytes: {2}, unique_users: {3}' \
             .format(
-            self.provider_id,
-            self.sessions_count,
-            self.total_bytes,
-            self.unique_users,
-        )
+                self.provider_id,
+                self.sessions_count,
+                self.total_bytes,
+                self.unique_users,
+            )
 
 
 def get_leaderboard_rows(date_from, date_to):

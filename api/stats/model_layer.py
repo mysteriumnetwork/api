@@ -74,6 +74,7 @@ def get_total_data_transferred_by_node(node_key, service_type):
 def get_country_string(country):
     return country or 'N/A'
 
+
 def get_available_nodes(limit=None):
     nodes = filter_active_nodes()
 
