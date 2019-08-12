@@ -40,4 +40,4 @@ IDENTITY_CONTRACT = os.environ.get('IDENTITY_CONTRACT') \
 
 DISCOVERY_VERIFY_IDENTITY = os.environ.get(
     'DISCOVERY_VERIFY_IDENTITY', 'true'
-    ).lower() == 'true'
+).lower() == 'true'

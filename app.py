@@ -18,6 +18,8 @@ if not settings.DISABLE_LOGS:
     helpers.setup_logger()
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 CORS(app, resources=[r'/v1/affiliates'])
 register_proposal_endpoints(app)
 register_identity_endpoints(app)

@@ -1,7 +1,6 @@
 import logging
 from api.stats.db_queries.leaderboard import (
     get_leaderboard_rows,
-    enrich_leaderboard_rows
 )
 from api.stats.model_layer import (
     get_active_nodes_count,
@@ -11,13 +10,11 @@ from api.stats.model_layer import (
     get_available_nodes,
     get_node_info,
     get_sessions_country_stats,
-    get_nodes
 )
+from api.stats.node_list import get_nodes
 from dashboard.settings import (
     METRICS_CACHE_TIMEOUT,
     DASHBOARD_CACHE_TIMEOUT,
-    LEADERBOARD_CACHE_TIMEOUT,
-    VIEW_NODES_CACHE_TIMEOUT,
     VIEW_SESSIONS_CACHE_TIMEOUT
 )
 from api.settings import DB_CONFIG
@@ -31,10 +28,10 @@ from dashboard.discovery_api import fetch_sessions, ApiError, fetch_session
 
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
 cache = SimpleCache()
-LEADERBOARD_ROWS_PER_PAGE = 10
 
 initialize_filters(app)
 
@@ -93,59 +90,16 @@ def main():
 
 @app.route('/leaderboard')
 def leaderboard():
-    try:
-        page = int(request.args.get('page', 1))
-    except ValueError:
-        abort(400)
-        return
-
-    if page < 1:
-        abort(400)
-        return
-
-    # TODO: return http error for non-existing pages
-
-    cache_key = 'leaderboard-page-{}'.format(page)
-    page_data = cache.get(cache_key)
-    if page_data is None:
-        offset = (page - 1) * LEADERBOARD_ROWS_PER_PAGE
-        date_from, date_to = get_month_range(datetime.utcnow().date())
-        leaderboard_rows = get_leaderboard_rows(
-            date_from, date_to, offset=offset, limit=LEADERBOARD_ROWS_PER_PAGE
-        )
-        enrich_leaderboard_rows(leaderboard_rows, date_from, date_to)
-
-        previous_page = None
-        if page >= 2:
-            previous_page = page - 1
-
-        next_page = None
-        # This is not always correct - i.e.
-        # if we have 10 rows and we're in first page,
-        # next button should be disabled.
-        # TODO: find optimal way to get total rows count
-        if len(leaderboard_rows) == LEADERBOARD_ROWS_PER_PAGE:
-            next_page = page + 1
-
-        page_data = {
-            'date_from': date_from.strftime('%b %d, %Y'),
-            'date_to': date_to.strftime('%b %d, %Y'),
-            'leaderboard_rows': leaderboard_rows,
-            'previous_page': previous_page,
-            'next_page': next_page,
-            'offset': offset,
-        }
-
-        cache.set(
-            cache_key,
-            page_data,
-            timeout=LEADERBOARD_CACHE_TIMEOUT
-        )
-
+    date_from, date_to = get_month_range(datetime.utcnow().date())
+    leaderboard_rows = get_leaderboard_rows(date_from, date_to)
+    page_data = {
+        'date_from': date_from.strftime('%b %d, %Y'),
+        'date_to': date_to.strftime('%b %d, %Y'),
+        'leaderboard_rows': leaderboard_rows,
+    }
     page_content = render_template(
         'leaderboard.html',
         **page_data,
-        **collect_metrics()
     )
     return page_content
 
@@ -161,18 +115,9 @@ def node(key, service_type):
 
 @app.route('/nodes')
 def nodes():
-    nodes = cache.get('all-nodes')
-    if nodes is None:
-        nodes = get_nodes(limit=500)
-        cache.set(
-            'all-nodes',
-            nodes,
-            timeout=VIEW_NODES_CACHE_TIMEOUT
-        )
-
     return render_template(
         'nodes.html',
-        nodes=nodes
+        nodes=get_nodes()
     )
 
 

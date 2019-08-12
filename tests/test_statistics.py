@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 
 from tests.test_case import TestCase
@@ -7,6 +8,7 @@ from models import db, Session
 class TestStatistics(TestCase):
     def test_sessions_returns_sessions(self):
         self._create_session('test-session')
+        time.sleep(2)
 
         re = self._get('/v1/statistics/sessions')
         self.assertEqual(200, re.status_code)
@@ -20,7 +22,7 @@ class TestStatistics(TestCase):
         self.assertEqual(0, session['data_sent'])
         self.assertEqual(0, session['data_received'])
         self.assertEqual(0, session['data_transferred'])
-        self.assertTrue(0 <= session['started'] < 1)
+        self.assertGreaterEqual(session['started'], 0)
         self.assertEqual('Ongoing', session['status'])
         self.assertEqual('N/A', session['client_country_string'])
 

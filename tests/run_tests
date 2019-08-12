@@ -8,8 +8,11 @@ until [ "` (docker inspect $(cd tests; docker-compose ps -q db) -f {{.State.Heal
     printf "."
     sleep 1
 done;
-sleep 3 # needed for db to fully initialize
+sleep 10 # needed for db to fully initialize
 printf "\n"
+
+printf "Migrating DB...\n"
+(cd tests; docker-compose exec api bin/db-upgrade)
 
 printf "Running api tests...\n"
 (cd tests; docker-compose exec api python -m unittest discover tests)
