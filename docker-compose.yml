@@ -11,9 +11,9 @@ services:
     environment:
       APP_PORT: 80
       DB_HOST: mysterium-mysql
-      DB_NAME: myst_api
-      DB_USER: myst_api
-      DB_PASSWORD: myst_api
+      DB_NAME: testnet_api
+      DB_USER: testnet_api
+      DB_PASSWORD: testnet_api
     volumes:
       - .:/code
     depends_on:
@@ -30,9 +30,9 @@ services:
       APP_PORT: 80
       API_HOST: http://api
       DB_HOST: mysterium-mysql
-      DB_NAME: myst_api
-      DB_USER: myst_api
-      DB_PASSWORD: myst_api
+      DB_NAME: testnet_api
+      DB_USER: testnet_api
+      DB_PASSWORD: testnet_api
     volumes:
       - .:/code
     depends_on:
@@ -45,13 +45,18 @@ services:
     command: ['--event-scheduler=ON']
     ports:
       - 33061:3306
+    volumes:
+      - db-data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: myst_api
-      MYSQL_USER: myst_api
-      MYSQL_PASSWORD: myst_api
+      MYSQL_DATABASE: testnet_api
+      MYSQL_USER: testnet_api
+      MYSQL_PASSWORD: testnet_api
     healthcheck:
       test: mysqladmin ping --silent
       interval: 5s
       timeout: 5s
       retries: 15
+
+volumes:
+  db-data:
