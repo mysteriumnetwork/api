@@ -3,10 +3,10 @@ from distutils import util
 
 APP_PORT = os.environ.get('APP_PORT') or 80
 
-DB_HOST = os.environ.get('DB_HOST') or 'localhost'
-DB_NAME = os.environ.get('DB_NAME') or ''
-USER = os.environ.get('DB_USER') or ''
-PASSWD = os.environ.get('DB_PASSWORD') or ''
+DB_HOST = os.environ.get('DB_HOST') or 'localhost:33061'
+DB_NAME = os.environ.get('DB_NAME') or 'testnet_api'
+USER = os.environ.get('DB_USER') or 'testnet_api'
+PASSWD = os.environ.get('DB_PASSWORD') or 'testnet_api'
 
 DB_CONFIG = {
     'host': DB_HOST,
