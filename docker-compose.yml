@@ -45,6 +45,8 @@ services:
     command: ['--event-scheduler=ON']
     ports:
       - 33061:3306
+    volumes:
+      - db-data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: testnet_api
@@ -55,3 +57,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 15
+
+volumes:
+  db-data:
