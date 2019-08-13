@@ -43,7 +43,7 @@ def get_leaderboard_rows(date_from, date_to):
             n.updated_at,
             TIMESTAMPDIFF(SECOND, n.updated_at, NOW()) AS last_seen
         FROM dwh_leaderboard l
-            LEFT JOIN node n ON n.node_key = l.provider_id
+            LEFT JOIN node n ON n.node_key = l.provider_id AND n.service_type = l.service_type
         ORDER BY l.data_transferred DESC
         """)
     rows = db.engine.execute(sql).fetchall()
