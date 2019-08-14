@@ -75,20 +75,13 @@ def get_country_string(country):
     return country or 'N/A'
 
 
-def get_available_nodes(limit=None):
+def get_available_nodes():
     nodes = filter_active_nodes()
-
-    if limit:
-        nodes = nodes.limit(limit)
-
     nodes = nodes.all()
 
     for node in nodes:
         node.country_string = get_country_string(
             node.get_country_from_service_proposal()
-        )
-        node.sessions_count = get_sessions_count_by_service_type(
-            node.node_key, node.service_type
         )
         delta = datetime.utcnow() - node.updated_at
         node.last_seen = delta.total_seconds()

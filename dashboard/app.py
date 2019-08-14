@@ -14,7 +14,6 @@ from api.stats.model_layer import (
 from api.stats.node_list import get_nodes
 from dashboard.settings import (
     METRICS_CACHE_TIMEOUT,
-    DASHBOARD_CACHE_TIMEOUT,
     VIEW_SESSIONS_CACHE_TIMEOUT
 )
 from api.settings import DB_CONFIG
@@ -68,17 +67,9 @@ def collect_metrics():
 
 @app.route('/')
 def main():
-    dashboard_data = cache.get('dashboard-data')
-    if dashboard_data is None:
-        dashboard_data = {
-            'available_nodes': get_available_nodes(limit=10),
-            'sessions': fetch_sessions(10),
-        }
-        cache.set(
-            'dashboard-data',
-            dashboard_data,
-            timeout=DASHBOARD_CACHE_TIMEOUT
-        )
+    dashboard_data = {
+        'available_nodes': get_available_nodes(),
+    }
 
     page_content = render_template(
         'dashboard.html',
@@ -108,15 +99,15 @@ def leaderboard():
 def node(key, service_type):
     node = get_node_info(key, service_type)
     return render_template(
-        'node.html',
+        'service.html',
         node=node,
     )
 
 
-@app.route('/nodes')
+@app.route('/services')
 def nodes():
     return render_template(
-        'nodes.html',
+        'services.html',
         nodes=get_nodes()
     )
 

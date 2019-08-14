@@ -6,7 +6,7 @@
       <div class="col-md-12 col-sm-6 col-xs-12">
         <div class="x_panel">
           <div class="x_title">
-            <h2>Nodes List</h2>
+            <h2>Services</h2>
             <div class="clearfix"></div>
           </div>
           <div class="x_content">
@@ -16,11 +16,11 @@
                 <tr>
                   <th class="enumerator">#</th>
                   <th>Node</th>
-                  <th>Status</th>
-                  <th>Seen</th>
-                  <th>Country</th>
                   <th class="mobile-hide">Service</th>
                   <th class="mobile-hide">Type</th>
+                  <th>Country</th>
+                  <th>Seen</th>
+                  <th>Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -28,11 +28,17 @@
                 <tr onclick="window.document.location='/node/{{node.node_key}}/{{node.service_type}}'">
                   <td scope="row" class="enumerator">{{loop.index}}</td>
                   <td class="td-node-key">{{node.node_key}}</td>
-                  <td>{{node.status()}}</td>
-                  <td>{{node.last_seen|format_time}}</td>
-                  <td>{{node.country_string}}</td>
                   <td class="mobile-hide">{{node.service_type}}</td>
                   <td class="mobile-hide">{{node.node_type.capitalize()}}</td>
+                  <td>{{node.country_string}}</td>
+                  <td>{{node.last_seen|format_time}}</td>
+                  <td>
+                    {% if node.status() == 'Online' %}
+                      <i class="fa fa-circle green" aria-hidden="true" title="Online"></i>
+                    {% else %}
+                      <i class="fa fa-circle" aria-hidden="true" title="Offline"></i>
+                    {% endif %}
+                  </td>
                 </tr>
                 {% endfor %}
               </tbody>
