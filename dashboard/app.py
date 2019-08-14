@@ -99,15 +99,15 @@ def leaderboard():
 def node(key, service_type):
     node = get_node_info(key, service_type)
     return render_template(
-        'node.html',
+        'service.html',
         node=node,
     )
 
 
-@app.route('/nodes')
+@app.route('/services')
 def nodes():
     return render_template(
-        'nodes.html',
+        'services.html',
         nodes=get_nodes()
     )
 
