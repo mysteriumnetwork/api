@@ -1,6 +1,6 @@
 # Mysterium Network API
 
-[![Build Status](https://travis-ci.org/MysteriumNetwork/api.svg?branch=master)](https://travis-ci.org/MysteriumNetwork/api)
+[![Build Status](https://travis-ci.com/mysteriumnetwork/api.svg?branch=master)](https://travis-ci.com/mysteriumnetwork/api)
 [![pyVersion36](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/)
 
 API for Node & Client
