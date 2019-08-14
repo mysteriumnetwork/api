@@ -75,12 +75,8 @@ def get_country_string(country):
     return country or 'N/A'
 
 
-def get_available_nodes(limit=None):
+def get_available_nodes():
     nodes = filter_active_nodes()
-
-    if limit:
-        nodes = nodes.limit(limit)
-
     nodes = nodes.all()
 
     for node in nodes:

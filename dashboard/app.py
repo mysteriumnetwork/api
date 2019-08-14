@@ -68,7 +68,7 @@ def collect_metrics():
 @app.route('/')
 def main():
     dashboard_data = {
-        'available_nodes': get_available_nodes(limit=10),
+        'available_nodes': get_available_nodes(),
     }
 
     page_content = render_template(
