@@ -16,10 +16,10 @@
                         <th>Node</th>
                         <th>Monthly Availability</th>
                         <th>Data Transferred</th>
-                        <th>Sessions</th>
+                        <th class="mobile-hide">Sessions</th>
                         <th class="mobile-hide">Unique Users</th>
-                        <th class="mobile-hide">Country</th>
-                        <th class="mobile-hide">Status</th>
+                        <th>Country</th>
+                        <th>Status</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -29,10 +29,16 @@
                         <td class="td-node-key">{{row.provider_id}}</td>
                         <td>{{row.availability}}</td>
                         <td>{{row.total_bytes|format_bytes_count}}</td>
-                        <td>{{row.sessions_count}}</td>
+                        <td class="mobile-hide">{{row.sessions_count}}</td>
                         <td class="mobile-hide">{{row.unique_users}}</td>
-                        <td class="mobile-hide">{{row.country}}</td>
-                        <td class="mobile-hide">{{row.service_status}}</td>
+                        <td>{{row.country}}</td>
+                        <td>
+                          {% if row.service_status == 'Online' %}
+                            <i class="fa fa-circle green" aria-hidden="true" title="Online"></i>
+                          {% else %}
+                            <i class="fa fa-circle" aria-hidden="true" title="Offline"></i>
+                          {% endif %}
+                        </td>
                       </tr>
                       {% endfor %}
                     </tbody>
