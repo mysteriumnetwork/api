@@ -9,10 +9,10 @@
           <br />
 
           <div class="row">
-            <div class="col-md-7 col-sm-7 col-xs-12">
+            <div class="col-xs-12">
               <div class="x_panel">
                 <div class="x_title">
-                  <h2>Available Nodes <small><a href="/nodes">view more</a></small></h2>
+                  <h2>Available Nodes <small><a href="/nodes">view all</a></small></h2>
                   <div class="clearfix"></div>
                 </div>
                 <div class="x_content">
@@ -25,7 +25,6 @@
                         <th>Service</th>
                         <th>Type</th>
                         <th>Country</th>
-                        <th>Sessions</th>
                         <th>Seen</th>
                       </tr>
                     </thead>
@@ -37,7 +36,6 @@
                         <td>{{node.service_type}}</td>
                         <td>{{node.node_type.capitalize()}}</td>
                         <td>{{node.country_string}}</td>
-                        <td>{{node.sessions_count}}</td>
                         <td>{{node.last_seen|format_time}}</td>
                       </tr>
                       {% endfor %}
@@ -47,42 +45,6 @@
                 </div>
               </div>
             </div>
-
-            <div class="col-md-5 col-sm-5 col-xs-12">
-              <div class="x_panel">
-                <div class="x_title">
-                  <h2>Latest Sessions <small><a href="/sessions">view more</a></small></h2>
-                  <div class="clearfix"></div>
-                </div>
-                <div class="x_content">
-
-                  <table class="table table-hover clickable">
-                    <thead>
-                      <tr>
-                        <th class="enumerator">#</th>
-                        <th>Duration</th>
-                        <th>Data Transferred</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-
-                    {% for se in sessions %}
-                    <tr onclick="window.document.location='/session/{{se.session_key}}'">
-                      <td scope="row" class="enumerator">{{loop.index}}</td>
-                      <td>{{se.duration|format_duration}}</td>
-                      <td>{{se.data_transferred|format_bytes_count}}</td>
-                      <td>{{se.status}}</td>
-                    </tr>
-                    {% endfor %}
-
-                    </tbody>
-                  </table>
-
-                </div>
-              </div>
-            </div>
-
 
           </div>
 

@@ -87,9 +87,6 @@ def get_available_nodes(limit=None):
         node.country_string = get_country_string(
             node.get_country_from_service_proposal()
         )
-        node.sessions_count = get_sessions_count_by_service_type(
-            node.node_key, node.service_type
-        )
         delta = datetime.utcnow() - node.updated_at
         node.last_seen = delta.total_seconds()
     return nodes
