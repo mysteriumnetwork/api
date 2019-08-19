@@ -8,6 +8,11 @@
 
           <br />
 
+    <div class="row">
+        <div class="col-xs-12">
+            <div id="network-map-container" style="height: 800px; width: 1100px; position: relative; margin: 0 auto;"></div>
+        </div>
+    </div>
           <div class="row">
             <div class="col-xs-12">
               <div class="x_panel">
@@ -48,4 +53,66 @@
 
           </div>
 
+<script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/datamaps/0.5.9/datamaps.world.min.js"></script>
+<script src="static/build/js/country-iso.js"></script>
+<script>
+let series = [
+    {% for k, v in available_nodes_count_by_country.items() %}
+    [getCountryISO3("{{k}}"), "{{v}}"],
+    {% endfor %}
+];
+
+let nodeCounts = series.map(function(obj){ return obj[1]; });
+let nodeCountMin = Math.min.apply(null, nodeCounts),
+    nodeCountMax = Math.max.apply(null, nodeCounts);
+
+var paletteScale = d3.scale.linear()
+    .domain([nodeCountMin,nodeCountMax])
+    .range(["#be99a8","#991c4e"]);
+
+var dataset = {};
+series.forEach(function(item){
+    var iso = item[0], value = item[1];
+    dataset[iso] = { numberOfThings: value, fillColor: paletteScale(value) };
+});
+
+let width = document.getElementById('network-map-container').offsetWidth;
+let height = width;
+
+var map = new Datamap({
+    scope: 'world',
+    element: document.getElementById('network-map-container'),
+    //projection: 'mercator',
+    setProjection: function(element) {
+        var projection = d3.geo
+            .mercator()
+            .translate([(width/2), (height/2)])
+            .scale(width/2/Math.PI)
+            .rotate([-11,0]);
+        var path = d3.geo
+            .path()
+            .projection(projection);
+        return {path: path, projection: projection};
+    },
+    height: 750,
+    geographyConfig: {
+            popupTemplate: function(geography, data) {
+                let countryNodes = data && data.numberOfThings || 0;
+                return "<div class='hoverinfo'><strong>" + geography.properties.name + ": </strong>" + countryNodes + "</div>"
+            },
+            popupOnHover: true,
+            highlightBorderWidth: 2,
+            highlightOnHover: true,
+            borderColor: '#e5e5e5',
+            borderWidth: 1
+    },
+    fills: {
+      defaultFill: '#ddd',
+    },
+    data: dataset,
+})
+
+</script>
 {% endblock %}
