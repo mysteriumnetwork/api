@@ -1,4 +1,6 @@
 import logging
+from collections import defaultdict
+
 from api.stats.db_queries.leaderboard import (
     get_leaderboard_rows,
 )
@@ -67,8 +69,18 @@ def collect_metrics():
 
 @app.route('/')
 def main():
+    available_nodes = list(get_available_nodes())
+
+    available_nodes_count_by_country = defaultdict(int)
+    seen = set()
+    for n in available_nodes:
+        if n.node_key not in seen:
+            available_nodes_count_by_country[n.country_string] += 1
+            seen.add(n.node_key)
+
     dashboard_data = {
-        'available_nodes': get_available_nodes(),
+        'available_nodes': available_nodes,
+        'available_nodes_count_by_country': available_nodes_count_by_country
     }
 
     page_content = render_template(
