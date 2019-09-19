@@ -28,7 +28,7 @@ def upgrade():
     BEGIN
         SET @service_type = 'openvpn',
             @node_type = 'residential',
-            @date_from = DATE_FORMAT(NOW(), '%%Y-%%m-1 00:00:00'),
+            @date_from = DATE_FORMAT(NOW(), '%%Y-%%m-01 00:00:00'),
             @date_to = DATE_FORMAT(LAST_DAY(NOW()), '%%Y-%%m-%%d 23:59:59');
     
         DELETE FROM dwh_leaderboard_nodes WHERE 1 = 1;
