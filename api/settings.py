@@ -7,6 +7,10 @@ DB_HOST = os.environ.get('DB_HOST') or 'localhost:33061'
 DB_NAME = os.environ.get('DB_NAME') or 'testnet_api'
 USER = os.environ.get('DB_USER') or 'testnet_api'
 PASSWD = os.environ.get('DB_PASSWORD') or 'testnet_api'
+THROTTLE_SESSION_STATS = util.strtobool(
+    os.environ.get('THROTTLE_SESSION_STATS') or 'no'
+)
+
 
 DB_CONFIG = {
     'host': DB_HOST,

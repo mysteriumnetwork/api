@@ -3,6 +3,8 @@ from request_helpers import validate_json, recover_identity
 from datetime import datetime
 from ip import mask_ip_partially
 from models import db, Session
+from cache import recentlyCalled, markRecentlyCalled
+from api import settings
 
 
 def register_endpoints(app):
@@ -11,8 +13,14 @@ def register_endpoints(app):
     @validate_json
     @recover_identity
     def session_stats_create(session_key, caller_identity):
-        payload = request.get_json(force=True)
+        if settings.THROTTLE_SESSION_STATS:
+            if recentlyCalled(session_key):
+                return jsonify(
+                    error='too many requests'
+                ), 429
+            markRecentlyCalled(session_key)
 
+        payload = request.get_json(force=True)
         service_type = payload.get('service_type', 'openvpn')
 
         bytes_sent = payload.get('bytes_sent')
@@ -30,7 +38,6 @@ def register_endpoints(app):
         provider_id = payload.get('provider_id')
         if not provider_id:
             return jsonify(error='provider_id missing'), 400
-
         session = Session.query.get(session_key)
         if session is None:
             consumer_country = payload.get('consumer_country', '')
@@ -40,8 +47,16 @@ def register_endpoints(app):
             session.client_country = consumer_country
             session.consumer_id = caller_identity
             session.node_key = provider_id
+            session.client_bytes_received = 0
+            session.client_bytes_sent = 0
         else:
             session.service_type = service_type
+
+        threshold = (1000000000 / 8 * 60)
+        if bytes_received - session.client_bytes_received > threshold:
+            return jsonify({}), 418
+        if bytes_sent - session.client_bytes_sent > threshold:
+            return jsonify({}), 418
 
         if session.consumer_id != caller_identity:
             message = 'session identity does not match current one'

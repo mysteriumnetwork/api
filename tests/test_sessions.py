@@ -4,6 +4,7 @@ from models import db, Session
 from tests.test_case import TestCase
 from tests.utils import (
     build_test_authorization,
+    setting,
 )
 
 
@@ -307,3 +308,79 @@ class TestSessions(TestCase):
             {'error': 'session has expired'},
             re.json
         )
+
+
+    def test_session_stats_exceeding_sent_limit(self):
+        payload = {
+            'bytes_sent': round((1000000000 / 8 * 60) * 5),
+            'bytes_received': 40,
+            'provider_id': '0x1',
+        }
+        auth = build_test_authorization(json.dumps(payload))
+
+        session = Session('123', 'openvpn')
+        session.consumer_id = auth['public_address']
+        db.session.add(session)
+        db.session.commit()
+
+        re = self._post(
+            '/v1/sessions/123/stats',
+            payload,
+            headers=auth['headers'],
+        )
+        self.assertEqual(418, re.status_code)
+        self.assertEqual({}, re.json)
+
+
+    def test_session_stats_exceeding_received_limit(self):
+        payload = {
+            'bytes_sent': 5,
+            'bytes_received': round(40 + (1000000000 / 8 * 60) + 1),
+            'provider_id': '0x1',
+        }
+        auth = build_test_authorization(json.dumps(payload))
+
+        session = Session('123', 'openvpn')
+        session.consumer_id = auth['public_address']
+        session.client_bytes_received = 40
+        db.session.add(session)
+        db.session.commit()
+
+        re = self._post(
+            '/v1/sessions/123/stats',
+            payload,
+            headers=auth['headers'],
+        )
+        self.assertEqual(418, re.status_code)
+        self.assertEqual({}, re.json)
+      
+
+    def test_session_stats_rate_limited(self):
+        payload = {
+            'bytes_sent': 5,
+            'bytes_received': 40,
+            'provider_id': '0x1',
+        }
+        auth = build_test_authorization(json.dumps(payload))
+
+        session = Session('123', 'openvpn')
+        session.consumer_id = auth['public_address']
+        db.session.add(session)
+        db.session.commit()
+
+        with setting('THROTTLE_SESSION_STATS', True):
+            re = self._post(
+                '/v1/sessions/123/stats',
+                payload,
+                headers=auth['headers'],
+            )
+            self.assertEqual(200, re.status_code)
+            self.assertEqual({}, re.json)
+
+            re = self._post(
+                '/v1/sessions/123/stats',
+                payload,
+                headers=auth['headers'],
+            )
+            self.assertEqual(429, re.status_code)
+            self.assertEqual({'error': 'too many requests'}, re.json)

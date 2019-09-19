@@ -11,3 +11,4 @@ eth-utils==1.2.0
 web3==4.5.0
 email_validator==1.0.4
 flask-cors==3.0.8
+beaker
