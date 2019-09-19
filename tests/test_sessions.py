@@ -309,7 +309,6 @@ class TestSessions(TestCase):
             re.json
         )
 
-
     def test_session_stats_exceeding_sent_limit(self):
         payload = {
             'bytes_sent': round((1000000000 / 8 * 60) * 5),
@@ -330,7 +329,6 @@ class TestSessions(TestCase):
         )
         self.assertEqual(418, re.status_code)
         self.assertEqual({}, re.json)
-
 
     def test_session_stats_exceeding_received_limit(self):
         payload = {
@@ -353,7 +351,6 @@ class TestSessions(TestCase):
         )
         self.assertEqual(418, re.status_code)
         self.assertEqual({}, re.json)
-      
 
     def test_session_stats_rate_limited(self):
         payload = {
