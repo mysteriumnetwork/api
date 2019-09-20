@@ -44,7 +44,7 @@ def get_leaderboard_rows(date_from, date_to):
             TIMESTAMPDIFF(SECOND, n.updated_at, NOW()) AS last_seen
         FROM dwh_leaderboard l
             LEFT JOIN node n ON n.node_key = l.provider_id AND n.service_type = l.service_type
-        ORDER BY l.data_transferred DESC
+        ORDER BY l.hours_available DESC
         """)
     rows = db.engine.execute(sql).fetchall()
     total_hours_in_range = round((date_to - date_from).total_seconds() / 3600)
