@@ -6,6 +6,7 @@ from tests.utils import (
     build_test_authorization,
     setting,
 )
+from cache import sessionStatCallCache
 
 
 class TestSessions(TestCase):
@@ -353,6 +354,7 @@ class TestSessions(TestCase):
         self.assertEqual({}, re.json)
 
     def test_session_stats_rate_limited(self):
+        sessionStatCallCache.clear()
         payload = {
             'bytes_sent': 5,
             'bytes_received': 40,

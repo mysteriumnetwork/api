@@ -10,7 +10,9 @@ PASSWD = os.environ.get('DB_PASSWORD') or 'testnet_api'
 THROTTLE_SESSION_STATS = util.strtobool(
     os.environ.get('THROTTLE_SESSION_STATS') or 'no'
 )
-
+THROTTLE_PROPOSAL_PING = util.strtobool(
+    os.environ.get('THROTTLE_PROPOSAL_PING') or 'no'
+)
 
 DB_CONFIG = {
     'host': DB_HOST,

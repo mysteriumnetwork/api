@@ -3,7 +3,7 @@ from request_helpers import validate_json, recover_identity
 from datetime import datetime
 from ip import mask_ip_partially
 from models import db, Session
-from cache import recentlyCalled, markRecentlyCalled
+from cache import isSessionStatRecentlyCalled, markSessionStatRecentlyCalled
 from api import settings
 
 
@@ -14,11 +14,11 @@ def register_endpoints(app):
     @recover_identity
     def session_stats_create(session_key, caller_identity):
         if settings.THROTTLE_SESSION_STATS:
-            if recentlyCalled(session_key):
+            if isSessionStatRecentlyCalled(session_key):
                 return jsonify(
                     error='too many requests'
                 ), 429
-            markRecentlyCalled(session_key)
+            markSessionStatRecentlyCalled(session_key)
 
         payload = request.get_json(force=True)
         service_type = payload.get('service_type', 'openvpn')

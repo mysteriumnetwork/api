@@ -13,6 +13,7 @@ from queries import (
     filter_nodes_in_bounty_programme,
     filter_nodes_by_node_type
 )
+from cache import isProposalPingRecentlyCalled, markProposalPingRecentlyCalled
 
 
 identity_contract = IdentityContract(
@@ -47,6 +48,13 @@ def register_endpoints(app):
         node_key = proposal.get('provider_id', None)
         if node_key is None:
             return jsonify(error='missing provider_id'), 400
+
+        if settings.THROTTLE_PROPOSAL_PING:
+            if isProposalPingRecentlyCalled(node_key, service_type):
+                return jsonify(
+                    error='too many requests'
+                ), 429
+            markProposalPingRecentlyCalled(node_key, service_type)
 
         if node_key.lower() != caller_identity:
             message = 'provider_id does not match current identity'
@@ -148,6 +156,13 @@ def register_endpoints(app):
     def ping_proposal(caller_identity):
         payload = request.get_json(force=True)
         service_type = payload.get('service_type', 'openvpn')
+
+        if settings.THROTTLE_PROPOSAL_PING:
+            if isProposalPingRecentlyCalled(caller_identity, service_type):
+                return jsonify(
+                    error='too many requests'
+                ), 429
+            markProposalPingRecentlyCalled(caller_identity, service_type)
 
         node = Node.query.get([caller_identity, service_type])
         if not node:

@@ -12,6 +12,7 @@ from tests.utils import (
 )
 from identity_contract import IdentityContractFake
 from api import proposals as proposalEndpoints
+from cache import proposalPingCallCache
 
 
 class TestProposals(TestCase):
@@ -886,3 +887,89 @@ class TestProposals(TestCase):
         ir = IdentityRegistration(node_key, eth_address)
         db.session.add(ir)
         return ir
+
+    def test_proposal_rate_limited_ping(self):
+        payload_openvpn = {'service_type': 'openvpn'}
+        auth_openvpn = build_test_authorization(json.dumps(payload_openvpn))
+        payload_wireguard = {'service_type': 'wireguard'}
+        auth_wireguard = build_test_authorization(json.dumps(payload_wireguard))
+        proposalPingCallCache.clear()
+        self._create_node(auth_openvpn['public_address'], "openvpn")
+        self._create_node(auth_wireguard['public_address'], "wireguard")
+        with setting('THROTTLE_PROPOSAL_PING', True):
+            re = self._post(
+                '/v1/ping_proposal',
+                payload_openvpn,
+                headers=auth_openvpn['headers']
+            )
+            self.assertEqual(200, re.status_code)
+            self.assertEqual({}, re.json)
+            re = self._post(
+                '/v1/ping_proposal',
+                payload_openvpn,
+                headers=auth_openvpn['headers']
+            )
+            self.assertEqual(429, re.status_code)
+            self.assertEqual({'error': 'too many requests'}, re.json)
+            re = self._post(
+                '/v1/ping_proposal',
+                payload_wireguard,
+                headers=auth_wireguard['headers']
+            )
+            self.assertEqual(200, re.status_code)
+            re = self._post(
+                '/v1/ping_proposal',
+                payload_wireguard,
+                headers=auth_wireguard['headers']
+            )
+            self.assertEqual(429, re.status_code)
+            self.assertEqual({'error': 'too many requests'}, re.json)
+
+    def test_proposal_rate_limited_register(self):
+        public_address = build_static_public_address()
+        payload_openvpn = {
+            "service_proposal": {
+                "id": 1,
+                "format": "service-proposal/v1",
+                "provider_id": public_address,
+                "service_type": "openvpn",
+            }
+        }
+        auth_openvpn = build_test_authorization(json.dumps(payload_openvpn))
+        payload_wireguard = {
+            "service_proposal": {
+                "id": 1,
+                "format": "service-proposal/v1",
+                "provider_id": public_address,
+                "service_type": "wireguard",
+            }
+        }
+        auth_wireguard = build_test_authorization(json.dumps(payload_wireguard))
+        proposalEndpoints.identity_contract = IdentityContractFake(True)
+        proposalPingCallCache.clear()
+        with setting('THROTTLE_PROPOSAL_PING', True):
+            re = self._post(
+                '/v1/register_proposal',
+                payload_openvpn,
+                headers=auth_openvpn['headers'])
+            self.assertEqual(200, re.status_code)
+            self.assertIsNotNone(re.json)
+            re = self._post(
+                '/v1/register_proposal',
+                payload_openvpn,
+                headers=auth_openvpn['headers'])
+            self.assertEqual(429, re.status_code)
+            self.assertEqual({'error': 'too many requests'}, re.json)
+
+            re = self._post(
+                '/v1/register_proposal',
+                payload_wireguard,
+                headers=auth_wireguard['headers'])
+            self.assertEqual(200, re.status_code)
+            self.assertIsNotNone(re.json)
+            re = self._post(
+                '/v1/register_proposal',
+                payload_wireguard,
+                headers=auth_wireguard['headers'])
+            self.assertEqual(429, re.status_code)
+            self.assertEqual({'error': 'too many requests'}, re.json)
