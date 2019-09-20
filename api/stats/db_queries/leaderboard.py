@@ -13,6 +13,8 @@ class LeaderboardRow:
         self.availability = '{0} / {1} h'.format(
             row.hours_available, total_hours_in_range
         )
+        self.hours_available = row.hours_available
+
         if row.last_seen is not None and row.last_seen < AVAILABILITY_TIMEOUT.seconds:
             self.service_status = 'Online'
         else:
