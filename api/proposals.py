@@ -1,6 +1,7 @@
 from api import settings
 import helpers
 import json
+import hashlib
 from flask import request, jsonify
 from models import db, Node, ProposalAccessPolicy, NodeAvailability
 from request_helpers import validate_json, restrict_by_ip, recover_identity
@@ -144,7 +145,15 @@ def register_endpoints(app):
         for node in nodes:
             service_proposals += node.get_service_proposals()
 
-        return jsonify({'proposals': service_proposals})
+        proposals_res = {'proposals': service_proposals}
+        etag = generate_etag(proposals_res)
+        req_etag = request.headers.get('If-None-Match')
+        if etag == req_etag:
+            return '', 304
+
+        response = jsonify(proposals_res)
+        response.headers.set('Etag', etag)
+        return response
 
     # node call this function each minute.
     @app.route('/v1/ping_proposal', methods=['post'])
@@ -185,3 +194,7 @@ def delete_proposal_policies(node_key):
         .query \
         .filter(ProposalAccessPolicy.node_key == node_key) \
         .delete()
+
+
+def generate_etag(obj):
+    return hashlib.md5(json.dumps(obj).encode("utf-8")).hexdigest()
