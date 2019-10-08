@@ -15,7 +15,10 @@ def get_active_nodes_count_query():
 
 
 def filter_active_nodes():
-    return _filter_active_models(Node, 'updated_at')
+    return _filter_active_models(Node, 'updated_at').order_by(
+        Node.node_key.asc(),
+        Node.service_type.asc()
+    )
 
 
 def filter_active_sessions():

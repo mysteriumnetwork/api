@@ -14,6 +14,7 @@ services:
       DB_NAME: testnet_api
       DB_USER: testnet_api
       DB_PASSWORD: testnet_api
+      DISCOVERY_VERIFY_IDENTITY: "false"
     volumes:
       - .:/code
     depends_on:
