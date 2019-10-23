@@ -1,5 +1,9 @@
 import json
+import time
 from datetime import datetime, timedelta
+
+from api.node_availability_worker import node_availability_batch_size, start_node_availability_worker, \
+    node_availability_queue, process_node_availabilities
 from models import (
     db, Node, ProposalAccessPolicy, AVAILABILITY_TIMEOUT, IdentityRegistration,
     NodeAvailability
@@ -778,38 +782,31 @@ class TestProposals(TestCase):
         data = json.loads(re.data)
         self.assertEqual(1, len(data['proposals']))
 
-    def test_ping_proposal(self):
-        payload = {}
-        auth = build_test_authorization(json.dumps(payload))
-
-        self._create_node(auth['public_address'], "openvpn")
-
-        re = self._post(
-            '/v1/ping_proposal',
-            payload,
-            headers=auth['headers']
-        )
-        self.assertEqual(200, re.status_code)
-        self.assertEqual({}, re.json)
-        pings = NodeAvailability.query.all()
-        self.assertEqual(pings[0].service_type, "openvpn")
-
     def test_ping_proposal_with_service_type(self):
-        payload = {'service_type': 'dummy'}
+        payload = {'service_type': 'dummy_service'}
         auth = build_test_authorization(json.dumps(payload))
 
-        self._create_node(auth['public_address'], "dummy")
+        self._create_node(auth['public_address'], "dummy_service")
 
-        re = self._post(
-            '/v1/ping_proposal',
-            payload,
-            headers=auth['headers']
-        )
-        self.assertEqual(200, re.status_code)
+        re = Node
+        for i in range(node_availability_batch_size):
+            re = self._post(
+                '/v1/ping_proposal',
+                payload,
+                headers=auth['headers']
+            )
+            self.assertEqual(200, re.status_code)
+
+        process_node_availabilities(db.engine, node_availability_queue)
+
+        # Detach current session so NodeAvailability model can pick new changes inserted from another session.
+        db.session.remove()
+        pings = NodeAvailability.query.filter(
+            getattr(NodeAvailability, 'service_type') == payload['service_type']
+        ).all()
+
         self.assertEqual({}, re.json)
-
-        pings = NodeAvailability.query.all()
-        self.assertEqual(pings[0].service_type, "dummy")
+        self.assertEqual(pings[0].service_type, "dummy_service")
 
     def test_ping_proposal_no_node_with_service_type(self):
         payload = {'service_type': 'dummy'}

@@ -3,6 +3,8 @@ import helpers
 import json
 import hashlib
 from flask import request, jsonify
+
+from api.node_availability_worker import node_availability_queue
 from models import db, Node, ProposalAccessPolicy, NodeAvailability
 from request_helpers import validate_json, restrict_by_ip, recover_identity
 from identity_contract import IdentityContract
@@ -15,7 +17,6 @@ from queries import (
     filter_nodes_by_node_type
 )
 from cache import isProposalPingRecentlyCalled, markProposalPingRecentlyCalled
-
 
 identity_contract = IdentityContract(
     settings.ETHER_RPC_URL,
@@ -156,7 +157,7 @@ def register_endpoints(app):
         return response
 
     # node call this function each minute.
-    @app.route('/v1/ping_proposal', methods=['post'])
+    @app.route('/v1/ping_proposal', methods=['POST'])
     # TODO: remove deprecated route when it's not used anymore
     @app.route('/v1/node_send_stats', methods=['POST'])
     @restrict_by_ip
@@ -179,12 +180,10 @@ def register_endpoints(app):
 
         node.mark_activity()
 
-        # add record to NodeAvailability
+        # Add record to NodeAvailability to queue.
         na = NodeAvailability(caller_identity)
         na.service_type = service_type
-
-        db.session.add(na)
-        db.session.commit()
+        node_availability_queue.put(na)
 
         return jsonify({})
 
@@ -198,3 +197,5 @@ def delete_proposal_policies(node_key):
 
 def generate_etag(obj):
     return hashlib.md5(json.dumps(obj).encode("utf-8")).hexdigest()
+
+

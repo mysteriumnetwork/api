@@ -24,8 +24,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # app.config['SQLALCHEMY_RECORD_QUERIES'] = True
 #
 # Usage example inside endpoints.
-# info = get_debug_queries()[0]
-# print(info.statement, info.parameters, info.duration, sep='\n')
+# for info in get_debug_queries():
+#     print(info.statement, info.parameters, info.duration, sep='\n')
+#     print('\n')
 
 CORS(app, resources=[r'/v1/affiliates'])
 register_proposal_endpoints(app)
