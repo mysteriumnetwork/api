@@ -197,5 +197,3 @@ def delete_proposal_policies(node_key):
 
 def generate_etag(obj):
     return hashlib.md5(json.dumps(obj).encode("utf-8")).hexdigest()
-
-
