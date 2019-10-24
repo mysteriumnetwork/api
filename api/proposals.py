@@ -179,6 +179,7 @@ def register_endpoints(app):
             return jsonify(error='node key not found'), 400
 
         node.mark_activity()
+        db.session.commit()
 
         # Add record to NodeAvailability to queue.
         na = NodeAvailability(caller_identity)
