@@ -1,8 +1,9 @@
 import threading
 import queue
 from sqlalchemy.orm import sessionmaker
+import logging
 
-
+logger = logging.getLogger('node_availability_worker')
 node_availability_queue = queue.Queue()
 node_availability_batch_size = 20
 
@@ -23,10 +24,9 @@ def process_node_availabilities(db_engine, availabilities_queue):
                 db_session.bulk_save_objects(batch)
                 db_session.commit()
                 batch = []
-                print("Committed node availability batch")
-                return
-        except Exception as e:
-            print("Failed to process node availabilities:", e)
+                logger.info("Committed node availability batch")
+        except Exception:
+            logger.error("Failed to process node availabilities:", exc_info=True)
             if db_session is not None:
                 db_session.rollback()
         finally:
