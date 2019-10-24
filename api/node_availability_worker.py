@@ -35,5 +35,5 @@ def process_node_availabilities(db_engine, availabilities_queue):
 
 
 def start_node_availability_worker(db_engine, availabilities_queue):
-    x = threading.Thread(target=process_node_availabilities, args=(db_engine, availabilities_queue))
+    x = threading.Thread(target=process_node_availabilities, args=(db_engine, availabilities_queue), daemon=True)
     x.start()

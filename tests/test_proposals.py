@@ -2,8 +2,10 @@ import json
 import time
 from datetime import datetime, timedelta
 
-from api.node_availability_worker import node_availability_batch_size, start_node_availability_worker, \
-    node_availability_queue, process_node_availabilities
+from api.node_availability_worker import (
+    node_availability_batch_size, start_node_availability_worker,
+    node_availability_queue
+)
 from models import (
     db, Node, ProposalAccessPolicy, AVAILABILITY_TIMEOUT, IdentityRegistration,
     NodeAvailability
@@ -783,6 +785,8 @@ class TestProposals(TestCase):
         self.assertEqual(1, len(data['proposals']))
 
     def test_ping_proposal_with_service_type(self):
+        start_node_availability_worker(db.engine, node_availability_queue)
+
         payload = {'service_type': 'dummy_service'}
         auth = build_test_authorization(json.dumps(payload))
 
@@ -797,7 +801,8 @@ class TestProposals(TestCase):
             )
             self.assertEqual(200, re.status_code)
 
-        process_node_availabilities(db.engine, node_availability_queue)
+        # Sleep for some time to wait for inserted availabilities.
+        time.sleep(3)
 
         # Detach current session so NodeAvailability model can pick new changes inserted from another session.
         db.session.remove()
