@@ -9,7 +9,7 @@ second = timedelta(seconds=1)
 
 class TestNodeAvailability(TestCase):
     def test_result_is_rounded_to_hour(self):
-        for x in range(31):
+        for x in range(11):
             self._create_node_availability('node key', 'service type', now)
 
         hours = get_node_hours_online(
@@ -21,17 +21,17 @@ class TestNodeAvailability(TestCase):
         self.assertEqual(1, hours)
 
     def test_not_match_query_params(self):
-        for x in range(31):
+        for x in range(11):
             self._create_node_availability(
                 'node key other', 'service type', now
             )
 
-        for x in range(31):
+        for x in range(11):
             self._create_node_availability(
                 'node key', 'service type other', now
             )
 
-        for x in range(31):
+        for x in range(11):
             self._create_node_availability(
                 'node key', 'service type', now + second
             )
