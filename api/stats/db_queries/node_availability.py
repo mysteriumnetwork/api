@@ -10,4 +10,4 @@ def get_node_hours_online(node_key, service_type, date_from, date_to) -> int:
         NodeAvailability.date <= date_to
     )
     records_count = query.scalar()
-    return int(round(records_count / 60.0))
+    return int(round(records_count / 20.0))
