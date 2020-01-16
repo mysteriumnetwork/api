@@ -150,11 +150,11 @@ def register_endpoints(app):
         etag = ''
         req_etag = request.headers.get('If-None-Match')
         if req_etag:
-            etag = generate_etag(proposals_res) 
+            etag = generate_etag(proposals_res)
             if etag == req_etag:
                 return '', 304
 
-        response = jsonify(proposals_res)	
+        response = jsonify(proposals_res)
         response.headers.set('Etag', etag)
         return response
 
@@ -198,5 +198,5 @@ def delete_proposal_policies(node_key):
         .delete()
 
 
-def generate_etag(obj):	
+def generate_etag(obj):
     return hashlib.md5(json.dumps(obj).encode("utf-8")).hexdigest()
