@@ -147,12 +147,10 @@ def register_endpoints(app):
             service_proposals += node.get_service_proposals()
 
         proposals_res = {'proposals': service_proposals}
-        etag = ''
+        etag = generate_etag(proposals_res)
         req_etag = request.headers.get('If-None-Match')
-        if req_etag:
-            etag = generate_etag(proposals_res)
-            if etag == req_etag:
-                return '', 304
+        if etag == req_etag:
+            return '', 304
 
         response = jsonify(proposals_res)
         response.headers.set('Etag', etag)
