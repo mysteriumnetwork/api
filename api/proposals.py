@@ -146,7 +146,16 @@ def register_endpoints(app):
         for node in nodes:
             service_proposals += node.get_service_proposals()
 
-        response = jsonify({'proposals': service_proposals})
+        proposals_res = {'proposals': service_proposals}
+        etag = ''
+        req_etag = request.headers.get('If-None-Match')
+        if req_etag:
+            etag = generate_etag(proposals_res) 
+            if etag == req_etag:
+                return '', 304
+
+        response = jsonify(proposals_res)	
+        response.headers.set('Etag', etag)
         return response
 
     # node call this function each minute.
@@ -187,3 +196,7 @@ def delete_proposal_policies(node_key):
         .query \
         .filter(ProposalAccessPolicy.node_key == node_key) \
         .delete()
+
+
+def generate_etag(obj):	
+    return hashlib.md5(json.dumps(obj).encode("utf-8")).hexdigest()
