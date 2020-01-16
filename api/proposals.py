@@ -187,4 +187,3 @@ def delete_proposal_policies(node_key):
         .query \
         .filter(ProposalAccessPolicy.node_key == node_key) \
         .delete()
-
