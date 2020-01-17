@@ -14,6 +14,7 @@ class LeaderboardRow:
             row.hours_available, total_hours_in_range
         )
         self.hours_available = row.hours_available
+        self.tokens = row.tokens
 
         if row.last_seen is not None and row.last_seen < AVAILABILITY_TIMEOUT.seconds:
             self.service_status = 'Online'
@@ -43,9 +44,11 @@ def get_leaderboard_rows(date_from, date_to):
             l.sessions,
             l.data_transferred,
             n.updated_at,
+            p.tokens,
             TIMESTAMPDIFF(SECOND, n.updated_at, NOW()) AS last_seen
         FROM dwh_leaderboard l
             LEFT JOIN node n ON n.node_key = l.provider_id AND n.service_type = l.service_type
+            LEFT JOIN payments_tokens p ON p.provider_id = l.provider_id
         ORDER BY l.hours_available DESC
         """)
     rows = db.engine.execute(sql).fetchall()

@@ -216,3 +216,19 @@ class Affiliate(db.Model):
     def update(self, referral_code):
         self.updated_at = datetime.utcnow()
         self.referral_code = referral_code
+
+
+class PaymentTokens(db.Model):
+    __tablename__ = 'payments_tokens'
+    provider_id = db.Column(db.String(IDENTITY_LENGTH_LIMIT), primary_key=True)
+    updated_at = db.Column(db.DateTime)
+    tokens = db.Column(db.BigInteger)
+
+    def __init__(self, provider_id, tokens):
+        self.provider_id = provider_id
+        self.updated_at = datetime.utcnow()
+        self.tokens = tokens
+
+    def update(self, tokens):
+        self.updated_at = datetime.utcnow()
+        self.tokens = tokens

@@ -19,12 +19,13 @@
                         <th class="mobile-hide">Sessions</th>
                         <th class="mobile-hide">Unique Users</th>
                         <th>Country</th>
+                        <th>Payment points</th>
                         <th>Status</th>
                       </tr>
                     </thead>
                     <tbody>
                       {% for row in leaderboard_rows %}
-                      {% if row.hours_available >= 24 %} 
+                      {% if row.hours_available >= 24 %}
                       <tr onclick="window.document.location='/node/{{row.provider_id}}/{{row.service_type}}'">
                       {% else %}
                       <tr style="opacity: 0.7;" onclick="window.document.location='/node/{{row.provider_id}}/{{row.service_type}}'">
@@ -36,6 +37,7 @@
                         <td class="mobile-hide">{{row.sessions_count}}</td>
                         <td class="mobile-hide">{{row.unique_users}}</td>
                         <td>{{row.country}}</td>
+                        <td>{{row.tokens}}</td>
                         <td>
                           {% if row.service_status == 'Online' %}
                             <i class="fa fa-circle green" aria-hidden="true" title="Online"></i>
