@@ -28,6 +28,7 @@ class Node(db.Model):
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime, index=True)
 
+    monitoring_failed = relationship("MonitoringFailed")
     access_policies = relationship("ProposalAccessPolicy")
 
     node_type = db.Column(
@@ -232,3 +233,11 @@ class PaymentTokens(db.Model):
     def update(self, tokens):
         self.updated_at = datetime.utcnow()
         self.tokens = tokens
+
+
+class MonitoringFailed(db.Model):
+    __tablename__ = 'monitoring_failed'
+    provider_id = db.Column(db.String(IDENTITY_LENGTH_LIMIT), ForeignKey('node.node_key'), primary_key=True)
+
+    def __init__(self, provider_id):
+        self.provider_id = provider_id

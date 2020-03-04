@@ -14,7 +14,8 @@ from queries import (
     filter_nodes_without_access_policies,
     filter_nodes_by_access_policy,
     filter_nodes_in_bounty_programme,
-    filter_nodes_by_node_type
+    filter_nodes_by_node_type,
+    filter_nodes_by_monitoring_failed
 )
 from cache import isProposalPingRecentlyCalled, markProposalPingRecentlyCalled
 
@@ -141,6 +142,9 @@ def register_endpoints(app):
         node_type_arg = request.args.get('node_type')
         if node_type_arg:
             nodes = filter_nodes_by_node_type(nodes, node_type_arg)
+
+        if request.args.get('include_failed') != 'true':
+            nodes = filter_nodes_by_monitoring_failed(nodes)
 
         service_proposals = []
         for node in nodes:
