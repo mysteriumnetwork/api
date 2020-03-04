@@ -13,3 +13,4 @@ email_validator==1.0.4
 flask-cors==3.0.8
 beaker
 prometheus_http_client
+Werkzeug==0.16.1
