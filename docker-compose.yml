@@ -43,7 +43,7 @@ services:
     image: percona:5.7
     container_name: mysterium-mysql
     restart: always
-    command: ['--event-scheduler=ON']
+    command: ['--event-scheduler=OFF']
     ports:
       - 33061:3306
     volumes:
