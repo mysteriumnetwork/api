@@ -32,7 +32,7 @@ services:
 
   db:
     image: percona:5.7
-    command: ['--event-scheduler=ON']
+    command: ['--event-scheduler=OFF']
     ports:
       - 33062:3306
     environment:
