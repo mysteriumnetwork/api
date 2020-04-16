@@ -2,7 +2,7 @@ import json
 from datetime import datetime, timedelta
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Index, ForeignKey
+from sqlalchemy import Index, ForeignKey, ForeignKeyConstraint
 from sqlalchemy.orm import relationship
 
 db = SQLAlchemy()
@@ -237,7 +237,10 @@ class PaymentTokens(db.Model):
 
 class MonitoringFailed(db.Model):
     __tablename__ = 'monitoring_failed'
-    provider_id = db.Column(db.String(IDENTITY_LENGTH_LIMIT), ForeignKey('node.node_key'), primary_key=True)
+    provider_id = db.Column(db.String(IDENTITY_LENGTH_LIMIT), primary_key=True)
+    service_type = db.Column(db.String(255), primary_key=True)
+    __table_args__ = (ForeignKeyConstraint(['provider_id', 'service_type'], ['node.node_key', 'node.service_type']), {})
 
-    def __init__(self, provider_id):
+    def __init__(self, provider_id, service_type):
         self.provider_id = provider_id
+        self.service_type = service_type
