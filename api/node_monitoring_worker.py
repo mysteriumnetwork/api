@@ -25,7 +25,7 @@ def process_node_monitoring(db_engine):
             data = json.loads(prometheus.query(metric='ALERTS{alertname="provider_down", alertstate="firing"}'))
             db_session.query(MonitoringFailed).delete()
             for r in data["data"]["result"]:
-                db_session.add(MonitoringFailed(r["metric"]["provider"]))
+                db_session.add(MonitoringFailed(r["metric"]["provider"], r["metric"]["service_type"]))
 
             db_session.commit()
             logger.info("Committed node monitoring batch")
