@@ -13,6 +13,7 @@ from api.identities import register_endpoints as register_identity_endpoints
 from api.sessions import register_endpoints as register_session_endpoints
 from api.statistics import register_endpoints as register_statistic_endpoints
 from api.affiliates import register_endpoints as register_affiliates_endpoints
+from api.mobile import register_endpoints as register_mobile_endpoints
 
 if not settings.DISABLE_LOGS:
     helpers.setup_logger()
@@ -34,6 +35,7 @@ register_identity_endpoints(app)
 register_session_endpoints(app)
 register_statistic_endpoints(app)
 register_affiliates_endpoints(app)
+register_mobile_endpoints(app)
 
 
 def _generate_database_uri(db_config):
