@@ -12,10 +12,10 @@ sleep 10 # needed for db to fully initialize
 printf "\n"
 
 printf "Migrating DB...\n"
-(cd tests; docker-compose exec api bin/db-upgrade)
+(cd tests; docker-compose exec -T api bin/db-upgrade)
 
 printf "Running api tests...\n"
-(cd tests; docker-compose exec api python -m unittest discover tests)
+(cd tests; docker-compose exec -T api python -m unittest discover tests)
 
 printf "Running dashboard tests...\n"
-(cd tests; docker-compose exec dashboard env PYTHONPATH=/code python -m unittest discover tests)
+(cd tests; docker-compose exec -T dashboard env PYTHONPATH=/code python -m unittest discover tests)

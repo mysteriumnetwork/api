@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD"
 
 bin/api_package_docker "$@"
 bin/dashboard_package_docker "$@"
