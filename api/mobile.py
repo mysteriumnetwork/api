@@ -1,7 +1,7 @@
 from flask import jsonify
 
 
-MIN_ANDROID_VERSION = "0.39.4"
+MIN_ANDROID_VERSION = "0.41.0"
 
 
 def register_endpoints(app):
